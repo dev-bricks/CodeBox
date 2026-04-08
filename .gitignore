@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+*.spec
+
+# Virtual Environments
+venv/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+desktop.ini
+Thumbs.db
+.DS_Store
+
+# Application
+*.db
+*.log
+logs/
+releases/
+
+# Internal
+AUFGABEN.txt
+TEST.txt
+TESTERGEBNISSE.txt
+tmpclaude-*
+.claude/

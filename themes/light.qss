@@ -1,0 +1,129 @@
+/* CodeBox Light Theme */
+
+QMainWindow, QWidget {
+    background-color: #ffffff;
+    color: #1e1e1e;
+}
+
+QMenuBar {
+    background-color: #f3f3f3;
+    color: #1e1e1e;
+    border-bottom: 1px solid #d4d4d4;
+}
+
+QMenuBar::item:selected {
+    background-color: #c8ddf3;
+}
+
+QMenu {
+    background-color: #f3f3f3;
+    color: #1e1e1e;
+    border: 1px solid #d4d4d4;
+}
+
+QMenu::item:selected {
+    background-color: #c8ddf3;
+}
+
+QToolBar {
+    background-color: #f3f3f3;
+    border: none;
+    spacing: 4px;
+    padding: 2px;
+}
+
+QTabBar::tab {
+    background-color: #ececec;
+    color: #5a5a5a;
+    padding: 6px 12px;
+    border: 1px solid #d4d4d4;
+    border-bottom: none;
+    min-width: 80px;
+}
+
+QTabBar::tab:selected {
+    background-color: #ffffff;
+    color: #1e1e1e;
+    border-bottom: 2px solid #0078d4;
+}
+
+QPlainTextEdit, QTextEdit {
+    background-color: #ffffff;
+    color: #1e1e1e;
+    selection-background-color: #add6ff;
+    border: none;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 13px;
+}
+
+QTreeWidget, QListWidget {
+    background-color: #f3f3f3;
+    color: #1e1e1e;
+    border: 1px solid #d4d4d4;
+}
+
+QTreeWidget::item:selected {
+    background-color: #c8ddf3;
+}
+
+QScrollBar:vertical {
+    background-color: #f3f3f3;
+    width: 12px;
+}
+
+QScrollBar::handle:vertical {
+    background-color: #c1c1c1;
+    min-height: 20px;
+    border-radius: 3px;
+    margin: 2px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background-color: #929292;
+}
+
+QScrollBar:horizontal {
+    background-color: #f3f3f3;
+    height: 12px;
+}
+
+QScrollBar::handle:horizontal {
+    background-color: #c1c1c1;
+    min-width: 20px;
+    border-radius: 3px;
+    margin: 2px;
+}
+
+QScrollBar::add-line, QScrollBar::sub-line {
+    height: 0;
+    width: 0;
+}
+
+QStatusBar {
+    background-color: #0078d4;
+    color: white;
+}
+
+QLineEdit, QComboBox {
+    background-color: #ffffff;
+    color: #1e1e1e;
+    border: 1px solid #cecece;
+    padding: 4px;
+    border-radius: 2px;
+}
+
+QPushButton {
+    background-color: #0078d4;
+    color: white;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 2px;
+}
+
+QPushButton:hover {
+    background-color: #106ebe;
+}
+
+QSplitter::handle {
+    background-color: #d4d4d4;
+}
