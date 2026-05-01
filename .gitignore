@@ -26,10 +26,19 @@ Thumbs.db
 *.log
 logs/
 releases/
+.env
+.env.*
+credentials.json
+client_secret*.json
+token.json
+*.pem
+*.key
+keyring/
 
 # Internal
 AUFGABEN.txt
 TEST.txt
+TESTS.txt
 TESTERGEBNISSE.txt
 tmpclaude-*
 .claude/

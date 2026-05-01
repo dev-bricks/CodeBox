@@ -71,7 +71,7 @@ class UniversalHighlighter(QSyntaxHighlighter):
             (QRegularExpression(r"'[^'\\]*(\\.[^'\\]*)*'"), str_fmt)
         )
 
-        # Numbers (Hellgruen)
+        # Numbers (Hellgrün)
         num_fmt = QTextCharFormat()
         num_fmt.setForeground(QColor(181, 206, 168))
         self.highlighting_rules.append(
@@ -91,7 +91,7 @@ class UniversalHighlighter(QSyntaxHighlighter):
             (QRegularExpression(r'\bfunction\s+(\w+)'), def_fmt)
         )
 
-        # Comments (Gruen, Kursiv) - MUSS am Ende stehen
+        # Comments (Grün, Kursiv) - MUSS am Ende stehen
         cmt_fmt = QTextCharFormat()
         cmt_fmt.setForeground(QColor(106, 153, 85))
         cmt_fmt.setFontItalic(True)

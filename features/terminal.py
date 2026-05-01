@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Integriertes Terminal fuer CodeBox
+Integriertes Terminal für CodeBox
 
 Bietet ein eingebettetes Terminal-Widget als QWidget,
-das Shell-Befehle ausfuehren und interaktiv nutzen kann.
+das Shell-Befehle ausführen und interaktiv nutzen kann.
 """
 
 import sys
@@ -34,9 +34,9 @@ class TerminalInput(QLineEdit):
 
 
 class TerminalWidget(QWidget):
-    """Integriertes Terminal-Widget fuer CodeBox.
+    """Integriertes Terminal-Widget für CodeBox.
 
-    Startet eine Shell (cmd/powershell/bash) und ermoeglicht
+    Startet eine Shell (cmd/powershell/bash) und ermöglicht
     interaktive Befehlseingabe.
     """
 
@@ -108,14 +108,14 @@ class TerminalWidget(QWidget):
         layout.addLayout(input_row)
 
     def _populate_shells(self):
-        """Fuellt die Shell-Auswahl basierend auf dem OS."""
+        """Füllt die Shell-Auswahl basierend auf dem OS."""
         if sys.platform == "win32":
             self.shell_combo.addItems(["cmd", "powershell"])
         else:
             self.shell_combo.addItems(["bash", "zsh", "sh"])
 
     def _get_shell_command(self) -> tuple:
-        """Gibt Shell-Programm und Argumente zurueck."""
+        """Gibt Shell-Programm und Argumente zurück."""
         shell = self.shell_combo.currentText()
         if shell == "cmd":
             return ("cmd.exe", ["/Q"])
@@ -149,7 +149,7 @@ class TerminalWidget(QWidget):
         self._start_shell()
 
     def _execute_command(self):
-        """Fuehrt den eingegebenen Befehl aus."""
+        """Führt den eingegebenen Befehl aus."""
         cmd = self.input.text().strip()
         if not cmd:
             return
@@ -181,7 +181,7 @@ class TerminalWidget(QWidget):
             self.input.clear()
 
     def append_text(self, text: str, color: str = None):
-        """Fuegt Text zum Output hinzu. Farbe wird pro Segment gesetzt (kein Dokument-Override)."""
+        """Fügt Text zum Output hinzu. Farbe wird pro Segment gesetzt (kein Dokument-Override)."""
         cursor = self.output.textCursor()
         cursor.movePosition(QTextCursor.MoveOperation.End)
         if color:
@@ -201,7 +201,7 @@ class TerminalWidget(QWidget):
         self.output.clear()
 
     def set_working_dir(self, path: str):
-        """Aendert das Arbeitsverzeichnis."""
+        """Ändert das Arbeitsverzeichnis."""
         self.working_dir = path
         self.cwd_label.setText(path)
         if self.process and self.process.state() == QProcess.ProcessState.Running:

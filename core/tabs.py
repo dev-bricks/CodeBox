@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Tab-System fuer CodeBox - Mehrere Dateien gleichzeitig oeffnen"""
+"""Tab-System für CodeBox - Mehrere Dateien gleichzeitig öffnen"""
 
 from pathlib import Path
 from PySide6.QtWidgets import QTabWidget, QMessageBox
@@ -12,7 +12,7 @@ from languages import get_provider_for_extension
 
 
 class EditorTab:
-    """Haelt Editor + Highlighter + Metadaten fuer einen Tab"""
+    """Hält Editor + Highlighter + Metadaten für einen Tab"""
     def __init__(self, file_path: Path = None):
         self.file_path = file_path
         self.editor = CodeEditor()
@@ -26,7 +26,7 @@ class EditorTab:
         self.editor.modificationChanged.connect(self._on_modified)
 
     def _load_file(self, path: Path):
-        """Laedt eine Datei in den Editor"""
+        """Lädt eine Datei in den Editor"""
         self.file_path = path
         if path.exists():
             text = path.read_text(encoding='utf-8', errors='replace')
@@ -66,7 +66,7 @@ class EditorTab:
 
 
 class TabWidget(QTabWidget):
-    """Tab-Widget fuer mehrere Editor-Tabs"""
+    """Tab-Widget für mehrere Editor-Tabs"""
 
     currentFileChanged = Signal(object)  # Path oder None
 
@@ -80,8 +80,8 @@ class TabWidget(QTabWidget):
         self.currentChanged.connect(self._on_tab_changed)
 
     def open_file(self, file_path: Path) -> EditorTab:
-        """Oeffnet eine Datei in einem neuen Tab (oder wechselt zu existierendem)"""
-        # Pruefe ob Datei bereits offen
+        """Öffnet eine Datei in einem neuen Tab (oder wechselt zu existierendem)"""
+        # Prüfe, ob die Datei bereits offen ist
         for idx in range(self.count()):
             tab = self.tabs.get(idx)
             if tab and tab.file_path and tab.file_path == file_path:
@@ -107,12 +107,12 @@ class TabWidget(QTabWidget):
         return tab
 
     def close_tab(self, index: int):
-        """Schliesst einen Tab (mit Speicher-Abfrage)"""
+        """Schließt einen Tab (mit Speicher-Abfrage)"""
         tab = self.tabs.get(index)
         if tab and tab.is_modified:
             reply = QMessageBox.question(
                 self, "Speichern?",
-                f"'{tab.title}' hat ungespeicherte Aenderungen. Speichern?",
+                f"'{tab.title}' hat ungespeicherte Änderungen. Speichern?",
                 QMessageBox.StandardButton.Save | QMessageBox.StandardButton.Discard | QMessageBox.StandardButton.Cancel
             )
             if reply == QMessageBox.StandardButton.Save:
@@ -132,7 +132,7 @@ class TabWidget(QTabWidget):
                     break
 
     def current_tab(self) -> EditorTab:
-        """Gibt den aktuellen EditorTab zurueck"""
+        """Gibt den aktuellen EditorTab zurück"""
         return self.tabs.get(self.currentIndex())
 
     def save_current(self) -> bool:

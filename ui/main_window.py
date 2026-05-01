@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (
     QStatusBar, QLabel, QComboBox, QToolBar, QFileDialog,
     QMessageBox, QTabWidget
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 
 from core.tabs import TabWidget
 from core.output import OutputPanel
@@ -16,48 +16,55 @@ from features.terminal import TerminalWidget
 from features.project_view import ProjectView
 from languages import get_provider_for_extension, get_provider_by_name, get_all_providers
 from features.lsp_client import LSPManager
+from version import format_window_title
 
 
 class MainWindow(QMainWindow):
     """CodeBox Hauptfenster"""
 
+    lspDiagnosticsReceived = Signal(object, list)
+    lspCompletionsReceived = Signal(object, list)
+
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("CodeBox v0.1.0")
+        self.setWindowTitle(format_window_title())
         self.setGeometry(100, 100, 1200, 800)
         self._lsp_manager = LSPManager()
+        self._lsp_tabs_by_uri = {}
+        self.lspDiagnosticsReceived.connect(self._apply_lsp_diagnostics)
+        self.lspCompletionsReceived.connect(self._apply_lsp_completions)
 
         self.setup_ui()
         self.setup_shortcuts()
         self.new_file()
 
     def setup_ui(self):
-        # ---- Menuebar ----
+        # ---- Menüleiste ----
         menubar = self.menuBar()
 
         file_menu = menubar.addMenu("Datei")
         file_menu.addAction("Neu", self.new_file, "Ctrl+N")
-        file_menu.addAction("Oeffnen...", self.open_file, "Ctrl+O")
+        file_menu.addAction("Öffnen...", self.open_file, "Ctrl+O")
         file_menu.addAction("Speichern", self.save_file, "Ctrl+S")
         file_menu.addSeparator()
         file_menu.addAction("Beenden", self.close, "Ctrl+Q")
 
         edit_menu = menubar.addMenu("Bearbeiten")
-        edit_menu.addAction("Rueckgaengig", self._undo, "Ctrl+Z")
+        edit_menu.addAction("Rückgängig", self._undo, "Ctrl+Z")
         edit_menu.addAction("Wiederherstellen", self._redo, "Ctrl+Y")
         edit_menu.addSeparator()
         edit_menu.addAction("Suchen", self._find, "Ctrl+F")
         edit_menu.addAction("Gehe zu Zeile", self._goto_line, "Ctrl+G")
 
-        run_menu = menubar.addMenu("Ausfuehren")
-        run_menu.addAction("Ausfuehren", self.run_current, "F5")
+        run_menu = menubar.addMenu("Ausführen")
+        run_menu.addAction("Ausführen", self.run_current, "F5")
         run_menu.addAction("Stoppen", self._stop_run, "Shift+F5")
 
         # ---- Toolbar ----
         toolbar = QToolBar("Hauptleiste")
         self.addToolBar(toolbar)
         toolbar.addAction("Neu", self.new_file)
-        toolbar.addAction("Oeffnen", self.open_file)
+        toolbar.addAction("Öffnen", self.open_file)
         toolbar.addAction("Speichern", self.save_file)
         toolbar.addSeparator()
         toolbar.addAction("Run", self.run_current)
@@ -71,7 +78,7 @@ class MainWindow(QMainWindow):
         toolbar.addWidget(QLabel("  Sprache: "))
         toolbar.addWidget(self.lang_combo)
 
-        # ---- Ansicht-Menue ----
+        # ---- Ansicht-Menü ----
         view_menu = menubar.addMenu("Ansicht")
         self._toggle_project_action = view_menu.addAction(
             "Projektbaum", self._toggle_project_view, "Ctrl+B"
@@ -80,7 +87,7 @@ class MainWindow(QMainWindow):
             "Terminal", self._toggle_terminal, "Ctrl+`"
         )
 
-        # Theme-Submenue
+        # Theme-Submenü
         from features.theme_manager import get_available_themes, apply_theme
         theme_menu = view_menu.addMenu("Theme")
         for theme_name in get_available_themes():
@@ -139,7 +146,7 @@ class MainWindow(QMainWindow):
         self.status_bar.addPermanentWidget(self.enc_label)
 
     def setup_shortcuts(self):
-        pass  # Shortcuts sind bereits ueber Menuebar definiert
+        pass  # Shortcuts sind bereits über die Menüleiste definiert
 
     # ---- Datei-Aktionen ----
 
@@ -149,7 +156,7 @@ class MainWindow(QMainWindow):
 
     def open_file(self):
         path, _ = QFileDialog.getOpenFileName(
-            self, "Datei oeffnen", "",
+            self, "Datei öffnen", "",
             "Alle Dateien (*);;Python (*.py);;JavaScript (*.js);;C++ (*.cpp *.h)"
         )
         if path:
@@ -161,8 +168,8 @@ class MainWindow(QMainWindow):
             self._connect_cursor(tab)
 
     def _connect_lsp(self, tab, file_path: Path):
-        """Verbindet den Tab mit dem LSP-Server fuer die Sprache."""
-        if not tab or not tab.provider:
+        """Verbindet den Tab mit dem LSP-Server für die Sprache."""
+        if not tab or not tab.provider or not file_path:
             return
         lang_name = tab.provider.get_name()
         client = self._lsp_manager.get_client(lang_name)
@@ -172,45 +179,114 @@ class MainWindow(QMainWindow):
         uri = file_path.resolve().as_uri()
         lang_id = lang_name.lower()
         text = tab.editor.toPlainText()
+        if getattr(tab, "_lsp_client", None) is client and getattr(tab, "_lsp_uri", None) == uri:
+            return
 
-        # Diagnostics-Callback: Fehler im Editor markieren
-        def on_diag(params):
-            diags = params.get("diagnostics", [])
-            errors = []
-            severity_map = {1: "error", 2: "warning", 3: "info", 4: "hint"}
-            for d in diags:
-                rng = d.get("range", {})
-                start = rng.get("start", {})
-                errors.append({
-                    "line": start.get("line", 0) + 1,  # LSP ist 0-basiert, Editor 1-basiert
-                    "col": start.get("character", 0),
-                    "message": d.get("message", ""),
-                    "severity": severity_map.get(d.get("severity", 1), "error"),
-                })
-            tab.editor.set_linter_errors(errors)
+        self._lsp_tabs_by_uri[uri] = tab
+        client.on_diagnostics = self._dispatch_lsp_diagnostics
 
-        client.on_diagnostics = on_diag
-        client.did_open(uri, lang_id, text)
+        old_text_changed = getattr(tab, "_lsp_text_changed_slot", None)
+        if old_text_changed:
+            try:
+                tab.editor.textChanged.disconnect(old_text_changed)
+            except (TypeError, RuntimeError):
+                pass
 
-        # Completion-Callback: LSP-Ergebnisse als Completer-Words
-        def on_completion(result):
-            items = result if isinstance(result, list) else result.get("items", [])
-            words = [i.get("label", "") for i in items if i.get("label")]
-            if words:
-                tab.editor.set_completer_words(words)
+        old_completion_slot = getattr(tab, "_lsp_completion_slot", None)
+        if old_completion_slot:
+            try:
+                tab.editor.completionRequested.disconnect(old_completion_slot)
+            except (TypeError, RuntimeError):
+                pass
 
-        client.on_completion = on_completion
-
-        # didChange bei Textaenderungen
-        version = [1]
-        def on_text_changed():
-            version[0] += 1
-            client.did_change(uri, tab.editor.toPlainText(), version[0])
-        tab.editor.textChanged.connect(on_text_changed)
-
-        # Speichern an LSP melden
         tab._lsp_uri = uri
         tab._lsp_client = client
+        tab._lsp_version = 1
+
+        client.did_open(uri, lang_id, text)
+
+        def on_text_changed():
+            tab._lsp_version += 1
+            client.did_change(uri, tab.editor.toPlainText(), tab._lsp_version)
+        tab.editor.textChanged.connect(on_text_changed)
+        tab._lsp_text_changed_slot = on_text_changed
+
+        def on_completion_requested(line, character, _prefix):
+            self._request_lsp_completion(tab, line, character)
+        tab.editor.completionRequested.connect(on_completion_requested)
+        tab._lsp_completion_slot = on_completion_requested
+
+    def _dispatch_lsp_diagnostics(self, params):
+        """Leitet LSP-Diagnostics aus dem Reader-Thread in den UI-Thread."""
+        tab = self._lsp_tabs_by_uri.get(params.get("uri"))
+        if not tab:
+            return
+        severity_map = {1: "error", 2: "warning", 3: "info", 4: "hint"}
+        errors = []
+        for diagnostic in params.get("diagnostics", []):
+            start = diagnostic.get("range", {}).get("start", {})
+            errors.append({
+                "line": start.get("line", 0) + 1,
+                "col": start.get("character", 0),
+                "message": diagnostic.get("message", ""),
+                "severity": severity_map.get(diagnostic.get("severity", 1), "error"),
+            })
+        self.lspDiagnosticsReceived.emit(tab, errors)
+
+    def _request_lsp_completion(self, tab, line: int, character: int):
+        if not self._is_live_tab(tab):
+            return
+        client = getattr(tab, "_lsp_client", None)
+        uri = getattr(tab, "_lsp_uri", None)
+        if not client or not uri:
+            return
+
+        def on_completion(result):
+            words = self._extract_lsp_completion_words(result)
+            if words:
+                self.lspCompletionsReceived.emit(tab, words)
+
+        client.request_completion(uri, line, character, callback=on_completion)
+
+    def _apply_lsp_diagnostics(self, tab, errors):
+        if self._is_live_tab(tab):
+            tab.editor.set_linter_errors(errors)
+
+    def _apply_lsp_completions(self, tab, words):
+        if not self._is_live_tab(tab):
+            return
+        tab.editor.set_completer_words(words)
+        completer = tab.editor.completer
+        prefix = tab.editor.text_under_cursor()
+        if not completer or len(prefix) < 2 or not tab.editor.hasFocus():
+            return
+        completer.setCompletionPrefix(prefix)
+        completer.popup().setCurrentIndex(completer.completionModel().index(0, 0))
+        cursor_rect = tab.editor.cursorRect()
+        cursor_rect.setWidth(
+            completer.popup().sizeHintForColumn(0) +
+            completer.popup().verticalScrollBar().sizeHint().width()
+        )
+        completer.complete(cursor_rect)
+
+    @staticmethod
+    def _extract_lsp_completion_words(result) -> list:
+        if isinstance(result, dict):
+            items = result.get("items", [])
+        else:
+            items = result or []
+        words = []
+        for item in items:
+            if isinstance(item, dict):
+                label = item.get("label")
+            else:
+                label = str(item)
+            if label:
+                words.append(label)
+        return sorted(set(words))
+
+    def _is_live_tab(self, tab) -> bool:
+        return any(self.tab_widget.tabs.get(idx) is tab for idx in range(self.tab_widget.count()))
 
     def save_file(self):
         tab = self.tab_widget.current_tab()
@@ -231,7 +307,10 @@ class MainWindow(QMainWindow):
                     tab.highlighter.set_provider(provider)
                     tab.editor.set_provider(provider)
                     self.lang_label.setText(provider.get_name())
-        tab.save()
+        if not tab.save():
+            return
+        if tab.file_path and tab.provider and not getattr(tab, "_lsp_client", None):
+            self._connect_lsp(tab, tab.file_path)
         # LSP: didSave melden
         if hasattr(tab, '_lsp_client') and tab._lsp_client:
             tab._lsp_client.did_save(tab._lsp_uri, tab.editor.toPlainText())
@@ -273,21 +352,21 @@ class MainWindow(QMainWindow):
             tab.editor.setTextCursor(cursor)
             tab.editor.centerCursor()
 
-    # ---- Ausfuehren ----
+    # ---- Ausführen ----
 
     def run_current(self):
         tab = self.tab_widget.current_tab()
         if not tab or not tab.file_path:
-            QMessageBox.warning(self, "Ausfuehren", "Bitte zuerst eine Datei speichern.")
+            QMessageBox.warning(self, "Ausführen", "Bitte zuerst eine Datei speichern.")
             return
-        # Automatisch speichern vor dem Ausfuehren
+        # Automatisch speichern vor dem Ausführen
         tab.save()
         if tab.provider:
             cmd = tab.provider.get_run_command(str(tab.file_path))
             self.output.run_command(cmd)
         else:
-            QMessageBox.warning(self, "Ausfuehren",
-                                "Keine Sprachunterstuetzung fuer diese Datei.")
+            QMessageBox.warning(self, "Ausführen",
+                                "Keine Sprachunterstützung für diese Datei.")
 
     def _stop_run(self):
         self.output.stop_process()
@@ -296,11 +375,12 @@ class MainWindow(QMainWindow):
 
     def _on_file_changed(self, file_path):
         if file_path:
-            self.setWindowTitle(f"CodeBox - {file_path.name}")
+            self.setWindowTitle(format_window_title(file_path))
             tab = self.tab_widget.current_tab()
             if tab and tab.provider:
                 self.lang_label.setText(tab.provider.get_name())
                 self.output.run_btn.setEnabled(True)
+                self._connect_lsp(tab, file_path)
             self._connect_cursor(tab)
             # ProjectView und Terminal auf Projektordner setzen
             project_dir = str(file_path.parent)
@@ -308,7 +388,7 @@ class MainWindow(QMainWindow):
                 self.project_view.set_root(project_dir)
             self.terminal.set_working_dir(project_dir)
         else:
-            self.setWindowTitle("CodeBox")
+            self.setWindowTitle(format_window_title())
             self.lang_label.setText("Keine Sprache")
             self.output.run_btn.setEnabled(False)
 
@@ -324,6 +404,8 @@ class MainWindow(QMainWindow):
                 tab.editor.set_provider(provider)
                 self.lang_label.setText(provider.get_name())
                 self.output.run_btn.setEnabled(True)
+                if tab.file_path:
+                    self._connect_lsp(tab, tab.file_path)
 
     def _connect_cursor(self, tab):
         if tab:
@@ -336,11 +418,12 @@ class MainWindow(QMainWindow):
             )
 
     def _open_file_from_project(self, file_path):
-        """Oeffnet eine Datei aus dem Projektbaum."""
+        """Öffnet eine Datei aus dem Projektbaum."""
         tab = self.tab_widget.open_file(file_path)
         if tab and tab.provider:
             self.lang_label.setText(tab.provider.get_name())
             self.output.run_btn.setEnabled(True)
+            self._connect_lsp(tab, file_path)
         self._connect_cursor(tab)
 
     def _toggle_project_view(self):
@@ -357,7 +440,7 @@ class MainWindow(QMainWindow):
             self.terminal.input.setFocus()
 
     def closeEvent(self, event):
-        # Alle Tabs pruefen auf ungespeicherte Aenderungen
+        # Alle Tabs auf ungespeicherte Änderungen prüfen
         unsaved = []
         for idx in range(self.tab_widget.count()):
             tab = self.tab_widget.tabs.get(idx)
@@ -367,7 +450,7 @@ class MainWindow(QMainWindow):
             names = "\n".join(f"  - {n}" for n in unsaved)
             reply = QMessageBox.question(
                 self, "Beenden",
-                f"Es gibt ungespeicherte Aenderungen in:\n{names}\n\nTrotzdem beenden?",
+                f"Es gibt ungespeicherte Änderungen in:\n{names}\n\nTrotzdem beenden?",
                 QMessageBox.Yes | QMessageBox.No
             )
             if reply == QMessageBox.No:

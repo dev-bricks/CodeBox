@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-LSP Client - Language Server Protocol Integration fuer CodeBox
+LSP Client - Language Server Protocol Integration für CodeBox
 
-Bietet grundlegende LSP-Funktionalitaet:
+Bietet grundlegende LSP-Funktionalität:
 - Server-Start/Stop pro Sprache
 - textDocument/didOpen, didChange, didSave
 - textDocument/completion (Auto-Completion)
@@ -59,9 +59,9 @@ class LSPMessage:
 
 
 class LSPClient:
-    """LSP-Client fuer eine einzelne Sprache/Server-Instanz.
+    """LSP-Client für eine einzelne Sprache/Server-Instanz.
 
-    Startet einen LSP-Server als Subprocess und kommuniziert ueber stdin/stdout.
+    Startet einen LSP-Server als Subprocess und kommuniziert über stdin/stdout.
     """
 
     def __init__(self, language: str, root_path: str = "."):
@@ -84,7 +84,7 @@ class LSPClient:
         return LSP_SERVERS.get(self.language)
 
     def is_available(self) -> bool:
-        """Prueft ob der LSP-Server installiert ist."""
+        """Prüft, ob der LSP-Server installiert ist."""
         config = self.server_config
         if not config:
             return False
@@ -145,7 +145,7 @@ class LSPClient:
             self.process = None
 
     def did_open(self, uri: str, language_id: str, text: str, version: int = 1):
-        """Benachrichtigt den Server ueber eine geoeffnete Datei."""
+        """Benachrichtigt den Server über eine geöffnete Datei."""
         self._send_notification("textDocument/didOpen", {
             "textDocument": {
                 "uri": uri,
@@ -156,14 +156,14 @@ class LSPClient:
         })
 
     def did_change(self, uri: str, text: str, version: int):
-        """Benachrichtigt den Server ueber Aenderungen."""
+        """Benachrichtigt den Server über Änderungen."""
         self._send_notification("textDocument/didChange", {
             "textDocument": {"uri": uri, "version": version},
             "contentChanges": [{"text": text}]
         })
 
     def did_save(self, uri: str, text: str = None):
-        """Benachrichtigt den Server ueber Speichern."""
+        """Benachrichtigt den Server über Speichern."""
         params = {"textDocument": {"uri": uri}}
         if text is not None:
             params["text"] = text
@@ -264,14 +264,14 @@ class LSPClient:
 
 
 class LSPManager:
-    """Verwaltet LSP-Clients fuer alle Sprachen."""
+    """Verwaltet LSP-Clients für alle Sprachen."""
 
     def __init__(self, root_path: str = "."):
         self.root_path = root_path
         self._clients: Dict[str, LSPClient] = {}
 
     def get_client(self, language: str) -> Optional[LSPClient]:
-        """Holt oder erstellt einen LSP-Client fuer eine Sprache."""
+        """Holt oder erstellt einen LSP-Client für eine Sprache."""
         if language not in self._clients:
             client = LSPClient(language, self.root_path)
             if client.is_available():
@@ -288,7 +288,7 @@ class LSPManager:
         self._clients.clear()
 
     def get_available_servers(self) -> List[str]:
-        """Gibt eine Liste der verfuegbaren LSP-Server zurueck."""
+        """Gibt eine Liste der verfügbaren LSP-Server zurück."""
         available = []
         for lang, config in LSP_SERVERS.items():
             if shutil.which(config["check"]):

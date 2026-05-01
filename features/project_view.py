@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Project View - Dateibaum-Explorer fuer CodeBox
+Project View - Dateibaum-Explorer für CodeBox
 
-Zeigt eine Baumstruktur des geoeffneten Projektordners an.
-Unterstuetzt Doppelklick zum Oeffnen, Kontextmenue und Filter.
+Zeigt eine Baumstruktur des geöffneten Projektordners an.
+Unterstützt Doppelklick zum Öffnen, Kontextmenü und Filter.
 """
 
 from pathlib import Path
@@ -17,7 +17,7 @@ from PySide6.QtCore import Qt, QDir, Signal, QSortFilterProxyModel, QModelIndex
 from PySide6.QtGui import QFont
 
 
-# Dateien/Ordner die standardmaessig ausgeblendet werden
+# Dateien/Ordner, die standardmäßig ausgeblendet werden
 DEFAULT_HIDDEN = {
     '__pycache__', '.git', '.svn', '.hg', 'node_modules',
     '.idea', '.vscode', '.vs', 'dist', 'build', '.eggs',
@@ -53,7 +53,7 @@ class FileFilterProxy(QSortFilterProxyModel):
         # Textfilter
         if self._filter_text:
             if self._filter_text not in name.lower():
-                # Ordner trotzdem zeigen (koennen passende Kinder haben)
+                # Ordner trotzdem zeigen (können passende Kinder haben)
                 if model.isDir(index):
                     return True
                 return False
@@ -62,10 +62,10 @@ class FileFilterProxy(QSortFilterProxyModel):
 
 
 class ProjectView(QWidget):
-    """Dateibaum-Widget fuer das Projekt-Panel.
+    """Dateibaum-Widget für das Projekt-Panel.
 
     Signals:
-        fileDoubleClicked(Path): Emittiert wenn eine Datei doppelgeklickt wird.
+        fileDoubleClicked(Path): Emittiert, wenn eine Datei doppelgeklickt wird.
     """
 
     fileDoubleClicked = Signal(object)  # Path
@@ -119,7 +119,7 @@ class ProjectView(QWidget):
         self.fs_model.setReadOnly(True)
         self.fs_model.setFilter(QDir.AllDirs | QDir.Files | QDir.NoDotAndDotDot)
 
-        # Proxy fuer Filterung
+        # Proxy für Filterung
         self.proxy = FileFilterProxy(parent=self)
         self.proxy.setSourceModel(self.fs_model)
         self.proxy.setDynamicSortFilter(True)
@@ -149,7 +149,7 @@ class ProjectView(QWidget):
             }
         """)
 
-        # Nur den Name-Column anzeigen, Rest ausblenden
+        # Nur die Namensspalte anzeigen, Rest ausblenden
         self.tree.hideColumn(1)  # Size
         self.tree.hideColumn(2)  # Type
         self.tree.hideColumn(3)  # Date Modified
@@ -182,7 +182,7 @@ class ProjectView(QWidget):
             self.title_label.setText(self._root_path.name)
 
     def _open_folder_dialog(self):
-        path = QFileDialog.getExistingDirectory(self, "Projektordner waehlen")
+        path = QFileDialog.getExistingDirectory(self, "Projektordner wählen")
         if path:
             self.set_root(path)
 
@@ -195,14 +195,14 @@ class ProjectView(QWidget):
         self.proxy.set_filter_text(text)
 
     def _on_double_click(self, proxy_index):
-        """Oeffnet die Datei bei Doppelklick."""
+        """Öffnet die Datei bei Doppelklick."""
         source_index = self.proxy.mapToSource(proxy_index)
         if not self.fs_model.isDir(source_index):
             file_path = Path(self.fs_model.filePath(source_index))
             self.fileDoubleClicked.emit(file_path)
 
     def _on_context_menu(self, position):
-        """Zeigt ein Kontextmenue an."""
+        """Zeigt ein Kontextmenü an."""
         proxy_index = self.tree.indexAt(position)
         if not proxy_index.isValid():
             return
@@ -214,7 +214,7 @@ class ProjectView(QWidget):
         menu = QMenu(self)
 
         if not is_dir:
-            act_open = menu.addAction("Oeffnen")
+            act_open = menu.addAction("Öffnen")
             act_open.triggered.connect(lambda: self.fileDoubleClicked.emit(file_path))
 
         act_reveal = menu.addAction("Im Explorer zeigen")
@@ -234,7 +234,7 @@ class ProjectView(QWidget):
         menu.exec(self.tree.viewport().mapToGlobal(position))
 
     def _reveal_in_explorer(self, path: Path):
-        """Oeffnet den Ordner im System-Dateimanager."""
+        """Öffnet den Ordner im System-Dateimanager."""
         import subprocess, sys
         target = str(path.parent if path.is_file() else path)
         try:

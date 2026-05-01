@@ -84,7 +84,7 @@ class SFTPSession:
             self._ssh.close()
             self._ssh = None
 
-        # Temp-Dateien aufraeumen
+        # Temp-Dateien aufräumen
         for local_path in self._local_cache.values():
             try:
                 os.unlink(local_path)
@@ -149,7 +149,7 @@ class SFTPSession:
         if local_path is None:
             local_path = self._local_cache.get(remote_path)
             if not local_path:
-                logger.error("Keine lokale Datei fuer %s", remote_path)
+                logger.error("Keine lokale Datei für %s", remote_path)
                 return False
 
         try:

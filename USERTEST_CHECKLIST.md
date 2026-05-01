@@ -1,7 +1,7 @@
 # CodeBox - Nutzertest-Checkliste
 
 **Version:** 0.1.0
-**Stand:** 2026-02-12
+**Stand:** 2026-05-01
 **Tester:** _______________
 
 ---
@@ -10,17 +10,18 @@
 
 - [ ] Anwendung startet ohne Fehler (`python main.py`)
 - [ ] Dark Theme wird korrekt angezeigt
-- [ ] Fenster-Groesse und -Position stimmen
-- [ ] Menue-Leiste ist vollstaendig (Datei, Bearbeiten, Ausfuehren)
+- [ ] Light Theme kann aktiviert werden und bleibt konsistent hell
+- [ ] Fenster-Größe und -Position stimmen
+- [ ] Menü-Leiste ist vollständig (Datei, Bearbeiten, Ausführen)
 - [ ] Toolbar-Buttons funktionieren
 
 ## 2. Datei-Operationen
 
 - [ ] Neue Datei erstellen (Ctrl+N)
-- [ ] Datei oeffnen (Ctrl+O)
+- [ ] Datei öffnen (Ctrl+O)
 - [ ] Datei speichern (Ctrl+S)
 - [ ] "Speichern unter" bei neuer Datei
-- [ ] Ungespeicherte Aenderungen: Warnung beim Schliessen
+- [ ] Ungespeicherte Änderungen: Warnung beim Schließen
 
 ## 3. Editor-Funktionen
 
@@ -36,14 +37,14 @@
 ### Python (.py)
 - [ ] Keywords (def, class, if, for, ...) blau und fett
 - [ ] Strings (einfach/doppelt) orange
-- [ ] Kommentare (#) gruen und kursiv
-- [ ] Zahlen hellgruen
+- [ ] Kommentare (#) grün und kursiv
+- [ ] Zahlen hellgrün
 - [ ] Decorators (@) lila
 
 ### JavaScript (.js)
 - [ ] Keywords (function, const, let, ...) blau und fett
 - [ ] Strings orange
-- [ ] Kommentare (//) gruen und kursiv
+- [ ] Kommentare (//) grün und kursiv
 - [ ] Builtins (console, Array, ...) gelb
 
 ### C++ (.cpp)
@@ -56,50 +57,58 @@
 - [ ] Popup erscheint nach 2+ Buchstaben
 - [ ] Python-Keywords vorgeschlagen
 - [ ] Auswahl mit Enter/Tab funktioniert
-- [ ] Snippets werden korrekt eingefuegt
+- [ ] Snippets werden korrekt eingefügt
 
 ## 6. Tab-System
 
-- [ ] Mehrere Dateien in Tabs oeffnen
+- [ ] Mehrere Dateien in Tabs öffnen
 - [ ] Tab wechseln per Klick
-- [ ] Tab schliessen (X-Button)
+- [ ] Tab schließen (X-Button)
 - [ ] Modifizierter Tab zeigt *
-- [ ] Gleiche Datei wird nicht doppelt geoeffnet
+- [ ] Gleiche Datei wird nicht doppelt geöffnet
 
-## 7. Ausfuehrung
+## 7. Projektbaum, Terminal und LSP
 
-- [ ] Python-Datei ausfuehren (F5)
+- [ ] Projektbaum per Ctrl+B ein-/ausblenden
+- [ ] Terminal per Ctrl+` ein-/ausblenden
+- [ ] Terminal-Arbeitsverzeichnis folgt der geöffneten Datei
+- [ ] Mit installiertem LSP-Server erscheinen Diagnostics im Editor
+- [ ] LSP-Completion erscheint nach Eingabe von mindestens zwei Zeichen
+
+## 8. Ausführung
+
+- [ ] Python-Datei ausführen (F5)
 - [ ] Output im Output-Panel sichtbar
 - [ ] Fehler-Output rot dargestellt
 - [ ] Stop-Button beendet laufenden Prozess
 - [ ] Clear-Button leert Output
 
-## 8. Suchen
+## 9. Suchen
 
-- [ ] Ctrl+F oeffnet Such-Dialog
+- [ ] Ctrl+F öffnet Such-Dialog
 - [ ] Treffer werden hervorgehoben
 - [ ] Anzahl Treffer in Statusbar
 
-## 9. Statusbar
+## 10. Statusbar
 
 - [ ] Zeile/Spalte wird angezeigt
 - [ ] Aktuelle Sprache wird angezeigt
 - [ ] Encoding (UTF-8) wird angezeigt
 
-## 10. Sprach-Auswahl
+## 11. Sprach-Auswahl
 
 - [ ] Dropdown in Toolbar vorhanden
-- [ ] Sprache wechseln aendert Highlighting
-- [ ] Auto-Erkennung bei Datei oeffnen
+- [ ] Sprache wechseln ändert Highlighting
+- [ ] Auto-Erkennung bei Datei öffnen
 
 ---
 
-## Bekannte Einschraenkungen
+## Bekannte Einschränkungen
 
 - Minimap noch nicht implementiert (aus PythonBox v8)
 - Code-Folding noch nicht implementiert
-- Linter wird noch nicht automatisch ausgefuehrt
-- Rust/Go Provider noch nicht vorhanden
+- Linter wird noch nicht automatisch ausgeführt
+- Runtime-Test mit installiertem LSP-Server steht noch aus
 
 ---
 
@@ -113,12 +122,13 @@
 | Highlighting | ___ / 10 | | |
 | Completion | ___ / 4 | | |
 | Tabs | ___ / 5 | | |
-| Ausfuehrung | ___ / 5 | | |
+| Projektbaum/Terminal/LSP | ___ / 5 | | |
+| Ausführung | ___ / 5 | | |
 | Suchen | ___ / 3 | | |
 | Statusbar | ___ / 3 | | |
 | Sprach-Auswahl | ___ / 3 | | |
-| **Gesamt** | ___ / 49 | | |
+| **Gesamt** | ___ / 55 | | |
 
 ---
 
-*Checkliste erstellt: 2026-02-12 durch ATI Worker 2*
+*Checkliste erstellt: 2026-02-12 durch ATI Worker 2, aktualisiert 2026-05-01*

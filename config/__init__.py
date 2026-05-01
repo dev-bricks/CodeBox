@@ -17,7 +17,7 @@ _SETTINGS_FILE = Path(__file__).parent / "settings.json"
 
 
 def load_settings() -> dict:
-    """Laedt Einstellungen aus settings.json"""
+    """Lädt Einstellungen aus settings.json"""
     if _SETTINGS_FILE.exists():
         try:
             with open(_SETTINGS_FILE, 'r', encoding='utf-8') as f:

@@ -13,7 +13,7 @@ from PySide6.QtGui import (
 
 
 class LineNumberArea(QWidget):
-    """Zeichnet Zeilennummern fuer den CodeEditor"""
+    """Zeichnet Zeilennummern für den CodeEditor"""
     def __init__(self, editor):
         super().__init__(editor)
         self.codeEditor = editor
@@ -29,6 +29,7 @@ class CodeEditor(QPlainTextEdit):
     """Code-Editor mit Zeilennummern, Highlighting, Auto-Completion und Bracket Matching"""
 
     cursorPositionInfo = Signal(int, int)  # Zeile, Spalte
+    completionRequested = Signal(int, int, str)  # LSP: Zeile, Spalte, Prefix (0-basiert)
     modificationChanged = Signal(bool)
 
     BRACKETS = {'(': ')', '[': ']', '{': '}', ')': '(', ']': '[', '}': '{'}
@@ -74,7 +75,7 @@ class CodeEditor(QPlainTextEdit):
         self._provider = None
 
     def set_completer_words(self, words: List[str]):
-        """Setzt die Completion-Woerter"""
+        """Setzt die Completion-Wörter"""
         self.completer = QCompleter(sorted(set(words)), self)
         self.completer.setWidget(self)
         self.completer.setCompletionMode(QCompleter.CompletionMode.PopupCompletion)
@@ -90,7 +91,7 @@ class CodeEditor(QPlainTextEdit):
         """)
 
     def set_provider(self, provider):
-        """Setzt den Language-Provider fuer Completion und Indent"""
+        """Setzt den Language-Provider für Completion und Indent"""
         self._provider = provider
         if provider:
             words = provider.get_keywords() + provider.get_builtins() + list(provider.get_snippets().keys())
@@ -103,7 +104,7 @@ class CodeEditor(QPlainTextEdit):
             return
         tc.movePosition(QTextCursor.MoveOperation.Left)
         tc.movePosition(QTextCursor.MoveOperation.EndOfWord)
-        # Snippet-Pruefung
+        # Snippet-Prüfung
         if self._provider and completion in self._provider.get_snippets():
             tc.movePosition(QTextCursor.MoveOperation.StartOfWord, QTextCursor.MoveMode.KeepAnchor)
             tc.removeSelectedText()
@@ -130,7 +131,7 @@ class CodeEditor(QPlainTextEdit):
             cursor = self.textCursor()
             line = cursor.block().text()
             indent = len(line) - len(line.lstrip())
-            # Indent-Trigger pruefen
+            # Indent-Trigger prüfen
             triggers = self._provider.get_indent_triggers() if self._provider else [':','{']
             if any(line.rstrip().endswith(t) for t in triggers):
                 indent += 4
@@ -158,6 +159,10 @@ class CodeEditor(QPlainTextEdit):
             if len(prefix) < 2:
                 self.completer.popup().hide()
                 return
+            cursor = self.textCursor()
+            self.completionRequested.emit(
+                cursor.blockNumber(), cursor.columnNumber(), prefix
+            )
             if prefix != self.completer.completionPrefix():
                 self.completer.setCompletionPrefix(prefix)
                 self.completer.popup().setCurrentIndex(

@@ -3,18 +3,18 @@
 > **Ziel:** PythonBox v8 -> CodeBox (Multi-Language IDE)
 > **Basis:** PythonBox_v8.py (3,381 Zeilen)
 > **Erstellt:** 2026-01-26
-> **Aktualisiert:** 2026-02-12
+> **Aktualisiert:** 2026-05-01
 
 ---
 
-## Uebersicht
+## Übersicht
 
 | Phase | Beschreibung | Aufwand | Status |
 |-------|--------------|---------|--------|
 | 1 | Core Refactoring | ~4h | ERLEDIGT |
 | 2 | Python Provider | ~1h | ERLEDIGT |
 | 3 | Weitere Sprachen | ~4h | ERLEDIGT (JS, C++) |
-| 4 | Features & Polish | ~3h | Teilweise |
+| 4 | Features & Polish | laufend | Teilweise |
 | **Gesamt** | | **~12h** | |
 
 ---
@@ -38,7 +38,7 @@
 - [x] Auto-Completion in editor.py integriert
 
 ### 1.4 UI-Komponenten extrahieren - DONE (2026-02-12)
-- [x] `ui/main_window.py` - Hauptfenster mit Menue, Toolbar, Statusbar
+- [x] `ui/main_window.py` - Hauptfenster mit Menü, Toolbar, Statusbar
 - [x] Suchen und Gehe-zu-Zeile implementiert
 
 ### 1.5 UniversalHighlighter - DONE (2026-02-12)
@@ -57,7 +57,7 @@
 
 ### 2.1 PythonProvider erstellen - DONE
 - [x] `languages/python_lang.py`
-- [x] Keywords, Builtins aus PythonBox uebernommen
+- [x] Keywords, Builtins aus PythonBox übernommen
 - [x] Snippets definiert
 - [x] Run/Debug Commands
 
@@ -78,7 +78,7 @@
 ### 3.5 Provider-Registry - DONE
 - [x] `languages/__init__.py` mit Auto-Discovery
 - [x] Extension -> Provider Mapping
-- [x] Fallback fuer unbekannte Extensions
+- [x] Fallback für unbekannte Extensions
 
 ---
 
@@ -87,7 +87,7 @@
 ### 4.1 Statusbar-Sprachauswahl - DONE (2026-02-12)
 - [x] Dropdown in Toolbar
 - [x] Manuelle Sprachauswahl
-- [x] Automatische Erkennung bei Dateieroeffnung
+- [x] Automatische Erkennung bei Dateieröffnung
 
 ### 4.2 Einstellungs-Dialog
 - [x] config/__init__.py mit Settings-System
@@ -100,12 +100,14 @@
 - [ ] Problems-Panel
 
 ### 4.4 Dokumentation
-- [ ] README.md fuer CodeBox
-- [ ] Tastenkuerzel-Uebersicht
+- [x] README.md für CodeBox
+- [x] GitHub-Community-Dateien aktualisieren
+- [ ] Tastenkürzel-Übersicht
 
 ### 4.5 Abschluss
-- [ ] requirements.txt erstellen
-- [ ] START.bat anpassen
+- [x] requirements.txt erstellen
+- [x] start.bat anpassen
+- [x] lokales Build-Script (`build_exe.bat`) ergänzen
 - [ ] Kompilieren und EXE testen
 
 ---
@@ -114,20 +116,20 @@
 
 | Meilenstein | Kriterien | Status |
 |-------------|-----------|--------|
-| **M1: Lauffaehig** | main.py startet, Editor zeigt Code | ERREICHT |
+| **M1: Lauffähig** | main.py startet, Editor zeigt Code | ERREICHT |
 | **M2: Python funktioniert** | Python-Highlighting, Run, Snippets | ERREICHT |
-| **M3: Multi-Language** | 3+ Sprachen nutzbar | ERREICHT (Python, JS, C++) |
+| **M3: Multi-Language** | 3+ Sprachen nutzbar | ERREICHT (Python, JS, TS, C++, Rust, Go, Java) |
 | **M4: Release-Ready** | Doku, Tests, EXE | Offen |
 
 ---
 
-## Naechste Aktionen
+## Nächste Aktionen
 
-- Rust- und Go-Provider hinzufuegen
-- Linter automatisch bei Speichern ausfuehren
+- Runtime-Test der LSP-Integration mit installiertem `python-lsp-server`
+- Linter automatisch bei Speichern ausführen
+- Problems-Panel ergänzen
 - Minimap aus PythonBox portieren
-- README.md und requirements.txt erstellen
-- START.bat fuer CodeBox
+- EXE-Build aus `build_exe.bat` prüfen
 
 ---
 
@@ -139,4 +141,4 @@
 
 ---
 
-*Plan erstellt: 2026-01-26 | Aktualisiert: 2026-02-12 durch ATI Worker 2*
+*Plan erstellt: 2026-01-26 | Aktualisiert: 2026-05-01 durch Codex Automation*

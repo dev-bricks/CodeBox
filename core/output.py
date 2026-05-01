@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Output-Panel - Ausfuehrung und Debug-Ausgabe"""
+"""Output-Panel - Ausführung und Debug-Ausgabe"""
 
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QPushButton, QLabel
@@ -10,7 +10,7 @@ from PySide6.QtGui import QFont, QColor, QTextCursor, QTextCharFormat
 
 
 class OutputPanel(QWidget):
-    """Panel fuer Programm-Ausgabe und Ausfuehrung"""
+    """Panel für Programm-Ausgabe und Ausführung"""
 
     processFinished = Signal(int, str)  # exit_code, output
 
@@ -59,7 +59,7 @@ class OutputPanel(QWidget):
             self.stop_process()
 
         self.output.clear()
-        self.status_label.setText(f"Ausfuehrung: {' '.join(command)}")
+        self.status_label.setText(f"Ausführung: {' '.join(command)}")
         self.stop_btn.setEnabled(True)
 
         self.process = QProcess(self)

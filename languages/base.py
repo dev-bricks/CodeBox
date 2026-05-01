@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-LanguageProvider - Abstrakte Basisklasse fuer Sprachunterstuetzung
+LanguageProvider - Abstrakte Basisklasse für Sprachunterstützung
 """
 
 from abc import ABC, abstractmethod
@@ -9,7 +9,7 @@ from typing import List, Dict, Tuple, Optional
 
 
 class LanguageProvider(ABC):
-    """Abstrakte Basisklasse fuer Sprachunterstuetzung in CodeBox"""
+    """Abstrakte Basisklasse für Sprachunterstützung in CodeBox"""
 
     @abstractmethod
     def get_name(self) -> str:
@@ -18,12 +18,12 @@ class LanguageProvider(ABC):
 
     @abstractmethod
     def get_extensions(self) -> List[str]:
-        """Unterstuetzte Dateiendungen (ohne Punkt)"""
+        """Unterstützte Dateiendungen (ohne Punkt)"""
         pass
 
     @abstractmethod
     def get_keywords(self) -> List[str]:
-        """Keywords fuer Highlighting und Completion"""
+        """Keywords für Highlighting und Completion"""
         pass
 
     def get_builtins(self) -> List[str]:
@@ -36,11 +36,11 @@ class LanguageProvider(ABC):
 
     @abstractmethod
     def get_run_command(self, file_path: str) -> List[str]:
-        """Kommando zum Ausfuehren"""
+        """Kommando zum Ausführen"""
         pass
 
     def get_debug_command(self, file_path: str) -> Optional[List[str]]:
-        """Kommando zum Debuggen (None = nicht verfuegbar)"""
+        """Kommando zum Debuggen (None = nicht verfügbar)"""
         return None
 
     def get_linter_command(self, file_path: str) -> Optional[List[str]]:
@@ -52,7 +52,7 @@ class LanguageProvider(ABC):
         return ("//", ("/*", "*/"))
 
     def get_bracket_pairs(self) -> Dict[str, str]:
-        """Klammer-Paare fuer Matching"""
+        """Klammer-Paare für Matching"""
         return {'(': ')', '[': ']', '{': '}'}
 
     def get_auto_close_pairs(self) -> Dict[str, str]:
@@ -60,9 +60,9 @@ class LanguageProvider(ABC):
         return {'(': ')', '[': ']', '{': '}', '"': '"', "'": "'"}
 
     def get_indent_triggers(self) -> List[str]:
-        """Zeichen/Woerter die Einrueckung ausloesen"""
+        """Zeichen/Wörter, die Einrückung auslösen"""
         return ['{']
 
     def get_dedent_triggers(self) -> List[str]:
-        """Zeichen/Woerter die Ausrueckung ausloesen"""
+        """Zeichen/Wörter, die Ausrückung auslösen"""
         return ['}']

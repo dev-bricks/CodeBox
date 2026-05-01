@@ -1,25 +1,24 @@
 # CodeBox
 
-Multi-Language Code Editor auf Basis von PySide6. Leichtgewichtiger
-Desktop-Editor mit Syntax-Highlighting, LSP-Integration, integriertem
-Terminal und Projekt-Dateibaum.
+Mehrsprachiger Desktop-Codeeditor auf Basis von PySide6.
+Multi-language desktop code editor built with PySide6.
 
-Abgeleitet von PythonBox v8, ausgebaut zur Multi-Language-IDE.
+CodeBox ist aus PythonBox v8 hervorgegangen und bündelt Editor, Projektbaum,
+Terminal sowie erste LSP- und API-Grundlagen in einer lokalen IDE.
 
-## Features
+## Screenshot
 
-- **Multi-Language Syntax-Highlighting** fuer 7 Sprachen: Python, JavaScript,
-  TypeScript, C++, Rust, Go, Java
-- **LSP-Client** fuer Autovervollstaendigung, Diagnostics und Hover-Info
-- **Integriertes Terminal** mit Shell-Auswahl (cmd, PowerShell, bash, zsh)
-  und Befehls-History
-- **Projekt-Dateibaum** mit Filter, Kontextmenue und Versteckte-Dateien-Support
-- **Tab-System** fuer mehrere Dateien gleichzeitig
-- **Ausfuehrungs-Panel** pro Sprache (Run/Stop, Output)
-- **Such- und Gehe-zu-Zeile** mit Tastenkuerzeln
-- **Theme-System** (Dark-Default, weitere per Theme-Menue)
-- **Git-Integration** (Basis: Status, Branch, Diff)
-- **REST-API/CLI-Steuerbarkeit** (via ATI-Template)
+![CodeBox Screenshot](README/screenshots/main.png)
+
+## Funktionen / Features
+
+- Syntax-Highlighting für Python, JavaScript, TypeScript, C++, Rust, Go und Java
+- Integriertes Terminal mit Shell-Auswahl und History
+- Projekt-Dateibaum mit Filter und Kontextmenü
+- Mehrere Tabs, Suchfunktion und Gehe-zu-Zeile
+- Theme-System über `features/theme_manager.py`
+- REST-API-/CLI-Grundlage für spätere Fernsteuerung
+- LSP-Diagnostics und Completion-Anbindung für installierte Language Server
 
 ## Installation
 
@@ -28,7 +27,9 @@ pip install -r requirements.txt
 python main.py
 ```
 
-### Voraussetzungen
+Alternativ per Doppelklick auf `start.bat`.
+
+### Voraussetzungen / Requirements
 
 - Python 3.10+
 - PySide6 >= 6.5.0
@@ -39,47 +40,72 @@ python main.py
 - TypeScript: `npm install -g typescript-language-server`
 - Rust: `rustup component add rust-analyzer`
 - Go: `go install golang.org/x/tools/gopls@latest`
-- C++: `apt install clangd` / `choco install llvm`
+- C++: `clangd` bzw. LLVM
+
+## Lokaler Windows-Build
+
+```bat
+build_exe.bat
+```
+
+Das Script nutzt PyInstaller und erstellt lokal eine `CodeBox.exe` mit
+`CodeBox.ico`. Build-Ausgaben in `build/`, `dist/` und `releases/` bleiben
+lokale Artefakte und werden nicht versioniert.
 
 ## Projektstruktur
 
-```
-main.py            # Einstiegspunkt (QApplication + Dark-Theme)
-core/              # Editor, Tabs, Output, Highlighter
-features/          # LSP-Client, Terminal, Project-View, Git, Themes, Remote
-languages/         # Language Provider (Keywords, Snippets, LSP-Config)
-ui/                # MainWindow mit Menues, Toolbar, Splittern
-config/            # Konfigurationsdateien
-themes/            # Theme-Definitionen
+```text
+main.py            Einstiegspunkt / application entry
+core/              Editor-Kern, Tabs, Output, Highlighter
+features/          Terminal, Projektbaum, LSP, Git, Themes, Remote
+languages/         Sprachprofile und LSP-Konfiguration
+ui/                MainWindow und UI-Komposition
+config/            Konfigurationsdateien
+themes/            QSS-Themes
 ```
 
 ## Status
 
-**In aktiver Entwicklung (v0.1.0).**
+Aktueller Stand: `DEV`, Version `0.1.0`
 
-Funktionsfaehig: Multi-Language-Editor, 7 Language-Provider, LSP-Manager,
-Terminal und Project-View sind in das MainWindow integriert (linker Sidebar-
-Splitter + unteres Tab-Panel mit Ausgabe/Terminal). Tastenkuerzel:
-`Ctrl+B` (Projektbaum), `` Ctrl+` `` (Terminal).
+Bereits stabil nutzbar:
 
-Noch offen fuer v1.0:
-- LSP-Diagnostics und -Completion direkt im Editor anzeigen
-- Automatischer Linter-Aufruf beim Speichern + Problems-Panel
-- Theme-Auswahl-Dialog (aktuell nur ueber Menue)
-- Plugin-System fuer weitere Sprachen
+- Mehrsprachiger Editor
+- Projektbaum und Terminal im MainWindow
+- Konsistente Fenstertitel über `version.py`
+- Light-/Dark-Theme-Wechsel über den zentralen Theme-Manager
+
+Noch offen für die nächste größere Ausbaustufe:
+
+- Runtime-Test mit installiertem LSP-Server
+- Linter-/Problems-Panel
+- Plugin-System für weitere Sprachen
 - Remote Editing (SSH/SFTP)
 
-## Lizenz
+## Datenschutz / Privacy
 
-MIT License -- siehe [LICENSE](./LICENSE).
+CodeBox arbeitet lokal auf Dateien, die der Nutzer öffnet. Es werden keine
+Zugangsdaten benötigt und keine externen Dienste kontaktiert, außer Sie starten
+selbst einen installierten Language Server oder externe Build-/Run-Tools.
 
----
+Lokale Arbeitsdateien wie `AUFGABEN.txt`, Test-Locks, `.env`-Dateien,
+Credentials, Logs, Datenbanken und Build-Artefakte sind über `.gitignore`
+ausgeschlossen.
+
+## Lizenz / License
+
+[MIT License](LICENSE)
 
 ## Haftung / Liability
 
-Dieses Projekt ist eine **unentgeltliche Open-Source-Schenkung** im Sinne der §§ 516 ff. BGB. Die Haftung des Urhebers ist gemäß **§ 521 BGB** auf **Vorsatz und grobe Fahrlässigkeit** beschränkt. Ergänzend gelten die Haftungsausschlüsse aus GPL-3.0 / MIT / Apache-2.0 §§ 15–16 (je nach gewählter Lizenz).
+Dieses Projekt ist eine unentgeltliche Open-Source-Schenkung im Sinne der
+§§ 516 ff. BGB. Die Haftung des Urhebers ist gemäß § 521 BGB auf Vorsatz und
+grobe Fahrlässigkeit beschränkt. Ergänzend gilt der Haftungsausschluss der
+MIT-Lizenz.
 
-Nutzung auf eigenes Risiko. Keine Wartungszusage, keine Verfügbarkeitsgarantie, keine Gewähr für Fehlerfreiheit oder Eignung für einen bestimmten Zweck.
+Nutzung auf eigenes Risiko. Keine Wartungszusage, keine Verfügbarkeitsgarantie,
+keine Gewähr für Fehlerfreiheit oder Eignung für einen bestimmten Zweck.
 
-This project is an unpaid open-source donation. Liability is limited to intent and gross negligence (§ 521 German Civil Code). Use at your own risk. No warranty, no maintenance guarantee, no fitness-for-purpose assumed.
-
+This project is an unpaid open-source donation. Liability is limited to intent
+and gross negligence (§ 521 German Civil Code). Use at your own risk. No
+warranty, maintenance guarantee, or fitness-for-purpose is assumed.
