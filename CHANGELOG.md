@@ -7,6 +7,8 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ### Hinzugefügt
 - Headless-Smoke-Test für MainWindow-Instanziierung
+- Optionale LSP-Runtime-Tests für `python-lsp-server[all]`:
+  Diagnostics bei Syntaxfehlern und Completion über `pylsp`.
 - `__all__`-Exports in allen Modul-`__init__.py`
 - LSP-Diagnostics und LSP-Completion sind jetzt im Editor verdrahtet:
   Diagnostics laufen thread-sicher über Qt-Signale, Completion-Anfragen werden
@@ -17,6 +19,10 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - Diverse ungenutzte Imports entfernt (core, features, languages, ui)
 - Fenstertitel liest die Version jetzt aus `version.py` statt aus einem Hardcode
 - Theme-Wechsel setzt Palette und QSS gemeinsam; Light-Mode bleibt nicht mehr auf Dark-Basis hängen
+- Python-LSP-Erkennung startet `pylsp` jetzt auch über `python -m pylsp`,
+  wenn das Script nicht auf `PATH` liegt, das Modul aber installiert ist.
+- LSP-Subprocess-Pipes werden beim Stoppen geschlossen; der Runtime-Test läuft
+  dadurch ohne ResourceWarnings.
 
 ### Geändert
 - Deutschsprachige Doku sowie Python-Kommentare, Docstrings und naheliegende UI-Texte

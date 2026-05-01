@@ -11,8 +11,10 @@ Bietet grundlegende LSP-Funktionalität:
 - textDocument/publishDiagnostics (Fehler/Warnungen)
 """
 
+import importlib.util
 import json
 import subprocess
+import sys
 import threading
 import shutil
 from typing import Optional, Dict, List, Callable
@@ -21,7 +23,7 @@ from pathlib import Path
 
 # Bekannte LSP-Server pro Sprache
 LSP_SERVERS = {
-    "Python": {"cmd": ["pylsp"], "check": "pylsp"},
+    "Python": {"cmd": ["pylsp"], "check": "pylsp", "module": "pylsp"},
     "JavaScript": {"cmd": ["typescript-language-server", "--stdio"], "check": "typescript-language-server"},
     "TypeScript": {"cmd": ["typescript-language-server", "--stdio"], "check": "typescript-language-server"},
     "Rust": {"cmd": ["rust-analyzer"], "check": "rust-analyzer"},
@@ -83,22 +85,37 @@ class LSPClient:
     def server_config(self) -> Optional[dict]:
         return LSP_SERVERS.get(self.language)
 
-    def is_available(self) -> bool:
-        """Prüft, ob der LSP-Server installiert ist."""
+    def _resolve_command(self) -> Optional[List[str]]:
+        """Ermittelt das startbare Server-Kommando.
+
+        Bei Python ist `pylsp.exe` nach einer pip-Installation nicht immer auf
+        PATH. Wenn das Modul im aktuellen Interpreter vorhanden ist, startet
+        CodeBox den Server deshalb über `python -m pylsp`.
+        """
         config = self.server_config
         if not config:
-            return False
-        return shutil.which(config["check"]) is not None
+            return None
+        check = config.get("check")
+        if check and shutil.which(check):
+            return list(config["cmd"])
+        module = config.get("module")
+        if module and importlib.util.find_spec(module):
+            return [sys.executable, "-m", module]
+        return None
+
+    def is_available(self) -> bool:
+        """Prüft, ob der LSP-Server installiert ist."""
+        return self._resolve_command() is not None
 
     def start(self) -> bool:
         """Startet den LSP-Server-Prozess."""
-        if not self.is_available():
+        command = self._resolve_command()
+        if not command:
             return False
 
-        config = self.server_config
         try:
             self.process = subprocess.Popen(
-                config["cmd"],
+                command,
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
@@ -131,18 +148,34 @@ class LSPClient:
     def stop(self):
         """Stoppt den LSP-Server."""
         self._running = False
-        if self.process:
+        process = self.process
+        if process:
             try:
                 self._send_request("shutdown", {})
                 self._send_notification("exit", {})
             except (BrokenPipeError, OSError):
                 pass
             try:
-                self.process.terminate()
-                self.process.wait(timeout=3)
+                process.terminate()
+                process.wait(timeout=3)
             except subprocess.TimeoutExpired:
-                self.process.kill()
-            self.process = None
+                process.kill()
+                process.wait(timeout=3)
+            finally:
+                for stream in (process.stdin, process.stdout, process.stderr):
+                    if stream:
+                        try:
+                            stream.close()
+                        except OSError:
+                            pass
+                self.process = None
+        if (
+            self._reader_thread
+            and self._reader_thread.is_alive()
+            and threading.current_thread() is not self._reader_thread
+        ):
+            self._reader_thread.join(timeout=1)
+        self._reader_thread = None
 
     def did_open(self, uri: str, language_id: str, text: str, version: int = 1):
         """Benachrichtigt den Server über eine geöffnete Datei."""

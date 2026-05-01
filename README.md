@@ -36,11 +36,16 @@ Alternativ per Doppelklick auf `start.bat`.
 
 ### Optionale LSP-Server
 
-- Python: `pip install python-lsp-server`
+- Python: `pip install "python-lsp-server[all]"` für Completion plus Diagnostics
+  (`pip install python-lsp-server` reicht nur für Completion)
 - TypeScript: `npm install -g typescript-language-server`
 - Rust: `rustup component add rust-analyzer`
 - Go: `go install golang.org/x/tools/gopls@latest`
 - C++: `clangd` bzw. LLVM
+
+Der Python-LSP wird bevorzugt über `pylsp` auf `PATH` gestartet. Falls das
+Script nach der Installation nicht auf `PATH` liegt, nutzt CodeBox den aktuellen
+Python-Interpreter als Fallback: `python -m pylsp`.
 
 ## Lokaler Windows-Build
 
