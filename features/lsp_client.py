@@ -323,7 +323,8 @@ class LSPManager:
     def get_available_servers(self) -> List[str]:
         """Gibt eine Liste der verfügbaren LSP-Server zurück."""
         available = []
-        for lang, config in LSP_SERVERS.items():
-            if shutil.which(config["check"]):
+        for lang in LSP_SERVERS:
+            client = LSPClient(lang, self.root_path)
+            if client.is_available():
                 available.append(lang)
         return available

@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-from features.lsp_client import LSPClient
+from features.lsp_client import LSPClient, LSPManager
 
 
 class LSPClientCommandResolutionTests(unittest.TestCase):
@@ -31,6 +31,19 @@ class LSPClientCommandResolutionTests(unittest.TestCase):
                 patch("features.lsp_client.importlib.util.find_spec", return_value=None):
             self.assertFalse(client.is_available())
             self.assertIsNone(client._resolve_command())
+
+    def test_available_servers_uses_module_fallback(self):
+        manager = LSPManager()
+
+        def mock_which(_):
+            return None
+
+        def mock_find_spec(name):
+            return object() if name == "pylsp" else None
+
+        with patch("features.lsp_client.shutil.which", side_effect=mock_which), \
+                patch("features.lsp_client.importlib.util.find_spec", side_effect=mock_find_spec):
+            self.assertEqual(manager.get_available_servers(), ["Python"])
 
     def test_unknown_language_is_unavailable(self):
         client = LSPClient("Unknown")
