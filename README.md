@@ -49,6 +49,15 @@ Python-Interpreter als Fallback: `python -m pylsp`.
 Die Verfügbarkeitsprüfung in der Oberfläche nutzt dieselbe Fallback-Logik, sodass
 installierte `pylsp`-Module auch ohne separates `pylsp.exe` korrekt erkannt werden.
 
+### Optionale Remote-Editing-Abhängigkeit
+
+Die vorbereitete SSH/SFTP-Schicht nutzt `paramiko`, ist aber nicht für den lokalen
+Editorstart erforderlich:
+
+```bash
+pip install paramiko
+```
+
 ## Lokaler Windows-Build
 
 ```bat
