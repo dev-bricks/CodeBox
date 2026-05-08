@@ -33,7 +33,7 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - README präzisiert die lokale Privacy-Abgrenzung; `.gitignore` schützt
   zusätzliche Credential-, SSH- und SQLite-Artefakte.
 - `.gitignore` deckt interne Diagnose-/Skill-Dateien, Test-Caches und lokale
-  Windows-Build-Artefakte ab, ohne die versionierte `CodeBox.spec` auszublenden.
+  Windows-Build-Artefakte inklusive PyInstaller-Spec-Dateien ab.
 - README beschreibt die optionale `paramiko`-Abhängigkeit für Remote Editing.
 
 ## [0.1.0] - 2026-04-08
