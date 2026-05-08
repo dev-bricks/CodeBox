@@ -46,6 +46,8 @@ Alternativ per Doppelklick auf `start.bat`.
 Der Python-LSP wird bevorzugt über `pylsp` auf `PATH` gestartet. Falls das
 Script nach der Installation nicht auf `PATH` liegt, nutzt CodeBox den aktuellen
 Python-Interpreter als Fallback: `python -m pylsp`.
+Die Verfügbarkeitsprüfung in der Oberfläche nutzt dieselbe Fallback-Logik, sodass
+installierte `pylsp`-Module auch ohne separates `pylsp.exe` korrekt erkannt werden.
 
 ## Lokaler Windows-Build
 
@@ -90,11 +92,16 @@ Noch offen für die nächste größere Ausbaustufe:
 ## Datenschutz / Privacy
 
 CodeBox arbeitet lokal auf Dateien, die der Nutzer öffnet. Es werden keine
-Zugangsdaten benötigt und keine externen Dienste kontaktiert, außer Sie starten
-selbst einen installierten Language Server oder externe Build-/Run-Tools.
+Zugangsdaten für den Editor-Grundbetrieb benötigt und keine externen Dienste
+kontaktiert, außer Sie starten selbst einen installierten Language Server,
+externe Build-/Run-Tools oder optionale Remote-Editing-Funktionen.
+
+Optionale Remote-Verbindungen können zur Laufzeit SSH-Passwörter oder
+Schlüsselpfade verwenden. Solche Daten gehören nicht ins Repository und sollten
+nur in lokalen, ignorierten Konfigurationsdateien oder im System-Keyring liegen.
 
 Lokale Arbeitsdateien wie `AUFGABEN.txt`, Test-Locks, `.env`-Dateien,
-Credentials, Logs, Datenbanken und Build-Artefakte sind über `.gitignore`
+Credentials, SSH-Schlüssel, Logs, Datenbanken und Build-Artefakte sind über `.gitignore`
 ausgeschlossen.
 
 ## Lizenz / License

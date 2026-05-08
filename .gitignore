@@ -3,9 +3,13 @@ __pycache__/
 *.py[cod]
 *.pyo
 *.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 dist/
 build/
-*.spec
 
 # Virtual Environments
 venv/
@@ -23,7 +27,13 @@ Thumbs.db
 
 # Application
 *.db
+*.db-*
+*.sqlite
+*.sqlite3
 *.log
+*.exe
+*.msi
+*.msix
 logs/
 releases/
 .env
@@ -32,13 +42,21 @@ credentials.json
 client_secret*.json
 token.json
 *.pem
+*.ppk
 *.key
+*.p12
+*.pfx
+known_hosts
 keyring/
+*.bak
 
 # Internal
 AUFGABEN.txt
 TEST.txt
 TESTS.txt
 TESTERGEBNISSE.txt
+BUGREPORT.md
+DIAGNOSE_REPORT.md
+SKILL.md
 tmpclaude-*
 .claude/

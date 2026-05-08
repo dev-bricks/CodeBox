@@ -21,12 +21,17 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - Theme-Wechsel setzt Palette und QSS gemeinsam; Light-Mode bleibt nicht mehr auf Dark-Basis hängen
 - Python-LSP-Erkennung startet `pylsp` jetzt auch über `python -m pylsp`,
   wenn das Script nicht auf `PATH` liegt, das Modul aber installiert ist.
+- Die Anzeige verfügbarer LSP-Server nutzt jetzt dieselbe Fallback-Prüfung wie
+  der Serverstart; installierte `pylsp`-Module werden daher auch ohne `pylsp.exe`
+  auf `PATH` korrekt erkannt.
 - LSP-Subprocess-Pipes werden beim Stoppen geschlossen; der Runtime-Test läuft
   dadurch ohne ResourceWarnings.
 
 ### Geändert
 - Deutschsprachige Doku sowie Python-Kommentare, Docstrings und naheliegende UI-Texte
   verwenden jetzt echte Umlaute statt `ae/oe/ue`
+- README und Security Policy präzisieren die lokale Privacy-Abgrenzung; `.gitignore`
+  schützt zusätzliche Credential-, SSH- und SQLite-Artefakte.
 
 ## [0.1.0] - 2026-04-08
 
