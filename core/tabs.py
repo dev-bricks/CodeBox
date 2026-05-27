@@ -78,6 +78,18 @@ class TabWidget(QTabWidget):
 
         self.tabCloseRequested.connect(self.close_tab)
         self.currentChanged.connect(self._on_tab_changed)
+        self.tabBar().tabMoved.connect(self._on_tab_moved)
+
+    def _rebuild_tab_map(self):
+        """Baut die Index-Map anhand der aktuellen Tab-Reihenfolge neu auf."""
+        old_tabs = list(self.tabs.values())
+        self.tabs = {}
+        for i in range(self.count()):
+            widget = self.widget(i)
+            for tab in old_tabs:
+                if tab.editor is widget:
+                    self.tabs[i] = tab
+                    break
 
     def open_file(self, file_path: Path) -> EditorTab:
         """Öffnet eine Datei in einem neuen Tab (oder wechselt zu existierendem)"""
@@ -116,20 +128,17 @@ class TabWidget(QTabWidget):
                 QMessageBox.StandardButton.Save | QMessageBox.StandardButton.Discard | QMessageBox.StandardButton.Cancel
             )
             if reply == QMessageBox.StandardButton.Save:
-                tab.save()
+                if not tab.save():
+                    return
             elif reply == QMessageBox.StandardButton.Cancel:
                 return
 
         self.removeTab(index)
-        # Tab-Dict neu aufbauen
-        old_tabs = self.tabs.copy()
-        self.tabs = {}
-        for i in range(self.count()):
-            widget = self.widget(i)
-            for old_idx, old_tab in old_tabs.items():
-                if old_tab.editor is widget:
-                    self.tabs[i] = old_tab
-                    break
+        self._rebuild_tab_map()
+
+    def _on_tab_moved(self, _from: int, _to: int):
+        """Hält die Tab-Map nach Drag-and-drop im Sync."""
+        self._rebuild_tab_map()
 
     def current_tab(self) -> EditorTab:
         """Gibt den aktuellen EditorTab zurück"""

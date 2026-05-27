@@ -26,10 +26,19 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
   auf `PATH` korrekt erkannt.
 - LSP-Subprocess-Pipes werden beim Stoppen geschlossen; der Runtime-Test läuft
   dadurch ohne ResourceWarnings.
+- `close_tab()` bricht jetzt ab, wenn das Speichern eines modifizierten Tabs fehlschlägt,
+  statt den Tab trotzdem zu schließen.
+- `run_current()` startet kein Programm mehr, wenn das automatische Speichern vor dem
+  Ausführen fehlschlägt.
+- Tab-Reordering hält die interne Index-Map jetzt synchron; `current_tab()`,
+  `close_tab()` und die offenen-Datei-Prüfungen bleiben nach Drag-and-drop korrekt.
 
 ### Geändert
 - Deutschsprachige Doku sowie Python-Kommentare, Docstrings und naheliegende UI-Texte
   verwenden jetzt echte Umlaute statt `ae/oe/ue`
+- Windows-Build nutzt jetzt die vorhandene PyInstaller-Spec mit lokalem
+  Arbeitsverzeichnis außerhalb von OneDrive; `start.bat` startet bevorzugt
+  `dist\CodeBox.exe` und fällt erst danach auf Release-EXE oder Python zurück.
 - README präzisiert die lokale Privacy-Abgrenzung; `.gitignore` schützt
   zusätzliche Credential-, SSH- und SQLite-Artefakte.
 - `.gitignore` deckt interne Diagnose-/Skill-Dateien, Test-Caches und lokale

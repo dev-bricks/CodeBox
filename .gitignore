@@ -11,6 +11,7 @@ htmlcov/
 dist/
 build/
 *.spec
+!CodeBox.spec
 
 # Virtual Environments
 venv/

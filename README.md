@@ -16,6 +16,7 @@ Terminal sowie erste LSP- und API-Grundlagen in einer lokalen IDE.
 - Integriertes Terminal mit Shell-Auswahl und History
 - Projekt-Dateibaum mit Filter und Kontextmenü
 - Mehrere Tabs, Suchfunktion und Gehe-zu-Zeile
+- Robuste Tab-Verwaltung mit Drag-and-drop-Reordering und Save-Failure-Guards
 - Theme-System über `features/theme_manager.py`
 - REST-API-/CLI-Grundlage für spätere Fernsteuerung
 - LSP-Diagnostics und Completion-Anbindung für installierte Language Server
@@ -65,8 +66,13 @@ build_exe.bat
 ```
 
 Das Script nutzt PyInstaller und erstellt lokal eine `CodeBox.exe` mit
-`CodeBox.ico`. Build-Ausgaben in `build/`, `dist/` und `releases/` bleiben
-lokale Artefakte und werden nicht versioniert.
+`CodeBox.ico`. Die versionierte `CodeBox.spec` bündelt Icon und Theme-Dateien,
+während temporäre Build-Daten unter `C:\_Local_DEV\codex_build\codebox` liegen.
+Build-Ausgaben in `build/`, `dist/` und `releases/` bleiben lokale Artefakte
+und werden nicht versioniert.
+
+`start.bat` startet bevorzugt `dist\CodeBox.exe`, nutzt danach eine vorhandene
+Release-EXE und fällt erst zuletzt auf `python main.py` zurück.
 
 ## Projektstruktur
 
@@ -90,6 +96,8 @@ Bereits stabil nutzbar:
 - Projektbaum und Terminal im MainWindow
 - Konsistente Fenstertitel über `version.py`
 - Light-/Dark-Theme-Wechsel über den zentralen Theme-Manager
+- Speichern-, Schließen- und Ausführen-Flows behalten Tabs offen, wenn ein
+  Dateisystemfehler das Speichern verhindert.
 
 Noch offen für die nächste größere Ausbaustufe:
 

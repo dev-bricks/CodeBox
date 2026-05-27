@@ -292,12 +292,18 @@ class MainWindow(QMainWindow):
         tab = self.tab_widget.current_tab()
         if not tab:
             return
+        assigned_new_path = False
+        original_file_path = tab.file_path
+        original_provider = tab.provider
+        original_lang_label = self.lang_label.text()
+        original_run_enabled = self.output.run_btn.isEnabled()
         if not tab.file_path:
             path, _ = QFileDialog.getSaveFileName(
                 self, "Speichern unter", "",
                 "Alle Dateien (*);;Python (*.py);;JavaScript (*.js);;C++ (*.cpp)"
             )
             if path:
+                assigned_new_path = True
                 tab.file_path = Path(path)
                 # Provider setzen basierend auf neuer Extension
                 ext = tab.file_path.suffix.lstrip('.')
@@ -307,8 +313,19 @@ class MainWindow(QMainWindow):
                     tab.highlighter.set_provider(provider)
                     tab.editor.set_provider(provider)
                     self.lang_label.setText(provider.get_name())
+            else:
+                return
         if not tab.save():
+            if assigned_new_path:
+                tab.file_path = original_file_path
+                tab.provider = original_provider
+                tab.highlighter.set_provider(original_provider)
+                tab.editor.set_provider(original_provider)
+                self.lang_label.setText(original_lang_label)
+                self.output.run_btn.setEnabled(original_run_enabled)
             return
+        self.tab_widget._update_tab_title(tab)
+        self.output.run_btn.setEnabled(bool(tab.provider))
         if tab.file_path and tab.provider and not getattr(tab, "_lsp_client", None):
             self._connect_lsp(tab, tab.file_path)
         # LSP: didSave melden
@@ -360,7 +377,8 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Ausführen", "Bitte zuerst eine Datei speichern.")
             return
         # Automatisch speichern vor dem Ausführen
-        tab.save()
+        if not tab.save():
+            return
         if tab.provider:
             cmd = tab.provider.get_run_command(str(tab.file_path))
             self.output.run_command(cmd)
