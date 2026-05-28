@@ -6,6 +6,8 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 ## [Unreleased]
 
 ### Hinzugefügt
+- README-Discoverability für GitHub/Web-Suche geschärft: englischer SEO-Einstieg,
+  CodeBox-Namenskollision erklärt, Quickstart und präzisere Suchbegriffe ergänzt.
 - Headless-Smoke-Test für MainWindow-Instanziierung
 - Optionale LSP-Runtime-Tests für `python-lsp-server[all]`:
   Diagnostics bei Syntaxfehlern und Completion über `pylsp`.

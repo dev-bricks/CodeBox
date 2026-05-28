@@ -1,10 +1,21 @@
-# CodeBox
+# CodeBox - local PySide6 desktop code editor
 
-Mehrsprachiger Desktop-Codeeditor auf Basis von PySide6.
-Multi-language desktop code editor built with PySide6.
+CodeBox is a local-first desktop IDE for Windows developers who want a
+lightweight PySide6 code editor with tabs, a project tree, an integrated
+terminal, Git helpers, syntax highlighting and Language Server Protocol
+diagnostics.
 
-CodeBox ist aus PythonBox v8 hervorgegangen und bündelt Editor, Projektbaum,
-Terminal sowie erste LSP- und API-Grundlagen in einer lokalen IDE.
+Mehrsprachiger Desktop-Codeeditor auf Basis von PySide6. CodeBox ist aus
+PythonBox v8 hervorgegangen und bündelt Editor, Projektbaum, Terminal sowie
+erste LSP- und API-Grundlagen in einer lokalen IDE.
+
+## Why CodeBox
+
+- Local-first: edit files on your machine without cloud accounts or telemetry.
+- PySide6 desktop stack: native Windows app behavior with a small Python codebase.
+- Multi-language workflow: Python, JavaScript, TypeScript, C++, Rust, Go and Java.
+- LSP-ready: diagnostics and completion can connect to installed language servers.
+- Dev-bricks ecosystem: companion to PythonBox and DevCenter for small local tools.
 
 ## Screenshot
 
@@ -29,6 +40,14 @@ python main.py
 ```
 
 Alternativ per Doppelklick auf `start.bat`.
+
+### Quick start
+
+1. Clone `https://github.com/dev-bricks/CodeBox`.
+2. Install dependencies with `pip install -r requirements.txt`.
+3. Run `python main.py`.
+4. Optional: install language servers such as `python-lsp-server[all]` or
+   `typescript-language-server` for diagnostics and completion.
 
 ### Voraussetzungen / Requirements
 
@@ -85,6 +104,14 @@ ui/                MainWindow und UI-Komposition
 config/            Konfigurationsdateien
 themes/            QSS-Themes
 ```
+
+## Discovery keywords
+
+CodeBox is best described as a local PySide6 code editor, Windows desktop IDE,
+offline code editor, LSP-enabled Python editor and lightweight multi-language
+developer tool. The repository name collides with older projects called
+`codebox`, so searches are most precise with `dev-bricks CodeBox`,
+`CodeBox PySide6`, `CodeBox LSP editor` or `file-bricks/dev-bricks desktop IDE`.
 
 ## Status
 
