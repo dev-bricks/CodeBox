@@ -52,5 +52,29 @@ class LSPClientCommandResolutionTests(unittest.TestCase):
         self.assertIsNone(client._resolve_command())
 
 
+class LSPReadLoopTerminationTests(unittest.TestCase):
+    def test_read_loop_terminates_on_server_death(self):
+        """Regressions-Test: _read_loop darf bei Server-Tod NICHT in einer
+        Busy-Loop haengen (readline() liefert b'' = EOF endlos)."""
+        import io
+        import threading
+        import types
+
+        client = LSPClient("Python")
+        client.process = types.SimpleNamespace(
+            stdout=io.BytesIO(b""),
+            stdin=None,
+            stderr=None,
+        )
+        client._running = True
+
+        t = threading.Thread(target=client._read_loop, daemon=True)
+        t.start()
+        t.join(timeout=2)
+
+        self.assertFalse(t.is_alive(), "read_loop haengt in Busy-Loop (Server-Tod nicht erkannt)")
+        self.assertFalse(client._running)
+
+
 if __name__ == "__main__":
     unittest.main()

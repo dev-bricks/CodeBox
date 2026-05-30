@@ -263,6 +263,8 @@ class LSPClient:
 
                 content_length = int(headers.get('Content-Length', 0))
                 if content_length == 0:
+                    if not headers:
+                        break  # EOF — Server-Prozess beendet
                     continue
 
                 # Body lesen
