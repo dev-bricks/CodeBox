@@ -119,7 +119,7 @@ class GitRepo:
                 index_status=x,
                 work_status=y,
                 is_staged=x in "MADRC",
-                is_modified=y == "M" or x == "M",
+                is_modified=y == "M",
                 is_untracked=x == "?" and y == "?",
                 is_deleted=x == "D" or y == "D",
                 is_renamed=x == "R",
