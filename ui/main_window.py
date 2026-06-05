@@ -160,12 +160,22 @@ class MainWindow(QMainWindow):
             "Alle Dateien (*);;Python (*.py);;JavaScript (*.js);;C++ (*.cpp *.h)"
         )
         if path:
-            tab = self.tab_widget.open_file(Path(path))
-            if tab and tab.provider:
-                self.lang_label.setText(tab.provider.get_name())
-                self.output.run_btn.setEnabled(True)
-                self._connect_lsp(tab, Path(path))
-            self._connect_cursor(tab)
+            self.open_path(Path(path))
+
+    def open_path(self, file_path: Path):
+        """Öffnet einen konkreten Pfad ohne Dateidialog."""
+        path = Path(file_path)
+        if not path.exists():
+            QMessageBox.warning(self, "Datei öffnen", f"Datei nicht gefunden:\n{path}")
+            return None
+
+        tab = self.tab_widget.open_file(path)
+        if tab and tab.provider:
+            self.lang_label.setText(tab.provider.get_name())
+            self.output.run_btn.setEnabled(True)
+            self._connect_lsp(tab, path)
+        self._connect_cursor(tab)
+        return tab
 
     def _connect_lsp(self, tab, file_path: Path):
         """Verbindet den Tab mit dem LSP-Server für die Sprache."""
@@ -437,12 +447,7 @@ class MainWindow(QMainWindow):
 
     def _open_file_from_project(self, file_path):
         """Öffnet eine Datei aus dem Projektbaum."""
-        tab = self.tab_widget.open_file(file_path)
-        if tab and tab.provider:
-            self.lang_label.setText(tab.provider.get_name())
-            self.output.run_btn.setEnabled(True)
-            self._connect_lsp(tab, file_path)
-        self._connect_cursor(tab)
+        self.open_path(file_path)
 
     def _toggle_project_view(self):
         """Blendet den Projektbaum ein/aus."""

@@ -5,7 +5,16 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [Unreleased]
 
+### Build / Release
+- EXE aktualisiert 2026-06-01 (OneDrive-Lock aufgelöst nach Beenden alter Prozesse); enthält Startup-/CLI-Bug-Fix (`--open`-Argument + offener Bootstrap-Tab). 13/13 Tests grün, Smoke OK.
+- EXE neu gebaut 2026-06-01 (PyInstaller, `CodeBox.spec` → `C:\_Local_DEV\codex_build\codebox`); 11/12 Tests grün (1 skipped), Smoke-Test bestanden. Vorherige EXE: 2026-05-28.
+
 ### Hinzugefügt
+- Linux-Source-Smoke für offscreen App-Start, Dateiöffnung, Terminalpfad,
+  Projektbaum-`xdg-open` und lokale Python-Run-Commands.
+- Regressionstest für Startup-Dateiübergabe per `--open` und positionalem Pfad.
+- README-Discoverability für GitHub/Web-Suche geschärft: englischer SEO-Einstieg,
+  CodeBox-Namenskollision erklärt, Quickstart und präzisere Suchbegriffe ergänzt.
 - Headless-Smoke-Test für MainWindow-Instanziierung
 - Optionale LSP-Runtime-Tests für `python-lsp-server[all]`:
   Diagnostics bei Syntaxfehlern und Completion über `pylsp`.
@@ -15,6 +24,8 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
   beim Tippen an den aktiven LSP-Client geschickt.
 
 ### Behoben
+- `python main.py --open <datei>` und nackte Dateipfade öffnen jetzt die Datei
+  direkt beim Start und entfernen den leeren Bootstrap-Tab.
 - `QApplication` fehlte im Import von `ui/main_window.py` (wurde in Theme-Lambda verwendet)
 - Diverse ungenutzte Imports entfernt (core, features, languages, ui)
 - Fenstertitel liest die Version jetzt aus `version.py` statt aus einem Hardcode

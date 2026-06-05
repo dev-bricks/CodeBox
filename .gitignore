@@ -62,3 +62,8 @@ DIAGNOSE_REPORT.md
 SKILL.md
 tmpclaude-*
 .claude/
+# ---- Interne Steuerungsdateien ----
+DECISIONS.md
+PORTIERUNGSPLAN.md
+TODO.md
+DONE.md
