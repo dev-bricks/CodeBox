@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import warnings
 from unittest.mock import Mock, patch
 
 from PySide6.QtWidgets import QApplication, QMessageBox
@@ -107,5 +108,31 @@ def test_initial_save_failure_restores_untitled_state():
     assert window.tab_widget.tabText(original_index) == "Unbenannt"
     assert window.lang_label.text() == original_label
     assert not window.output.run_btn.isEnabled()
+
+    window.close()
+
+
+def test_connect_cursor_emits_no_runtime_warning_on_first_call():
+    """Regression (B-001): _connect_cursor() darf keine RuntimeWarning auslösen,
+    wenn der Tab noch nie mit dem Cursor-Signal verbunden war."""
+    _ensure_app()
+
+    with patch("features.terminal.TerminalWidget._start_shell", lambda self: None):
+        window = MainWindow()
+
+    tab = window.tab_widget.current_tab()
+    assert tab is not None
+    assert not hasattr(tab, "_cursor_slot"), "Neuer Tab darf noch kein _cursor_slot haben"
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        window._connect_cursor(tab)
+
+    runtime_warnings = [w for w in caught if issubclass(w.category, RuntimeWarning)]
+    assert not runtime_warnings, (
+        f"_connect_cursor() hat unerwartete RuntimeWarnings ausgelöst: "
+        + ", ".join(str(w.message) for w in runtime_warnings)
+    )
+    assert hasattr(tab, "_cursor_slot"), "_cursor_slot muss nach _connect_cursor gesetzt sein"
 
     window.close()

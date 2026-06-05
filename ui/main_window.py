@@ -437,13 +437,18 @@ class MainWindow(QMainWindow):
 
     def _connect_cursor(self, tab):
         if tab:
-            try:
-                tab.editor.cursorPositionInfo.disconnect()
-            except TypeError:
-                pass
-            tab.editor.cursorPositionInfo.connect(
-                lambda line, col: self.pos_label.setText(f"Zeile {line}, Spalte {col}")
-            )
+            old_slot = getattr(tab, "_cursor_slot", None)
+            if old_slot is not None:
+                try:
+                    tab.editor.cursorPositionInfo.disconnect(old_slot)
+                except (TypeError, RuntimeError):
+                    pass
+
+            def _slot(line, col):
+                self.pos_label.setText(f"Zeile {line}, Spalte {col}")
+
+            tab._cursor_slot = _slot
+            tab.editor.cursorPositionInfo.connect(_slot)
 
     def _open_file_from_project(self, file_path):
         """Öffnet eine Datei aus dem Projektbaum."""
