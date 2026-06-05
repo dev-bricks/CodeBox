@@ -55,8 +55,18 @@ class OutputPanel(QWidget):
 
     def run_command(self, command: list):
         """Startet einen Prozess mit dem gegebenen Kommando"""
-        if self.process and self.process.state() != QProcess.ProcessState.NotRunning:
-            self.stop_process()
+        if self.process:
+            for sig in (
+                self.process.readyReadStandardOutput,
+                self.process.readyReadStandardError,
+                self.process.finished,
+            ):
+                try:
+                    sig.disconnect()
+                except (TypeError, RuntimeError):
+                    pass
+            if self.process.state() != QProcess.ProcessState.NotRunning:
+                self.process.kill()
 
         self.output.clear()
         self.status_label.setText(f"Ausführung: {' '.join(command)}")
