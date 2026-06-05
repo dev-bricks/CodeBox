@@ -151,8 +151,9 @@ class MainWindow(QMainWindow):
     # ---- Datei-Aktionen ----
 
     def new_file(self):
-        self.tab_widget.new_tab()
+        tab = self.tab_widget.new_tab()
         self.output.run_btn.setEnabled(False)
+        self._connect_cursor(tab)
 
     def open_file(self):
         path, _ = QFileDialog.getOpenFileName(
@@ -419,6 +420,9 @@ class MainWindow(QMainWindow):
             self.setWindowTitle(format_window_title())
             self.lang_label.setText("Keine Sprache")
             self.output.run_btn.setEnabled(False)
+            tab = self.tab_widget.current_tab()
+            if tab:
+                self._connect_cursor(tab)
 
     def _on_language_changed(self, lang_name):
         if lang_name == "(Auto)":

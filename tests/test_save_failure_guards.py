@@ -112,9 +112,10 @@ def test_initial_save_failure_restores_untitled_state():
     window.close()
 
 
-def test_connect_cursor_emits_no_runtime_warning_on_first_call():
-    """Regression (B-001): _connect_cursor() darf keine RuntimeWarning auslösen,
-    wenn der Tab noch nie mit dem Cursor-Signal verbunden war."""
+def test_cursor_position_updates_for_untitled_tab():
+    """Regression (B-007): _on_file_changed(None) muss _connect_cursor aufrufen,
+    damit die Positionsanzeige auch für unbenannte Tabs aktuell bleibt.
+    Vor dem Fix: else-Zweig rief _connect_cursor nicht auf."""
     _ensure_app()
 
     with patch("features.terminal.TerminalWidget._start_shell", lambda self: None):
@@ -122,7 +123,35 @@ def test_connect_cursor_emits_no_runtime_warning_on_first_call():
 
     tab = window.tab_widget.current_tab()
     assert tab is not None
-    assert not hasattr(tab, "_cursor_slot"), "Neuer Tab darf noch kein _cursor_slot haben"
+    assert tab.file_path is None, "Tab soll unbenannt sein"
+
+    assert hasattr(tab, "_cursor_slot"), (
+        "Unbenannter Tab muss _cursor_slot haben — _on_file_changed(None) hat _connect_cursor nicht aufgerufen"
+    )
+
+    tab.editor.cursorPositionInfo.emit(7, 3)
+    assert window.pos_label.text() == "Zeile 7, Spalte 3", (
+        f"Positionsanzeige aktualisiert sich nicht: {window.pos_label.text()!r}"
+    )
+
+    window.close()
+
+
+def test_connect_cursor_emits_no_runtime_warning_on_reconnect():
+    """Regression (B-001): _connect_cursor() darf keine RuntimeWarning auslösen,
+    auch wenn der Tab bereits einen _cursor_slot hat (Reconnect-Szenario).
+    Nach B-007 ruft new_file() _connect_cursor direkt auf, weshalb der initiale
+    Tab _cursor_slot bereits besitzt — ein zweiter Aufruf muss fehlerfrei sein."""
+    _ensure_app()
+
+    with patch("features.terminal.TerminalWidget._start_shell", lambda self: None):
+        window = MainWindow()
+
+    tab = window.tab_widget.current_tab()
+    assert tab is not None
+    assert hasattr(tab, "_cursor_slot"), (
+        "_cursor_slot muss nach new_file() bereits gesetzt sein (B-007)"
+    )
 
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
