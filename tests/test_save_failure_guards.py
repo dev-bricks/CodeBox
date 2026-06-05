@@ -80,6 +80,9 @@ def test_initial_save_updates_tab_title_and_enables_run(tmp_path):
     assert tab.file_path == target
     assert window.tab_widget.tabText(current_index) == "script.py"
     assert window.output.run_btn.isEnabled()
+    assert "script.py" in window.windowTitle(), (
+        f"Fenstertitel muss Dateinamen enthalten, zeigt aber: {window.windowTitle()!r}"
+    )
 
     window.close()
 

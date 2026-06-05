@@ -336,6 +336,7 @@ class MainWindow(QMainWindow):
                 self.output.run_btn.setEnabled(original_run_enabled)
             return
         self.tab_widget._update_tab_title(tab)
+        self.setWindowTitle(format_window_title(tab.file_path))
         self.output.run_btn.setEnabled(bool(tab.provider))
         if tab.file_path and tab.provider and not getattr(tab, "_lsp_client", None):
             self._connect_lsp(tab, tab.file_path)
