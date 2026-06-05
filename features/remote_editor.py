@@ -119,6 +119,7 @@ class SFTPSession:
         if not self._sftp:
             return None
 
+        local_path = None
         try:
             # Temp-Datei mit passendem Suffix erstellen
             suffix = Path(remote_path).suffix or ".txt"
@@ -131,6 +132,11 @@ class SFTPSession:
             return local_path
         except Exception as e:
             logger.error("Download fehlgeschlagen: %s (%s)", remote_path, e)
+            if local_path:
+                try:
+                    os.unlink(local_path)
+                except OSError:
+                    pass
             return None
 
     def upload_file(self, remote_path: str, local_path: str = None) -> bool:
