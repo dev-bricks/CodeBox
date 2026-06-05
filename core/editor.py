@@ -144,9 +144,21 @@ class CodeEditor(QPlainTextEdit):
         auto_close = self._provider.get_auto_close_pairs() if self._provider else \
             {'(': ')', '[': ']', '{': '}', '"': '"', "'": "'"}
         if event.text() in auto_close:
+            close_char = auto_close[event.text()]
+            cursor = self.textCursor()
+            pos = cursor.position()
+            text = self.toPlainText()
+            # Skip over existing closing char when open == close (quotes)
+            if (event.text() == close_char
+                    and pos < len(text)
+                    and text[pos] == close_char
+                    and not cursor.hasSelection()):
+                cursor.movePosition(QTextCursor.MoveOperation.Right)
+                self.setTextCursor(cursor)
+                return
             super().keyPressEvent(event)
             cursor = self.textCursor()
-            cursor.insertText(auto_close[event.text()])
+            cursor.insertText(close_char)
             cursor.movePosition(QTextCursor.MoveOperation.Left)
             self.setTextCursor(cursor)
             return
