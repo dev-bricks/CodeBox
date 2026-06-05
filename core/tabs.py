@@ -138,6 +138,8 @@ class TabWidget(QTabWidget):
 
         self.removeTab(index)
         self._rebuild_tab_map()
+        current = self.current_tab()
+        self.currentFileChanged.emit(current.file_path if current else None)
 
     def _on_tab_moved(self, _from: int, _to: int):
         """Hält die Tab-Map nach Drag-and-drop im Sync."""
