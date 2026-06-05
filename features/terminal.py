@@ -148,6 +148,14 @@ class TerminalWidget(QWidget):
         self.clear()
         self._start_shell()
 
+    def _input_encoding(self) -> str:
+        """Encoding für Eingaben an die Shell — cp1252 für cmd/Windows, sonst utf-8."""
+        if sys.platform == "win32":
+            shell = self.shell_combo.currentText() if hasattr(self, "shell_combo") else "cmd"
+            if shell == "cmd":
+                return "cp1252"
+        return "utf-8"
+
     def _execute_command(self):
         """Führt den eingegebenen Befehl aus."""
         cmd = self.input.text().strip()
@@ -164,8 +172,7 @@ class TerminalWidget(QWidget):
 
         # An den Prozess senden
         if self.process and self.process.state() == QProcess.ProcessState.Running:
-            encoding = 'utf-8' if sys.platform != 'win32' else 'cp1252'
-            self.process.write(f"{cmd}\n".encode(encoding, errors='replace'))
+            self.process.write(f"{cmd}\n".encode(self._input_encoding(), errors='replace'))
 
     def _history_up(self):
         if self.history and self.history_index > 0:
@@ -205,10 +212,11 @@ class TerminalWidget(QWidget):
         self.working_dir = path
         self.cwd_label.setText(path)
         if self.process and self.process.state() == QProcess.ProcessState.Running:
+            encoding = self._input_encoding()
             if sys.platform == "win32":
-                self.process.write(f"cd /d \"{path}\"\n".encode('utf-8'))
+                self.process.write(f"cd /d \"{path}\"\n".encode(encoding, errors='replace'))
             else:
-                self.process.write(f"cd \"{path}\"\n".encode('utf-8'))
+                self.process.write(f"cd \"{path}\"\n".encode(encoding, errors='replace'))
 
     def _on_stdout(self):
         data = self.process.readAllStandardOutput().data().decode('utf-8', errors='replace')
