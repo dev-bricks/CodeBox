@@ -259,5 +259,10 @@ class ProjectView(QWidget):
             if new_path.exists():
                 QMessageBox.warning(self, "Fehler", f"'{name}' existiert bereits.")
                 return
-            new_path.write_text("", encoding='utf-8')
+            try:
+                new_path.write_text("", encoding='utf-8')
+            except OSError as e:
+                QMessageBox.critical(self, "Fehler",
+                                     f"Datei konnte nicht erstellt werden:\n{e}")
+                return
             self.fileDoubleClicked.emit(new_path)
