@@ -116,6 +116,9 @@ class TabWidget(QTabWidget):
         idx = self.addTab(tab.editor, "Unbenannt")
         self.tabs[idx] = tab
         self.setCurrentIndex(idx)
+        tab.editor.modificationChanged.connect(
+            lambda _: self._update_tab_title(tab)
+        )
         return tab
 
     def close_tab(self, index: int):
