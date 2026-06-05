@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import warnings
+from pathlib import Path
 from unittest.mock import Mock, patch
 
 from PySide6.QtWidgets import QApplication, QMessageBox
@@ -108,6 +109,37 @@ def test_initial_save_failure_restores_untitled_state():
     assert window.tab_widget.tabText(original_index) == "Unbenannt"
     assert window.lang_label.text() == original_label
     assert not window.output.run_btn.isEnabled()
+
+    window.close()
+
+
+def test_switching_to_file_without_provider_resets_lang_label_and_run_btn(tmp_path):
+    """Regression (B-011): Wenn von einem Sprach-Tab (Python) auf eine Datei ohne
+    Provider (.txt) gewechselt wird, müssen lang_label und run_btn zurückgesetzt
+    werden. Vorher blieb lang_label auf 'Python' und Run blieb aktiviert."""
+    _ensure_app()
+
+    with patch("features.terminal.TerminalWidget._start_shell", lambda self: None):
+        window = MainWindow()
+
+    # Python-Datei öffnen (hat Provider → Run aktiv)
+    py_file = tmp_path / "script.py"
+    py_file.write_text("print('hi')", encoding="utf-8")
+    window.open_path(py_file)
+    assert window.output.run_btn.isEnabled(), "Run soll für Python aktiv sein"
+    assert window.lang_label.text() == "Python"
+
+    # Txt-Datei öffnen (kein Provider)
+    txt_file = tmp_path / "notes.txt"
+    txt_file.write_text("some notes", encoding="utf-8")
+    window.open_path(txt_file)
+
+    assert not window.output.run_btn.isEnabled(), (
+        "Run muss nach Wechsel zu .txt deaktiviert werden"
+    )
+    assert window.lang_label.text() == "Keine Sprache", (
+        f"lang_label muss 'Keine Sprache' zeigen, zeigt aber: {window.lang_label.text()!r}"
+    )
 
     window.close()
 

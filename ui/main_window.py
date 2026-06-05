@@ -410,6 +410,9 @@ class MainWindow(QMainWindow):
                 self.lang_label.setText(tab.provider.get_name())
                 self.output.run_btn.setEnabled(True)
                 self._connect_lsp(tab, file_path)
+            else:
+                self.lang_label.setText("Keine Sprache")
+                self.output.run_btn.setEnabled(False)
             self._connect_cursor(tab)
             # ProjectView und Terminal auf Projektordner setzen
             project_dir = str(file_path.parent)
