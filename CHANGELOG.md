@@ -10,6 +10,9 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - EXE neu gebaut 2026-06-01 (PyInstaller, `CodeBox.spec` → `C:\_Local_DEV\codex_build\codebox`); 11/12 Tests grün (1 skipped), Smoke-Test bestanden. Vorherige EXE: 2026-05-28.
 
 ### Hinzugefügt
+- macOS-Source-Smoke für offscreen App-Start, Dateiöffnung, Terminalpfad,
+  Projektbaum-`open -R` (Finder) und lokale Python-Run-Commands.
+  CI-Job `macos-smoke` in `linux-platform-smoke.yml` ergänzt.
 - Linux-Source-Smoke für offscreen App-Start, Dateiöffnung, Terminalpfad,
   Projektbaum-`xdg-open` und lokale Python-Run-Commands.
 - Regressionstest für Startup-Dateiübergabe per `--open` und positionalem Pfad.
