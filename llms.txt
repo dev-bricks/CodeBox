@@ -1,0 +1,36 @@
+# CodeBox - local PySide6 desktop code editor
+
+> CodeBox is a local-first desktop IDE for Windows developers who want a lightweight PySide6 code editor with tabs, a project tree, an integrated terminal, Git helpers, syntax highlighting, and Language Server Protocol diagnostics.
+
+Part of the dev-bricks family. Python, MIT.
+
+## Docs
+
+- [README.md](https://github.com/dev-bricks/CodeBox/blob/main/README.md): Primary documentation, installation guide, features, and setup instructions.
+- [CHANGELOG.md](https://github.com/dev-bricks/CodeBox/blob/main/CHANGELOG.md): Project release history and updates.
+- [AUFGABEN.txt](https://github.com/dev-bricks/CodeBox/blob/main/AUFGABEN.txt): Detailed developer task list.
+- [DEVELOPMENT_PLAN.md](https://github.com/dev-bricks/CodeBox/blob/main/DEVELOPMENT_PLAN.md): Architectural roadmap and planned improvements.
+- [LICENSE](https://github.com/dev-bricks/CodeBox/blob/main/LICENSE): MIT license text.
+
+## Features
+
+- **Syntax Highlighting**: Supports Python, JavaScript, TypeScript, C++, Rust, Go, and Java.
+- **Integrated Terminal**: Native shell integration (cmd/powershell/bash) with command history and styled outputs.
+- **Project Dateibaum**: File tree with proxy filters, custom context menus, and file system watcher.
+- **LSP Diagnostics & Completion**: Full thread-safe Qt integration with local language servers (e.g. pylsp, typescript-language-server).
+- **Tab Reordering**: Robust drag-and-drop tab management with save failure guards.
+- **Theme System**: Fusion palette combined with dynamic light/dark stylesheet configurations.
+
+## Commands
+
+- `python main.py`: Launches the CodeBox desktop interface.
+- `python main.py --open <file>`: Launches and directly opens a target file path.
+- `build_exe.bat`: Uses PyInstaller to bundle the application into a standalone executable.
+- `python -m pytest`: Runs the automated test suite.
+
+## Related Projects (dev-bricks & ellmos family)
+
+- [safe-start-for-codex](https://github.com/dev-bricks/safe-start-for-codex): Startup gating utility for local Codex automations.
+- [companion-for-agy](https://github.com/dev-bricks/companion-for-agy): Node.js wrapper for the Antigravity TUI.
+- [ellmos-filecommander-mcp](https://github.com/ellmos-ai/ellmos-filecommander-mcp): Filesystem and process orchestration.
+- [ellmos-codecommander-mcp](https://github.com/ellmos-ai/ellmos-codecommander-mcp): Code analysis and AST processing.
