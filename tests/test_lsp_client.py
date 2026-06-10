@@ -52,6 +52,72 @@ class LSPClientCommandResolutionTests(unittest.TestCase):
         self.assertIsNone(client._resolve_command())
 
 
+class LSPClientStopRobustnessTests(unittest.TestCase):
+    def test_stop_does_not_raise_when_kill_wait_times_out(self):
+        """Regression B-009: LSPClient.stop() darf keine Exception werfen wenn
+        process.wait() nach process.kill() erneut TimeoutExpired auslöst.
+        Ohne Fix propagiert die Exception und _reader_thread.join() wird nie erreicht."""
+        import subprocess
+        import types
+
+        client = LSPClient("Python")
+        client._running = True
+        client._reader_thread = None
+
+        process = types.SimpleNamespace(
+            terminate=lambda: None,
+            kill=lambda: None,
+            wait=unittest.mock.Mock(side_effect=subprocess.TimeoutExpired(cmd=[], timeout=3)),
+            stdin=None,
+            stdout=None,
+            stderr=None,
+        )
+        client.process = process
+
+        try:
+            client.stop()
+        except subprocess.TimeoutExpired:
+            self.fail("stop() hat TimeoutExpired propagiert — _reader_thread.join() wurde übersprungen")
+
+        self.assertIsNone(client.process)
+        self.assertIsNone(client._reader_thread)
+
+    def test_stop_joins_reader_thread_even_after_stubborn_process(self):
+        """_reader_thread.join() muss aufgerufen werden, auch wenn der Prozess
+        beim Warten auf das Ende beide Male TimeoutExpired wirft."""
+        import subprocess
+        import threading
+        import types
+
+        client = LSPClient("Python")
+        client._running = True
+
+        joined = []
+
+        class FakeThread:
+            def is_alive(self):
+                return True
+
+            def join(self, timeout=None):
+                joined.append(timeout)
+
+        client._reader_thread = FakeThread()
+
+        process = types.SimpleNamespace(
+            terminate=lambda: None,
+            kill=lambda: None,
+            wait=unittest.mock.Mock(side_effect=subprocess.TimeoutExpired(cmd=[], timeout=3)),
+            stdin=None,
+            stdout=None,
+            stderr=None,
+        )
+        client.process = process
+
+        client.stop()
+
+        self.assertTrue(joined, "_reader_thread.join() wurde nach stubborn process NICHT aufgerufen (B-009)")
+
+
 class LSPReadLoopTerminationTests(unittest.TestCase):
     def test_read_loop_terminates_on_server_death(self):
         """Regressions-Test: _read_loop darf bei Server-Tod NICHT in einer

@@ -160,7 +160,10 @@ class LSPClient:
                 process.wait(timeout=3)
             except subprocess.TimeoutExpired:
                 process.kill()
-                process.wait(timeout=3)
+                try:
+                    process.wait(timeout=3)
+                except subprocess.TimeoutExpired:
+                    pass
             finally:
                 for stream in (process.stdin, process.stdout, process.stderr):
                     if stream:

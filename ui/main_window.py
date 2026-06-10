@@ -487,9 +487,9 @@ class MainWindow(QMainWindow):
             reply = QMessageBox.question(
                 self, "Beenden",
                 f"Es gibt ungespeicherte Änderungen in:\n{names}\n\nTrotzdem beenden?",
-                QMessageBox.Yes | QMessageBox.No
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
             )
-            if reply == QMessageBox.No:
+            if reply == QMessageBox.StandardButton.No:
                 event.ignore()
                 return
         # Terminal-Prozess sauber beenden

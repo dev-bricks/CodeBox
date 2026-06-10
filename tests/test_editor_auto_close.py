@@ -75,6 +75,46 @@ class AutoCloseQuoteTests(unittest.TestCase):
         self.assertEqual(text, "()", f"Erwartet '()', bekommen: {text!r}")
         self.assertEqual(self.editor.textCursor().position(), 1)
 
+    def test_selection_wrapped_with_brackets(self):
+        """Regression B-010: Markierter Text + ( soll '(text)' ergeben, nicht '()'."""
+        self.editor.setPlainText("hello")
+        cursor = self.editor.textCursor()
+        cursor.setPosition(0)
+        cursor.setPosition(5, cursor.MoveMode.KeepAnchor)
+        self.editor.setTextCursor(cursor)
+
+        self.editor.keyPressEvent(_key_event("("))
+        text = self.editor.toPlainText()
+        self.assertEqual(text, "(hello)", f"Erwartete '(hello)', bekommen: {text!r}")
+
+    def test_selection_wrapped_with_double_quotes(self):
+        """Regression B-010b: Markierter Text + \" soll '\"text\"' ergeben."""
+        self.editor.setPlainText("world")
+        cursor = self.editor.textCursor()
+        cursor.setPosition(0)
+        cursor.setPosition(5, cursor.MoveMode.KeepAnchor)
+        self.editor.setTextCursor(cursor)
+
+        self.editor.keyPressEvent(_key_event('"'))
+        text = self.editor.toPlainText()
+        self.assertEqual(text, '"world"', f"Erwartete '\"world\"', bekommen: {text!r}")
+
+    def test_multiline_selection_wrapped_without_u2029(self):
+        """Regression B-010c: Mehrzeilige Markierung + ( darf kein U+2029 in den Text einfügen.
+        selectedText() liefert U+2029 für Zeilenumbrüche — muss zu \\n normalisiert werden."""
+        self.editor.setPlainText("line1\nline2")
+        cursor = self.editor.textCursor()
+        cursor.setPosition(0)
+        cursor.movePosition(cursor.MoveOperation.End, cursor.MoveMode.KeepAnchor)
+        self.editor.setTextCursor(cursor)
+
+        self.editor.keyPressEvent(_key_event("("))
+        text = self.editor.toPlainText()
+        self.assertNotIn(' ', text,
+                         f"U+2029 darf nicht im Dokument erscheinen: {text!r}")
+        self.assertEqual(text, "(line1\nline2)",
+                         f"Erwartete '(line1\\nline2)', bekommen: {text!r}")
+
 
 if __name__ == "__main__":
     unittest.main()

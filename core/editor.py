@@ -148,11 +148,16 @@ class CodeEditor(QPlainTextEdit):
             cursor = self.textCursor()
             pos = cursor.position()
             text = self.toPlainText()
+            # Wrap selection in brackets/quotes instead of discarding it
+            if cursor.hasSelection():
+                selected = cursor.selectedText().replace(' ', '\n')
+                cursor.insertText(event.text() + selected + close_char)
+                self.setTextCursor(cursor)
+                return
             # Skip over existing closing char when open == close (quotes)
             if (event.text() == close_char
                     and pos < len(text)
-                    and text[pos] == close_char
-                    and not cursor.hasSelection()):
+                    and text[pos] == close_char):
                 cursor.movePosition(QTextCursor.MoveOperation.Right)
                 self.setTextCursor(cursor)
                 return

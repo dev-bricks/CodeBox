@@ -200,3 +200,59 @@ def test_connect_cursor_emits_no_runtime_warning_on_reconnect():
     assert hasattr(tab, "_cursor_slot"), "_cursor_slot muss nach _connect_cursor gesetzt sein"
 
     window.close()
+
+
+def test_close_event_blocks_when_user_clicks_no(tmp_path):
+    """Regression B-008: closeEvent muss QMessageBox.StandardButton verwenden.
+    Wird QMessageBox.No (deprecated, Integer) benutzt, schlägt der Vergleich
+    stumm fehl und der Dialog blockiert nie."""
+    from PySide6.QtCore import QEvent
+    _ensure_app()
+
+    with patch("features.terminal.TerminalWidget._start_shell", lambda self: None):
+        window = MainWindow()
+
+    tab = window.tab_widget.current_tab()
+    assert tab is not None
+    tab.is_modified = True
+    tab.file_path = tmp_path / "unsaved.py"
+
+    event = QEvent(QEvent.Type.Close)
+
+    with patch.object(QMessageBox, "question",
+                      return_value=QMessageBox.StandardButton.No):
+        window.closeEvent(event)
+
+    assert not event.isAccepted(), (
+        "closeEvent() muss das Schliessen blockieren, wenn der User 'No' wählt (B-008)"
+    )
+
+    tab.is_modified = False
+    window.close()
+
+
+def test_close_event_allows_when_user_clicks_yes(tmp_path):
+    """Regression B-008b: closeEvent muss Schliessen erlauben wenn User 'Yes' wählt."""
+    from PySide6.QtCore import QEvent
+    _ensure_app()
+
+    with patch("features.terminal.TerminalWidget._start_shell", lambda self: None):
+        window = MainWindow()
+
+    tab = window.tab_widget.current_tab()
+    assert tab is not None
+    tab.is_modified = True
+    tab.file_path = tmp_path / "unsaved.py"
+
+    event = QEvent(QEvent.Type.Close)
+
+    with patch.object(QMessageBox, "question",
+                      return_value=QMessageBox.StandardButton.Yes):
+        window.closeEvent(event)
+
+    assert event.isAccepted(), (
+        "closeEvent() muss Schliessen erlauben, wenn der User 'Yes' wählt (B-008b)"
+    )
+
+    tab.is_modified = False
+    window.close()
