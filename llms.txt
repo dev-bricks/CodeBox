@@ -8,7 +8,6 @@ Part of the dev-bricks family. Python, MIT.
 
 - [README.md](https://github.com/dev-bricks/CodeBox/blob/main/README.md): Primary documentation, installation guide, features, and setup instructions.
 - [CHANGELOG.md](https://github.com/dev-bricks/CodeBox/blob/main/CHANGELOG.md): Project release history and updates.
-- [AUFGABEN.txt](https://github.com/dev-bricks/CodeBox/blob/main/AUFGABEN.txt): Detailed developer task list.
 - [DEVELOPMENT_PLAN.md](https://github.com/dev-bricks/CodeBox/blob/main/DEVELOPMENT_PLAN.md): Architectural roadmap and planned improvements.
 - [LICENSE](https://github.com/dev-bricks/CodeBox/blob/main/LICENSE): MIT license text.
 
@@ -34,3 +33,26 @@ Part of the dev-bricks family. Python, MIT.
 - [companion-for-agy](https://github.com/dev-bricks/companion-for-agy): Node.js wrapper for the Antigravity TUI.
 - [ellmos-filecommander-mcp](https://github.com/ellmos-ai/ellmos-filecommander-mcp): Filesystem and process orchestration.
 - [ellmos-codecommander-mcp](https://github.com/ellmos-ai/ellmos-codecommander-mcp): Code analysis and AST processing.
+
+## Audience
+
+- Windows developers who want a lightweight local PySide6 desktop IDE without cloud accounts or telemetry
+- Python developers building or experimenting with LSP-integrated code editors
+- Developers in the dev-bricks / ellmos ecosystem who need a programmable, agent-controllable editor
+- Hobbyists and students who want a readable, hackable Python codebase as a learning reference
+- Contributors extending CodeBox with new language providers, themes, or remote editing features
+
+## Search Phrases
+
+```
+dev-bricks CodeBox
+CodeBox local PySide6 desktop IDE
+local-first code editor Python Windows
+PySide6 code editor with LSP diagnostics
+lightweight IDE no cloud Python
+CodeBox desktop editor tabs terminal
+Python desktop IDE Language Server Protocol
+dev-bricks editor dev tools
+```
+
+## Last-checked: 2026-06-11
