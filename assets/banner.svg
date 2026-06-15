@@ -1,0 +1,181 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 340" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradients -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090D16" />
+      <stop offset="50%" stop-color="#0F172A" />
+      <stop offset="100%" stop-color="#050811" />
+    </linearGradient>
+    
+    <radialGradient id="glow" cx="20%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#06B6D4" stop-opacity="0.15" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- UI/Text Gradients -->
+    <linearGradient id="brandGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06B6D4" />
+      <stop offset="100%" stop-color="#10B981" />
+    </linearGradient>
+
+    <linearGradient id="crateBorderGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06B6D4" />
+      <stop offset="50%" stop-color="#8B5CF6" />
+      <stop offset="100%" stop-color="#10B981" />
+    </linearGradient>
+
+    <linearGradient id="panelLeftGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E293B" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#0F172A" stop-opacity="0.9" />
+    </linearGradient>
+
+    <linearGradient id="panelRightGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#334155" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#1E293B" stop-opacity="0.9" />
+    </linearGradient>
+
+    <!-- Filters -->
+    <filter id="glowFilter" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&amp;display=swap');
+    .title-text {
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 84px;
+    }
+    .tagline-text {
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 26px;
+    }
+    .code-font {
+      font-family: 'JetBrains Mono', 'Fira Code', Consolas, Monaco, monospace;
+    }
+  </style>
+
+  <!-- Background Rect -->
+  <rect width="1200" height="340" rx="16" fill="url(#bgGradient)" stroke="#1E293B" stroke-width="1.5" />
+  
+  <!-- Radial Glow Behind Crate -->
+  <rect width="1200" height="340" rx="16" fill="url(#glow)" style="mix-blend-mode: screen;" />
+
+  <!-- Background Grid -->
+  <g opacity="0.15">
+    <path d="M 0,40 L 1200,40 M 0,80 L 1200,80 M 0,120 L 1200,120 M 0,160 L 1200,160 M 0,200 L 1200,200 M 0,240 L 1200,240 M 0,280 L 1200,280 M 0,320 L 1200,320" fill="none" stroke="#334155" stroke-width="1" />
+    <path d="M 40,0 L 40,340 M 80,0 L 80,340 M 120,0 L 120,340 M 160,0 L 160,340 M 200,0 L 200,340 M 240,0 L 240,340 M 280,0 L 280,340 M 320,0 L 320,340 M 360,0 L 360,340 M 400,0 L 400,340 M 440,0 L 440,340 M 480,0 L 480,340 M 520,0 L 520,340 M 560,0 L 560,340 M 600,0 L 600,340 M 640,0 L 640,340 M 680,0 L 680,340 M 720,0 L 720,340 M 760,0 L 760,340 M 800,0 L 800,340 M 840,0 L 840,340 M 880,0 L 880,340 M 920,0 L 920,340 M 960,0 L 960,340 M 1000,0 L 1000,340 M 1040,0 L 1040,340 M 1080,0 L 1080,340 M 1120,0 L 1120,340 M 1160,0 L 1160,340" fill="none" stroke="#334155" stroke-width="1" />
+  </g>
+
+  <!-- ==================== FRONT-LEFT CRATE GRAPHIC (SAFE ZONE) ==================== -->
+  <g>
+    <!-- Background Connection Nodes (Faint) -->
+    <path d="M 140,210 L 95,230" fill="none" stroke="#06B6D4" stroke-width="1.5" stroke-opacity="0.3" stroke-dasharray="4 4" />
+    <circle cx="95" cy="230" r="3.5" fill="#06B6D4" fill-opacity="0.6" filter="url(#glowFilter)" />
+
+    <path d="M 220,80 L 220,65" fill="none" stroke="#8B5CF6" stroke-width="1.5" stroke-opacity="0.3" stroke-dasharray="4 4" />
+    <circle cx="220" cy="65" r="3.5" fill="#8B5CF6" fill-opacity="0.6" filter="url(#glowFilter)" />
+
+    <path d="M 300,210 L 345,195" fill="none" stroke="#10B981" stroke-width="1.5" stroke-opacity="0.3" stroke-dasharray="4 4" />
+    <circle cx="345" cy="195" r="3.5" fill="#10B981" fill-opacity="0.6" filter="url(#glowFilter)" />
+
+    <!-- Crate Inner Back (Drawn First) -->
+    <!-- Bottom Rhombus -->
+    <path d="M 140,210 L 220,170 L 300,210 L 220,250 Z" fill="#0D1321" />
+    <!-- Back Inner Edges -->
+    <path d="M 140,210 L 220,170 L 300,210" fill="none" stroke="#1E293B" stroke-width="1.5" />
+    <path d="M 220,170 L 220,80" fill="none" stroke="#1E293B" stroke-width="1.5" />
+    
+    <!-- Code Symbols (Floating/Emerging) -->
+    <!-- Floating Brackets and Tags -->
+    <!-- Curly brace { -->
+    <text x="175" y="145" class="code-font" font-weight="800" font-size="42" fill="#10B981" filter="url(#glowFilter)" transform="rotate(-15 175 145)" opacity="0.9">{</text>
+    <!-- Curly brace } -->
+    <text x="245" y="135" class="code-font" font-weight="800" font-size="46" fill="#06B6D4" filter="url(#glowFilter)" transform="rotate(18 245 135)" opacity="0.9">}</text>
+    <!-- Tag </> -->
+    <text x="180" y="105" class="code-font" font-weight="700" font-size="30" fill="#FBBF24" filter="url(#glowFilter)" transform="rotate(-5 180 105)">&lt;/&gt;</text>
+    <!-- Square bracket [ -->
+    <text x="195" y="165" class="code-font" font-weight="700" font-size="34" fill="#8B5CF6" filter="url(#glowFilter)" transform="rotate(10 195 165)" opacity="0.75">[</text>
+    <!-- Square bracket ] -->
+    <text x="230" y="170" class="code-font" font-weight="700" font-size="34" fill="#EC4899" filter="url(#glowFilter)" transform="rotate(-20 230 170)" opacity="0.75">]</text>
+    <!-- Small code snippets/particles -->
+    <text x="215" y="90" class="code-font" font-weight="600" font-size="20" fill="#38BDF8" filter="url(#glowFilter)" transform="rotate(12 215 90)">y</text>
+    <text x="225" y="90" class="code-font" font-weight="600" font-size="20" fill="#34D399" filter="url(#glowFilter)" transform="rotate(12 225 90)">+</text>
+
+    <!-- Glassy Front Panels (Drawn Over Floating Inner Symbols) -->
+    <path d="M 140,120 L 220,160 L 220,250 L 140,210 Z" fill="url(#panelLeftGrad)" />
+    <path d="M 220,160 L 300,120 L 300,210 L 220,250 Z" fill="url(#panelRightGrad)" />
+
+    <!-- Inset Detail lines on Panels -->
+    <path d="M 150,128 L 210,158 L 210,238 L 150,208 Z" fill="none" stroke="#334155" stroke-width="1.2" stroke-opacity="0.6" stroke-dasharray="3 3" />
+    <path d="M 230,158 L 290,128 L 290,208 L 230,238 Z" fill="none" stroke="#334155" stroke-width="1.2" stroke-opacity="0.6" stroke-dasharray="3 3" />
+
+    <!-- Outer Front Frame (Metallic / Glowing) -->
+    <path d="M 140,120 L 220,160 L 300,120 L 300,210 L 220,250 L 140,210 Z" fill="none" stroke="url(#crateBorderGradient)" stroke-width="3.5" stroke-linejoin="round" />
+    <path d="M 220,160 L 220,250" fill="none" stroke="url(#crateBorderGradient)" stroke-width="3.5" />
+
+    <!-- Glowing Nodes at Vertices -->
+    <circle cx="140" cy="120" r="3.5" fill="#06B6D4" filter="url(#glowFilter)" />
+    <circle cx="220" cy="160" r="3.5" fill="#8B5CF6" filter="url(#glowFilter)" />
+    <circle cx="300" cy="120" r="3.5" fill="#10B981" filter="url(#glowFilter)" />
+    <circle cx="300" cy="210" r="3.5" fill="#10B981" filter="url(#glowFilter)" />
+    <circle cx="220" cy="250" r="3.5" fill="#8B5CF6" filter="url(#glowFilter)" />
+    <circle cx="140" cy="210" r="3.5" fill="#06B6D4" filter="url(#glowFilter)" />
+  </g>
+
+  <!-- ==================== TYPOGRAPHY (SAFE ZONE) ==================== -->
+  <g>
+    <!-- Main Wordmark -->
+    <text x="380" y="175" class="title-text" font-weight="300" fill="#FFFFFF" letter-spacing="-0.5">
+      Code<tspan fill="url(#brandGradient)" font-weight="900">Box</tspan>
+    </text>
+
+    <!-- Tagline -->
+    <text x="385" y="222" class="tagline-text" fill="#94A3B8" letter-spacing="0.5">
+      Local <tspan fill="#34D399" font-weight="600">PySide6</tspan> Code Editor
+    </text>
+  </g>
+
+  <!-- ==================== EDITOR WINDOW PREVIEW (SAFE ZONE) ==================== -->
+  <g>
+    <!-- Window Container -->
+    <rect x="820" y="90" width="280" height="180" rx="10" fill="#1E293B" fill-opacity="0.3" stroke="#334155" stroke-width="1.5" />
+    
+    <!-- Window Header -->
+    <path d="M 820,100 A 10,10 0 0 1 830,90 L 1090,90 A 10,10 0 0 1 1100,100 L 1100,120 L 820,120 Z" fill="#0F172A" fill-opacity="0.6" />
+    
+    <!-- Window Buttons -->
+    <circle cx="840" cy="105" r="4.5" fill="#EF4444" opacity="0.8" />
+    <circle cx="854" cy="105" r="4.5" fill="#F59E0B" opacity="0.8" />
+    <circle cx="868" cy="105" r="4.5" fill="#10B981" opacity="0.8" />
+    
+    <!-- Editor Code Lines -->
+    <!-- Line 1 -->
+    <rect x="840" y="138" width="55" height="5" rx="2.5" fill="#38BDF8" opacity="0.8" />
+    <rect x="900" y="138" width="75" height="5" rx="2.5" fill="#34D399" opacity="0.8" />
+    
+    <!-- Line 2 (Indented) -->
+    <rect x="860" y="158" width="45" height="5" rx="2.5" fill="#F472B6" opacity="0.8" />
+    <rect x="910" y="158" width="95" height="5" rx="2.5" fill="#93C5FD" opacity="0.8" />
+    
+    <!-- Line 3 (Indented) -->
+    <rect x="860" y="178" width="85" height="5" rx="2.5" fill="#FB7185" opacity="0.8" />
+    
+    <!-- Line 4 (Double Indented) -->
+    <rect x="880" y="198" width="60" height="5" rx="2.5" fill="#FBBF24" opacity="0.8" />
+    <rect x="945" y="198" width="40" height="5" rx="2.5" fill="#34D399" opacity="0.8" />
+    
+    <!-- Line 5 (Indented) -->
+    <rect x="860" y="218" width="30" height="5" rx="2.5" fill="#A78BFA" opacity="0.8" />
+    
+    <!-- Line 6 -->
+    <rect x="840" y="238" width="45" height="5" rx="2.5" fill="#F472B6" opacity="0.8" />
+    
+    <!-- Cursor -->
+    <rect x="990" y="196" width="1.5" height="9" fill="#06B6D4" opacity="0.9" filter="url(#glowFilter)" />
+  </g>
+</svg>
