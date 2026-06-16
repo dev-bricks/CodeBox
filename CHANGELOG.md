@@ -27,6 +27,7 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 ### Build / Release
 - `build_exe.bat`: `DIST_DIR` zeigt jetzt auf `C:\_Local_DEV\codex_build\codebox\dist` statt auf `%CD%\dist` (OneDrive). Verhindert, dass OneDrive-Sync die EXE beim Rebuild sperrt; konsistent mit dem bereits lokalen `WORK_DIR`. (DEV-Loop Run 46, 2026-06-16)
 - `start.bat`: Unterstützt `CODEBOX_LOCAL_DIST`-Umgebungsvariable als erstes EXE-Suchziel vor dem relativen `dist\`-Pfad. Ermöglicht lokales Build-Verzeichnis ohne Hardcode im Skript. (DEV-Loop Run 46, 2026-06-16)
+- Nach dem Build: `set CODEBOX_LOCAL_DIST=C:\_Local_DEV\codex_build\codebox\dist` in der Shell setzen (oder dauerhaft in den Systemvariablen), damit `start.bat` die lokal gebaute EXE findet. `build_exe.bat` gibt diesen Hinweis jetzt automatisch nach erfolgreichem Build aus.
 - EXE aktualisiert 2026-06-01 (OneDrive-Lock aufgelöst nach Beenden alter Prozesse); enthält Startup-/CLI-Bug-Fix (`--open`-Argument + offener Bootstrap-Tab). 13/13 Tests grün, Smoke OK.
 - EXE neu gebaut 2026-06-01 (PyInstaller, `CodeBox.spec` → lokales Build-Verzeichnis); 11/12 Tests grün (1 skipped), Smoke-Test bestanden. Vorherige EXE: 2026-05-28.
 

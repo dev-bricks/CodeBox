@@ -14,3 +14,6 @@ if not exist "%BUILD_ROOT%" mkdir "%BUILD_ROOT%"
 echo Baue CodeBox.exe...
 python -m PyInstaller --noconfirm --clean --workpath "%WORK_DIR%" --distpath "%DIST_DIR%" CodeBox.spec
 if errorlevel 1 pause
+echo.
+echo EXE liegt in: %DIST_DIR%\CodeBox.exe
+echo Fuer start.bat: set CODEBOX_LOCAL_DIST=%DIST_DIR%
