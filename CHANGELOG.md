@@ -7,6 +7,10 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ### Behoben
 
+- `ui/main_window.py` (B-011): ProjectView blieb beim Öffnen einer Datei aus
+  einem anderen Ordner auf dem ersten Root hängen. Der Projektbaum folgt jetzt
+  auch bei späteren Dateiwechseln dem aktuellen Dateiverzeichnis; neuer
+  Regressionstest in `tests/test_project_view.py`.
 - `features/lsp_client.py` (B-009): Zweites `process.wait()` nach `kill()` in `try/except` eingebettet — `subprocess.TimeoutExpired` wurde bisher nicht gefangen, sodass `_reader_thread.join()` übersprungen werden konnte. Streams werden jetzt im `finally`-Block zuverlässig geschlossen.
 - `core/editor.py` (B-010): Auto-Close wrappte bei aktiver Textmarkierung nicht mehr die Auswahl, sondern verwarf sie. Jetzt wird `selectedText()` mit dem Bracket-/Quote-Paar umschlossen; `U+2029`-Absatztrenner werden vor dem Einfügen zu `\n` normalisiert. 3 Regressionstests hinzugefügt.
 - `ui/main_window.py` (B-008): `closeEvent` verwendete veraltete `QMessageBox.Yes/No`-Kurznamen statt `QMessageBox.StandardButton.Yes/No` (PySide6-6.x-Deprecation-Hygiene).
@@ -21,6 +25,8 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - `AUFGABEN.txt` und `dist/` Struktur bereinigt (redundante `CodeBox_new.exe` entfernt).
 
 ### Build / Release
+- `build_exe.bat`: `DIST_DIR` zeigt jetzt auf `C:\_Local_DEV\codex_build\codebox\dist` statt auf `%CD%\dist` (OneDrive). Verhindert, dass OneDrive-Sync die EXE beim Rebuild sperrt; konsistent mit dem bereits lokalen `WORK_DIR`. (DEV-Loop Run 46, 2026-06-16)
+- `start.bat`: Unterstützt `CODEBOX_LOCAL_DIST`-Umgebungsvariable als erstes EXE-Suchziel vor dem relativen `dist\`-Pfad. Ermöglicht lokales Build-Verzeichnis ohne Hardcode im Skript. (DEV-Loop Run 46, 2026-06-16)
 - EXE aktualisiert 2026-06-01 (OneDrive-Lock aufgelöst nach Beenden alter Prozesse); enthält Startup-/CLI-Bug-Fix (`--open`-Argument + offener Bootstrap-Tab). 13/13 Tests grün, Smoke OK.
 - EXE neu gebaut 2026-06-01 (PyInstaller, `CodeBox.spec` → lokales Build-Verzeichnis); 11/12 Tests grün (1 skipped), Smoke-Test bestanden. Vorherige EXE: 2026-05-28.
 

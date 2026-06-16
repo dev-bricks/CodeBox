@@ -1,6 +1,12 @@
 @echo off
 chcp 65001 >nul
 cd /d "%~dp0"
+if defined CODEBOX_LOCAL_DIST (
+    if exist "%CODEBOX_LOCAL_DIST%\CodeBox.exe" (
+        start "" "%CODEBOX_LOCAL_DIST%\CodeBox.exe"
+        exit /b 0
+    )
+)
 set "DIST_EXE=dist\CodeBox.exe"
 set "RELEASE_EXE=releases\v0.1.0\CodeBox-0.1.0-win64.exe"
 if exist "%DIST_EXE%" (

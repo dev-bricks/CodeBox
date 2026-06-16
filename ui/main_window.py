@@ -416,10 +416,10 @@ class MainWindow(QMainWindow):
                 self.output.run_btn.setEnabled(False)
             self._connect_cursor(tab)
             # ProjectView und Terminal auf Projektordner setzen
-            project_dir = str(file_path.parent)
-            if not self.project_view._root_path:
-                self.project_view.set_root(project_dir)
-            self.terminal.set_working_dir(project_dir)
+            project_dir = file_path.parent
+            if self.project_view._root_path != project_dir:
+                self.project_view.set_root(str(project_dir))
+            self.terminal.set_working_dir(str(project_dir))
         else:
             self.setWindowTitle(format_window_title())
             self.lang_label.setText("Keine Sprache")
