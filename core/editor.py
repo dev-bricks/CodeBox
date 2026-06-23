@@ -306,7 +306,7 @@ class CodeEditor(QPlainTextEdit):
                 else:
                     painter.setPen(QColor(100, 100, 100))
                 painter.drawText(0, top, self.lineNumberArea.width() - 5,
-                                 self.fontMetrics().height(), Qt.AlignRight, str(line_num))
+                                 self.fontMetrics().height(), Qt.AlignmentFlag.AlignRight, str(line_num))
             block = block.next()
             if not block.isValid():
                 break

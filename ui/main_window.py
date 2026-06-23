@@ -103,7 +103,7 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(0, 0, 0, 0)
 
         # Horizontaler Splitter: ProjectView | Editor+Output
-        self.h_splitter = QSplitter(Qt.Horizontal)
+        self.h_splitter = QSplitter(Qt.Orientation.Horizontal)
 
         # Linke Seite: Project-View (Dateibaum)
         self.project_view = ProjectView()
@@ -111,7 +111,7 @@ class MainWindow(QMainWindow):
         self.h_splitter.addWidget(self.project_view)
 
         # Rechte Seite: Vertikaler Splitter (Editor oben, Output/Terminal unten)
-        self.v_splitter = QSplitter(Qt.Vertical)
+        self.v_splitter = QSplitter(Qt.Orientation.Vertical)
 
         # Tab-Widget (Editor)
         self.tab_widget = TabWidget()

@@ -48,6 +48,15 @@ class OutputPanelSignalTests(unittest.TestCase):
             mock_cls.return_value = mock_new
             self.panel.run_command(["echo", "test"])
 
+    def test_run_command_rejects_empty_command(self):
+        """Leere Provider-Kommandos dürfen nicht per IndexError crashen."""
+        with patch("core.output.QProcess") as mock_cls:
+            self.panel.run_command([])
+
+        mock_cls.assert_not_called()
+        self.assertFalse(self.panel.stop_btn.isEnabled())
+        self.assertIn("Kein Befehl", self.panel.status_label.text())
+
     def test_run_command_stop_btn_enabled_after_start(self):
         """stop_btn muss nach run_command() aktiviert sein."""
         with patch("core.output.QProcess") as mock_cls:

@@ -55,6 +55,11 @@ class OutputPanel(QWidget):
 
     def run_command(self, command: list):
         """Startet einen Prozess mit dem gegebenen Kommando"""
+        if not command:
+            self.status_label.setText("Kein Befehl zum Ausführen")
+            self.stop_btn.setEnabled(False)
+            return
+
         if self.process:
             for sig in (
                 self.process.readyReadStandardOutput,
