@@ -152,7 +152,7 @@ Optional remote connections may use SSH passwords or key paths at runtime. Such
 data does not belong in the repository and should only live in local ignored
 configuration files or the system keyring.
 
-Local working files such as `AUFGABEN.txt`, test locks, `.env` files,
+Local working files such as `AUFGABEN.txt`, `LOCK*.txt`, `.env` files,
 credentials, SSH keys, logs, databases, and build artifacts are excluded through
 `.gitignore`.
 

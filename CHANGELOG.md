@@ -26,6 +26,9 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
   deutsche Einstiegsseite ergänzt. `llms.txt` auf den Marketing-Check vom
   2026-06-25 mit zusätzlichen Suchphrasen und externen Discovery-Notizen
   aktualisiert.
+- `.gitignore` schützt interne Lock- und Aufgabenvarianten (`LOCK*.txt`,
+  `AUFGABEN.md`, `TODO.txt`, `DONE.txt`, `ERLEDIGT.txt`) vor versehentlichem
+  Tracking.
 - `llms.txt` im Root-Verzeichnis hinzugefügt, um Entdeckung und Indexierung durch KI-Crawler zu verbessern.
 - `AUFGABEN.txt` und `dist/` Struktur bereinigt (redundante `CodeBox_new.exe` entfernt).
 

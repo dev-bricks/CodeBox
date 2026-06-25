@@ -126,6 +126,10 @@ Optionale Remote-Verbindungen können zur Laufzeit SSH-Passwörter oder
 Schlüsselpfade verwenden. Solche Daten gehören nicht ins Repository und sollten
 nur in lokalen, ignorierten Konfigurationsdateien oder im System-Keyring liegen.
 
+Lokale Arbeitsdateien wie `AUFGABEN.txt`, `LOCK*.txt`, `.env`-Dateien,
+Credentials, SSH-Schlüssel, Logs, Datenbanken und Build-Artefakte sind über
+`.gitignore` ausgeschlossen.
+
 ## Lizenz
 
 [MIT License](LICENSE)

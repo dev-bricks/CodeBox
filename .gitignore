@@ -54,6 +54,10 @@ keyring/
 
 # Internal
 AUFGABEN.txt
+AUFGABEN.md
+LOCK.txt
+LOCK.*.txt
+LOCK*.txt
 TEST.txt
 TESTS.txt
 TESTERGEBNISSE.txt
@@ -66,4 +70,7 @@ tmpclaude-*
 DECISIONS.md
 PORTIERUNGSPLAN.md
 TODO.md
+TODO.txt
 DONE.md
+DONE.txt
+ERLEDIGT.txt
