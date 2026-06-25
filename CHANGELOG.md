@@ -21,6 +21,11 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - `stale.yml` hinzugefügt: Issues und PRs werden nach 30 Tagen als stale markiert und nach 37 Tagen automatisch geschlossen.
 
 ### Dokumentation
+- `README.md` als klaren englischen Einstieg mit Start-Here-Tabelle,
+  Screenshot-Alt-Text und Suchabgrenzung neu strukturiert; `README_de.md` als
+  deutsche Einstiegsseite ergänzt. `llms.txt` auf den Marketing-Check vom
+  2026-06-25 mit zusätzlichen Suchphrasen und externen Discovery-Notizen
+  aktualisiert.
 - `llms.txt` im Root-Verzeichnis hinzugefügt, um Entdeckung und Indexierung durch KI-Crawler zu verbessern.
 - `AUFGABEN.txt` und `dist/` Struktur bereinigt (redundante `CodeBox_new.exe` entfernt).
 

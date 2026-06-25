@@ -1,22 +1,28 @@
 <img src="assets/banner.svg" width="100%" alt="CodeBox Banner">
 
-# CodeBox — local PySide6 desktop code editor
+# CodeBox - local PySide6 desktop code editor
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![Platform: Windows](https://img.shields.io/badge/platform-Windows-lightgrey.svg)]()
 [![LSP Ready](https://img.shields.io/badge/LSP-ready-purple.svg)]()
 
-> Local-first desktop IDE for Windows — lightweight PySide6 code editor with tabs, project tree, integrated terminal, Git helpers, syntax highlighting and LSP diagnostics.
+[Deutsch](README_de.md) | English
 
-
+CodeBox is a local-first desktop IDE for Windows developers who want a
 lightweight PySide6 code editor with tabs, a project tree, an integrated
-terminal, Git helpers, syntax highlighting and Language Server Protocol
+terminal, Git helpers, syntax highlighting, and Language Server Protocol
 diagnostics.
 
-Mehrsprachiger Desktop-Codeeditor auf Basis von PySide6. CodeBox ist aus
-PythonBox v8 hervorgegangen und bündelt Editor, Projektbaum, Terminal sowie
-erste LSP- und API-Grundlagen in einer lokalen IDE.
+## Start here
+
+| Need | Start with |
+| --- | --- |
+| Run the editor from source | `pip install -r requirements.txt` and `python main.py` |
+| Open a file directly | `python main.py --open path/to/file.py` |
+| Build a local Windows executable | `build_exe.bat` |
+| Add diagnostics or completion | Install a local language server such as `python-lsp-server[all]` |
+| Understand the roadmap | [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) |
 
 ## Why CodeBox
 
@@ -28,151 +34,134 @@ erste LSP- und API-Grundlagen in einer lokalen IDE.
 
 ## Screenshot
 
-![CodeBox Screenshot](README/screenshots/main.png)
+![CodeBox main window with project tree, editor tabs, output panel, and terminal](README/screenshots/main.png)
 
-## Funktionen / Features
+## Features
 
-- Syntax-Highlighting für Python, JavaScript, TypeScript, C++, Rust, Go und Java
-- Integriertes Terminal mit Shell-Auswahl und History
-- Projekt-Dateibaum mit Filter und Kontextmenü
-- Mehrere Tabs, Suchfunktion und Gehe-zu-Zeile
-- Robuste Tab-Verwaltung mit Drag-and-drop-Reordering und Save-Failure-Guards
-- Theme-System über `features/theme_manager.py`
-- REST-API-/CLI-Grundlage für spätere Fernsteuerung
-- LSP-Diagnostics und Completion-Anbindung für installierte Language Server
+- Syntax highlighting for Python, JavaScript, TypeScript, C++, Rust, Go, and Java
+- Integrated terminal with shell selection and command history
+- Project file tree with filtering and context menus
+- Multiple editor tabs, search, and go-to-line navigation
+- Robust tab handling with drag-and-drop reordering and save-failure guards
+- Theme system via `features/theme_manager.py`
+- REST API and CLI foundation for later remote control
+- LSP diagnostics and completion for installed language servers
 
 ## Installation
 
 ```bash
+git clone https://github.com/dev-bricks/CodeBox
+cd CodeBox
 pip install -r requirements.txt
 python main.py
-python main.py --open path/to/file.py
 ```
 
-Alternativ per Doppelklick auf `start.bat`.
+You can also start the app on Windows by double-clicking `start.bat`.
 
-### Quick start
-
-1. Clone `https://github.com/dev-bricks/CodeBox`.
-2. Install dependencies with `pip install -r requirements.txt`.
-3. Run `python main.py`.
-4. Optional: install language servers such as `python-lsp-server[all]` or
-   `typescript-language-server` for diagnostics and completion.
-5. Open a file directly with `python main.py --open path/to/file.py`.
-
-### Voraussetzungen / Requirements
+### Requirements
 
 - Python 3.10+
 - PySide6 >= 6.5.0
 
-### Optionale LSP-Server
+### Optional language servers
 
-- Python: `pip install "python-lsp-server[all]"` für Completion plus Diagnostics
-  (`pip install python-lsp-server` reicht nur für Completion)
+- Python: `pip install "python-lsp-server[all]"` for completion and diagnostics
+  (`pip install python-lsp-server` is enough for completion only)
 - TypeScript: `npm install -g typescript-language-server`
 - Rust: `rustup component add rust-analyzer`
 - Go: `go install golang.org/x/tools/gopls@latest`
-- C++: `clangd` bzw. LLVM
+- C++: install `clangd` through LLVM
 
-Der Python-LSP wird bevorzugt über `pylsp` auf `PATH` gestartet. Falls das
-Script nach der Installation nicht auf `PATH` liegt, nutzt CodeBox den aktuellen
-Python-Interpreter als Fallback: `python -m pylsp`.
-Die Verfügbarkeitsprüfung in der Oberfläche nutzt dieselbe Fallback-Logik, sodass
-installierte `pylsp`-Module auch ohne separates `pylsp.exe` korrekt erkannt werden.
+CodeBox prefers `pylsp` on `PATH`. If the script is not on `PATH`, it falls back
+to the current Python interpreter with `python -m pylsp`. The UI availability
+check uses the same fallback logic.
 
-### Optionale Remote-Editing-Abhängigkeit
+### Optional remote-editing dependency
 
-Die vorbereitete SSH/SFTP-Schicht nutzt `paramiko`, ist aber nicht für den lokalen
-Editorstart erforderlich:
+The prepared SSH/SFTP layer uses `paramiko`, but it is not required for the
+local editor startup:
 
 ```bash
 pip install paramiko
 ```
 
-## Lokaler Windows-Build
+## Local Windows build
 
 ```bat
 build_exe.bat
 ```
 
-Das Script nutzt PyInstaller und erstellt lokal eine `CodeBox.exe` mit
-`CodeBox.ico`. Die versionierte `CodeBox.spec` bündelt Icon und Theme-Dateien,
-während temporäre Build-Daten unter `C:\_Local_DEV\codex_build\codebox` liegen.
-Build-Ausgaben in `build/`, `dist/` und `releases/` bleiben lokale Artefakte
-und werden nicht versioniert.
+The script uses PyInstaller and creates a local `CodeBox.exe` with
+`CodeBox.ico`. The versioned `CodeBox.spec` bundles icon and theme files, while
+temporary build data stays under `C:\_Local_DEV\codex_build\codebox`. Build
+outputs in `build/`, `dist/`, and `releases/` remain local artifacts and are not
+versioned.
 
-`start.bat` startet bevorzugt `dist\CodeBox.exe`, nutzt danach eine vorhandene
-Release-EXE und fällt erst zuletzt auf `python main.py` zurück.
+`start.bat` first looks for `dist\CodeBox.exe`, then for an existing release EXE,
+and finally falls back to `python main.py`.
 
-## Projektstruktur
+## Project structure
 
 ```text
-main.py            Einstiegspunkt / application entry
-core/              Editor-Kern, Tabs, Output, Highlighter
-features/          Terminal, Projektbaum, LSP, Git, Themes, Remote
-languages/         Sprachprofile und LSP-Konfiguration
-ui/                MainWindow und UI-Komposition
-config/            Konfigurationsdateien
-themes/            QSS-Themes
+main.py            Application entry point
+core/              Editor core, tabs, output panel, highlighter
+features/          Terminal, project tree, LSP, Git, themes, remote editing
+languages/         Language profiles and LSP configuration
+ui/                MainWindow and UI composition
+config/            Configuration files
+themes/            QSS themes
+README/screenshots Screenshot assets for the project page
 ```
 
-## Discovery keywords
+## Search and disambiguation
 
 CodeBox is best described as a local PySide6 code editor, Windows desktop IDE,
-offline code editor, LSP-enabled Python editor and lightweight multi-language
+offline code editor, LSP-enabled Python editor, and lightweight multi-language
 developer tool. The repository name collides with older projects called
 `codebox`, so searches are most precise with `dev-bricks CodeBox`,
-`CodeBox PySide6`, `CodeBox LSP editor` or `file-bricks/dev-bricks desktop IDE`.
+`CodeBox PySide6`, `CodeBox LSP editor`, `CodeBox local desktop IDE`, or
+`PySide6 code editor with LSP diagnostics`.
 
 ## Status
 
-Aktueller Stand: `DEV`, Version `0.1.0`
+Current status: `DEV`, version `0.1.0`.
 
-Bereits stabil nutzbar:
+Already usable:
 
-- Mehrsprachiger Editor
-- Projektbaum und Terminal im MainWindow
-- Konsistente Fenstertitel über `version.py`
-- Light-/Dark-Theme-Wechsel über den zentralen Theme-Manager
-- Speichern-, Schließen- und Ausführen-Flows behalten Tabs offen, wenn ein
-  Dateisystemfehler das Speichern verhindert.
+- Multi-language editor
+- Project tree and terminal in the main window
+- Consistent window titles via `version.py`
+- Light/dark theme switching through the central theme manager
+- Save, close, and run flows that keep tabs open if a filesystem error prevents saving
 
-Noch offen für die nächste größere Ausbaustufe:
+Open for the next larger expansion:
 
-- Runtime-Test mit installiertem LSP-Server
-- Linter-/Problems-Panel
-- Plugin-System für weitere Sprachen
-- Remote Editing (SSH/SFTP)
+- Runtime test with an installed LSP server
+- Linter/problems panel
+- Plugin system for additional languages
+- Remote editing over SSH/SFTP
 
-## Datenschutz / Privacy
+## Privacy
 
-CodeBox arbeitet lokal auf Dateien, die der Nutzer öffnet. Es werden keine
-Zugangsdaten für den Editor-Grundbetrieb benötigt und keine externen Dienste
-kontaktiert, außer Sie starten selbst einen installierten Language Server,
-externe Build-/Run-Tools oder optionale Remote-Editing-Funktionen.
+CodeBox works locally on files that the user opens. The base editor does not
+require credentials and does not contact external services unless you start a
+local language server, external build/run tools, or optional remote-editing
+features yourself.
 
-Optionale Remote-Verbindungen können zur Laufzeit SSH-Passwörter oder
-Schlüsselpfade verwenden. Solche Daten gehören nicht ins Repository und sollten
-nur in lokalen, ignorierten Konfigurationsdateien oder im System-Keyring liegen.
+Optional remote connections may use SSH passwords or key paths at runtime. Such
+data does not belong in the repository and should only live in local ignored
+configuration files or the system keyring.
 
-Lokale Arbeitsdateien wie `AUFGABEN.txt`, Test-Locks, `.env`-Dateien,
-Credentials, SSH-Schlüssel, Logs, Datenbanken und Build-Artefakte sind über `.gitignore`
-ausgeschlossen.
+Local working files such as `AUFGABEN.txt`, test locks, `.env` files,
+credentials, SSH keys, logs, databases, and build artifacts are excluded through
+`.gitignore`.
 
-## Lizenz / License
+## License
 
 [MIT License](LICENSE)
 
-## Haftung / Liability
-
-Dieses Projekt ist eine unentgeltliche Open-Source-Schenkung im Sinne der
-§§ 516 ff. BGB. Die Haftung des Urhebers ist gemäß § 521 BGB auf Vorsatz und
-grobe Fahrlässigkeit beschränkt. Ergänzend gilt der Haftungsausschluss der
-MIT-Lizenz.
-
-Nutzung auf eigenes Risiko. Keine Wartungszusage, keine Verfügbarkeitsgarantie,
-keine Gewähr für Fehlerfreiheit oder Eignung für einen bestimmten Zweck.
+## Liability
 
 This project is an unpaid open-source donation. Liability is limited to intent
-and gross negligence (§ 521 German Civil Code). Use at your own risk. No
+and gross negligence (Section 521 German Civil Code). Use at your own risk. No
 warranty, maintenance guarantee, or fitness-for-purpose is assumed.
