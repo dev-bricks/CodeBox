@@ -63,3 +63,25 @@ def test_download_file_returns_path_and_caches_on_success(tmp_path):
     # Aufräumen
     session.disconnect()
     session._sftp = None
+
+
+def test_connect_rejects_unknown_host_keys(monkeypatch):
+    """SSH-Verbindungen dürfen unbekannte Hostkeys nicht automatisch akzeptieren."""
+    from features import remote_editor
+
+    fake_paramiko = MagicMock()
+    ssh_mock = MagicMock()
+    reject_policy = object()
+    fake_paramiko.SSHClient.return_value = ssh_mock
+    fake_paramiko.RejectPolicy.return_value = reject_policy
+    monkeypatch.setattr(remote_editor, "PARAMIKO_AVAILABLE", True)
+    monkeypatch.setattr(remote_editor, "paramiko", fake_paramiko, raising=False)
+
+    host = remote_editor.RemoteHost(name="test", hostname="localhost", username="user")
+    session = remote_editor.SFTPSession(host)
+
+    assert session.connect() is True
+
+    ssh_mock.load_system_host_keys.assert_called_once_with()
+    ssh_mock.set_missing_host_key_policy.assert_called_once_with(reject_policy)
+    ssh_mock.connect.assert_called_once_with(hostname="localhost", port=22, username="user")

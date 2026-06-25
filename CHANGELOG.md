@@ -7,6 +7,8 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ### Behoben
 
+- `features/remote_editor.py`: SSH/SFTP-Verbindungen laden bekannte Hostkeys und
+  lehnen unbekannte Hostkeys jetzt ab, statt sie automatisch zu akzeptieren.
 - `ui/main_window.py` (B-011): ProjectView blieb beim Öffnen einer Datei aus
   einem anderen Ordner auf dem ersten Root hängen. Der Projektbaum folgt jetzt
   auch bei späteren Dateiwechseln dem aktuellen Dateiverzeichnis; neuer

@@ -52,7 +52,15 @@ class SFTPSession:
 
         try:
             self._ssh = paramiko.SSHClient()
-            self._ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            try:
+                self._ssh.load_system_host_keys()
+            except OSError as exc:
+                logger.debug("System-Hostkeys konnten nicht geladen werden: %s", exc)
+
+            user_known_hosts = Path.home() / ".ssh" / "known_hosts"
+            if user_known_hosts.exists():
+                self._ssh.load_host_keys(str(user_known_hosts))
+            self._ssh.set_missing_host_key_policy(paramiko.RejectPolicy())
 
             connect_kwargs = {
                 "hostname": self.host.hostname,
