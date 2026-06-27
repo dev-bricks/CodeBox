@@ -130,8 +130,21 @@ class TerminalWidget(QWidget):
     def _start_shell(self):
         """Startet den Shell-Prozess."""
         if self.process:
-            self.process.kill()
-            self.process.waitForFinished(1000)
+            # B-012: Signale trennen bevor der Prozess ersetzt wird,
+            # sonst feuert _on_finished/_on_stdout des alten Prozesses auf
+            # den neuen Zustand (analog B-004 in core/output.py).
+            for sig in (
+                self.process.readyReadStandardOutput,
+                self.process.readyReadStandardError,
+                self.process.finished,
+            ):
+                try:
+                    sig.disconnect()
+                except (TypeError, RuntimeError):
+                    pass
+            if self.process.state() != QProcess.ProcessState.NotRunning:
+                self.process.kill()
+                self.process.waitForFinished(1000)
 
         self.process = QProcess(self)
         self.process.setWorkingDirectory(self.working_dir)

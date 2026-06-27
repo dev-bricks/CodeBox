@@ -90,23 +90,42 @@ class ProjectView(QWidget):
 
         header.addStretch()
 
-        btn_open = QPushButton("Ordner...")
-        btn_open.setFixedWidth(60)
-        btn_open.setStyleSheet("font-size: 10px;")
-        btn_open.clicked.connect(self._open_folder_dialog)
-        header.addWidget(btn_open)
+        self.btn_open = QPushButton("Ordner...")
+        self.btn_open.setObjectName("project_view_open_folder_button")
+        self.btn_open.setFixedWidth(60)
+        self.btn_open.setStyleSheet("font-size: 10px;")
+        self.btn_open.setToolTip("Projektordner auswählen")
+        self.btn_open.setAccessibleName("Projektordner auswählen")
+        self.btn_open.setAccessibleDescription(
+            "Öffnet einen Dialog, um den angezeigten Projektordner zu wechseln."
+        )
+        self.btn_open.clicked.connect(self._open_folder_dialog)
+        header.addWidget(self.btn_open)
 
-        btn_refresh = QPushButton("Aktualisieren")
-        btn_refresh.setFixedWidth(80)
-        btn_refresh.setStyleSheet("font-size: 10px;")
-        btn_refresh.clicked.connect(self._refresh)
-        header.addWidget(btn_refresh)
+        self.btn_refresh = QPushButton("Aktualisieren")
+        self.btn_refresh.setObjectName("project_view_refresh_button")
+        self.btn_refresh.setFixedWidth(80)
+        self.btn_refresh.setStyleSheet("font-size: 10px;")
+        self.btn_refresh.setToolTip("Projektbaum neu laden")
+        self.btn_refresh.setAccessibleName("Projektbaum neu laden")
+        self.btn_refresh.setAccessibleDescription(
+            "Lädt den aktuell angezeigten Projektordner und seine Dateien neu."
+        )
+        self.btn_refresh.clicked.connect(self._refresh)
+        header.addWidget(self.btn_refresh)
 
         layout.addLayout(header)
 
         # Filter
         self.filter_input = QLineEdit()
+        self.filter_input.setObjectName("project_view_filter_input")
         self.filter_input.setPlaceholderText("Datei filtern...")
+        self.filter_input.setToolTip("Dateien und Ordner im Projektbaum filtern")
+        self.filter_input.setAccessibleName("Projektdateien filtern")
+        self.filter_input.setAccessibleDescription(
+            "Filtert Dateien und Ordner im Projektbaum. Ordner bleiben sichtbar,"
+            " wenn sie passende Kinder enthalten können."
+        )
         self.filter_input.setStyleSheet(
             "QLineEdit { background: #2a2a2a; color: #ccc; border: 1px solid #444; "
             "padding: 3px; margin: 2px 4px; font-size: 11px; }"
@@ -126,11 +145,17 @@ class ProjectView(QWidget):
 
         # Tree View
         self.tree = QTreeView()
+        self.tree.setObjectName("project_view_tree")
         self.tree.setModel(self.proxy)
         self.tree.setHeaderHidden(True)
         self.tree.setAnimated(True)
         self.tree.setIndentation(16)
         self.tree.setFont(QFont("Consolas", 10))
+        self.tree.setAccessibleName("Projektdateien")
+        self.tree.setAccessibleDescription(
+            "Dateibaum des aktuellen Projekts. Das Filterfeld grenzt die angezeigten"
+            " Dateien und Ordner ein."
+        )
         self.tree.setStyleSheet("""
             QTreeView {
                 background-color: #1e1e1e;

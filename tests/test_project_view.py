@@ -81,3 +81,28 @@ def test_project_view_root_follows_current_file_directory(tmp_path):
         assert window.project_view._root_path == second_dir
     finally:
         window.close()
+
+
+def test_project_view_compact_controls_expose_accessible_context():
+    """Die kompakte Sidebar-UI muss Filter- und Baumkontext ohne Dauerlabels
+    für Screenreader und Tastaturhilfen bereitstellen."""
+    _ensure_app()
+    view = ProjectView()
+
+    try:
+        assert view.filter_input.toolTip() == "Dateien und Ordner im Projektbaum filtern"
+        assert view.filter_input.accessibleName() == "Projektdateien filtern"
+        assert "Ordner" in view.filter_input.accessibleDescription()
+
+        assert view.tree.accessibleName() == "Projektdateien"
+        assert "Dateibaum" in view.tree.accessibleDescription()
+
+        assert view.btn_open.toolTip() == "Projektordner auswählen"
+        assert view.btn_open.accessibleName() == "Projektordner auswählen"
+        assert "Dialog" in view.btn_open.accessibleDescription()
+
+        assert view.btn_refresh.toolTip() == "Projektbaum neu laden"
+        assert view.btn_refresh.accessibleName() == "Projektbaum neu laden"
+        assert "neu" in view.btn_refresh.accessibleDescription().lower()
+    finally:
+        view.close()

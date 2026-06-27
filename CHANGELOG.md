@@ -9,6 +9,19 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 - `features/remote_editor.py`: SSH/SFTP-Verbindungen laden bekannte Hostkeys und
   lehnen unbekannte Hostkeys jetzt ab, statt sie automatisch zu akzeptieren.
+- `features/terminal.py` (B-012): `_start_shell()` trennte die Signale
+  (`readyReadStandardOutput`, `readyReadStandardError`, `finished`) des alten
+  `QProcess`-Objekts nicht, bevor es durch ein neues ersetzt wurde. Beim
+  Shell-Neustart konnte der alte Prozess nach `kill()` noch `_on_finished` oder
+  `_on_stdout` auslösen und so einen spuriösen „Shell beendet"-Eintrag in den
+  neuen Terminal-Output schreiben. Fix: Signale werden jetzt analog zu B-004
+  (`core/output.py`) getrennt; `kill()` wird nur noch bei `state() != NotRunning`
+  aufgerufen. 3 Regressionstests in `tests/test_terminal_encoding.py` ergänzt.
+- `features/project_view.py`: Die kompakte Sidebar im Projektbaum verlässt sich
+  für Filterfeld und Dateibaum nicht mehr nur auf Placeholder und Position.
+  `Ordner...`, `Aktualisieren`, das Filterfeld und der Dateibaum exponieren
+  jetzt sprechende Accessible Names, Descriptions und Tooltips; Regressionstest
+  in `tests/test_project_view.py` ergänzt.
 - `ui/main_window.py` (B-011): ProjectView blieb beim Öffnen einer Datei aus
   einem anderen Ordner auf dem ersten Root hängen. Der Projektbaum folgt jetzt
   auch bei späteren Dateiwechseln dem aktuellen Dateiverzeichnis; neuer
