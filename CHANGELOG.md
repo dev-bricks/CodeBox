@@ -5,6 +5,16 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [Unreleased]
 
+### Hinzugefügt
+
+- `features/project_view.py`: Git-Status-Indikatoren (M / S / SM / U / D / R) werden
+  jetzt rechts neben dem Dateinamen im Projektbaum angezeigt. Neue Hilfsfunktion
+  `status_for_path()` (Qt-frei, direkt testbar) sucht per `Path.as_posix()`-Normalisierung
+  auch auf Windows mit Backslash-Pfaden korrekt im Porcelain-Status-Dict. Neuer
+  `GitStatusDelegate` (`QStyledItemDelegate`) zeichnet farbige Badges; `_load_git_status()`
+  befüllt den Cache bei `set_root()` und `_refresh()`. 10 neue Regressionstests in
+  `tests/test_git_project_view_status.py`.
+
 ### Behoben
 
 - `features/remote_editor.py`: SSH/SFTP-Verbindungen laden bekannte Hostkeys und

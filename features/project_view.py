@@ -5,16 +5,21 @@ Project View - Dateibaum-Explorer für CodeBox
 
 Zeigt eine Baumstruktur des geöffneten Projektordners an.
 Unterstützt Doppelklick zum Öffnen, Kontextmenü und Filter.
+Git-Status-Indikatoren (M/S/U/D) werden rechts neben dem Dateinamen eingeblendet.
 """
 
 from pathlib import Path
+from typing import Optional, Dict, TYPE_CHECKING
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QTreeView, QFileSystemModel,
     QPushButton, QLabel, QLineEdit, QMenu, QFileDialog,
-    QMessageBox
+    QMessageBox, QStyledItemDelegate
 )
 from PySide6.QtCore import Qt, QDir, Signal, QSortFilterProxyModel, QModelIndex
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QFont, QColor
+
+if TYPE_CHECKING:
+    from features.git_integration import GitFileStatus
 
 
 # Dateien/Ordner, die standardmäßig ausgeblendet werden
@@ -23,6 +28,89 @@ DEFAULT_HIDDEN = {
     '.idea', '.vscode', '.vs', 'dist', 'build', '.eggs',
     '*.pyc', '*.pyo', '.DS_Store', 'Thumbs.db'
 }
+
+
+def status_for_path(
+    abs_path: str,
+    repo_root: str,
+    status_dict: Dict[str, "GitFileStatus"],
+) -> Optional["GitFileStatus"]:
+    """Sucht GitFileStatus für einen absoluten Dateipfad anhand eines Status-Dicts.
+
+    Normalisiert Windows-Backslashes zu Forward-Slashes (Porcelain-Format von
+    ``git status --porcelain``). Gibt None zurück, wenn der Pfad außerhalb des
+    Repos liegt oder kein Status-Eintrag existiert.
+
+    Args:
+        abs_path:    Absoluter Dateipfad (Windows- oder Unix-Trennzeichen).
+        repo_root:   Absoluter Pfad zum Repo-Wurzelordner.
+        status_dict: Dict aus ``GitRepo.get_status()`` (Keys: Slash-relativ).
+
+    Returns:
+        GitFileStatus oder None.
+    """
+    try:
+        rel = Path(abs_path).relative_to(repo_root)
+    except ValueError:
+        return None
+    return status_dict.get(rel.as_posix())
+
+
+class GitStatusDelegate(QStyledItemDelegate):
+    """Zeichnet einen farbigen Git-Status-Badge rechts neben dem Dateinamen.
+
+    Holt sich den absoluten Dateipfad über ``QFileSystemModel``/Proxy und
+    delegiert den Lookup an die Qt-freie ``status_for_path``-Funktion.
+    Ordner werden nicht beschriftet.
+    """
+
+    _BADGE_FONT_SIZE = 9
+
+    def __init__(self, fs_model: QFileSystemModel, proxy: QSortFilterProxyModel,
+                 parent=None):
+        super().__init__(parent)
+        self._fs_model = fs_model
+        self._proxy = proxy
+        self._status_dict: Dict[str, "GitFileStatus"] = {}
+        self._repo_root: str = ""
+
+    def set_status(self, repo_root: str, status_dict: Dict[str, "GitFileStatus"]):
+        """Setzt den aktuellen Git-Status-Cache (wird bei set_root/refresh aufgerufen)."""
+        self._repo_root = repo_root
+        self._status_dict = status_dict
+
+    def _status_for_index(self, index: QModelIndex) -> Optional["GitFileStatus"]:
+        source = self._proxy.mapToSource(index)
+        if not source.isValid():
+            return None
+        abs_path = self._fs_model.filePath(source)
+        if not abs_path or not self._repo_root:
+            return None
+        return status_for_path(abs_path, self._repo_root, self._status_dict)
+
+    def paint(self, painter, option, index):
+        super().paint(painter, option, index)
+        # Ordner nicht beschriften
+        source = self._proxy.mapToSource(index)
+        if source.isValid() and self._fs_model.isDir(source):
+            return
+        status = self._status_for_index(index)
+        if not (status and status.status_icon):
+            return
+        painter.save()
+        color = status.color_hint
+        if color:
+            painter.setPen(QColor(color))
+        badge_font = QFont("Consolas", self._BADGE_FONT_SIZE)
+        badge_font.setBold(True)
+        painter.setFont(badge_font)
+        rect = option.rect.adjusted(0, 0, -4, 0)
+        painter.drawText(
+            rect,
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter,
+            status.status_icon,
+        )
+        painter.restore()
 
 
 class FileFilterProxy(QSortFilterProxyModel):
@@ -183,6 +271,10 @@ class ProjectView(QWidget):
         self.tree.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.tree.customContextMenuRequested.connect(self._on_context_menu)
 
+        # Git-Status-Delegate (zeigt M/S/U/D-Badges neben Dateinamen)
+        self.git_delegate = GitStatusDelegate(self.fs_model, self.proxy, self)
+        self.tree.setItemDelegateForColumn(0, self.git_delegate)
+
         layout.addWidget(self.tree)
 
     def set_root(self, path: str):
@@ -192,6 +284,7 @@ class ProjectView(QWidget):
         proxy_root = self.proxy.mapFromSource(root_index)
         self.tree.setRootIndex(proxy_root)
         self._update_git_info()
+        self._load_git_status()
 
     def _update_git_info(self):
         """Aktualisiert die Git-Branch-Anzeige im Titel."""
@@ -206,13 +299,29 @@ class ProjectView(QWidget):
         else:
             self.title_label.setText(self._root_path.name)
 
+    def _load_git_status(self):
+        """Lädt den Git-Status aller geänderten Dateien für den aktuellen Root.
+
+        Befüllt den Cache des GitStatusDelegate, damit dieser beim Paint-Aufruf
+        sofort die Badges rendern kann.
+        """
+        if not self._root_path:
+            self.git_delegate.set_status("", {})
+            return
+        from features.git_integration import GitRepo
+        repo = GitRepo(str(self._root_path))
+        if repo.is_git_repo():
+            self.git_delegate.set_status(str(self._root_path), repo.get_status())
+        else:
+            self.git_delegate.set_status("", {})
+
     def _open_folder_dialog(self):
         path = QFileDialog.getExistingDirectory(self, "Projektordner wählen")
         if path:
             self.set_root(path)
 
     def _refresh(self):
-        """Aktualisiert die Ansicht."""
+        """Aktualisiert die Ansicht und den Git-Status-Cache."""
         if self._root_path:
             self.set_root(str(self._root_path))
 
