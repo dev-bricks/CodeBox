@@ -61,6 +61,11 @@ class TerminalWidget(QWidget):
 
         self.shell_combo = QComboBox()
         self._populate_shells()
+        self.shell_combo.setToolTip("Shell für das integrierte Terminal auswählen")
+        self.shell_combo.setAccessibleName("Terminal-Shell auswählen")
+        self.shell_combo.setAccessibleDescription(
+            "Wählt aus, welche lokale Shell im integrierten Terminal gestartet wird."
+        )
         self.shell_combo.currentTextChanged.connect(self._restart_shell)
         toolbar.addWidget(QLabel("Shell:"))
         toolbar.addWidget(self.shell_combo)
@@ -69,10 +74,21 @@ class TerminalWidget(QWidget):
 
         self.cwd_label = QLabel(self.working_dir)
         self.cwd_label.setStyleSheet("color: #888; font-size: 10px;")
+        self.cwd_label.setToolTip("Aktueller Arbeitsordner des Terminals")
+        self.cwd_label.setAccessibleName("Terminal-Arbeitsordner")
+        self.cwd_label.setAccessibleDescription(
+            "Zeigt den Ordner, in dem Befehle im integrierten Terminal ausgeführt werden."
+        )
         toolbar.addWidget(self.cwd_label)
 
-        btn_clear = QPushButton("Clear")
+        btn_clear = QPushButton("Leeren")
         btn_clear.setFixedWidth(50)
+        btn_clear.setToolTip("Terminalausgabe leeren")
+        btn_clear.setAccessibleName("Terminalausgabe leeren")
+        btn_clear.setAccessibleDescription(
+            "Entfernt die sichtbare Ausgabe des integrierten Terminals."
+        )
+        self.clear_btn = btn_clear
         btn_clear.clicked.connect(self.clear)
         toolbar.addWidget(btn_clear)
 
@@ -81,6 +97,11 @@ class TerminalWidget(QWidget):
         # Output
         self.output = QTextEdit()
         self.output.setReadOnly(True)
+        self.output.setToolTip("Ausgabe des integrierten Terminals")
+        self.output.setAccessibleName("Terminalausgabe")
+        self.output.setAccessibleDescription(
+            "Zeigt Ausgaben, Fehlermeldungen und Statuszeilen der gestarteten Shell."
+        )
         self.output.setFont(QFont("Consolas", 10))
         self.output.setStyleSheet(
             "QTextEdit { background-color: #0c0c0c; color: #cccccc; border: none; }"
@@ -93,10 +114,16 @@ class TerminalWidget(QWidget):
 
         self.prompt_label = QLabel(">")
         self.prompt_label.setStyleSheet("color: #4ec9b0; font-family: Consolas;")
+        self.prompt_label.setAccessibleName("Terminal-Eingabeaufforderung")
         input_row.addWidget(self.prompt_label)
 
         self.input = TerminalInput()
         self.input.setFont(QFont("Consolas", 10))
+        self.input.setToolTip("Befehl im integrierten Terminal eingeben")
+        self.input.setAccessibleName("Terminal-Befehl")
+        self.input.setAccessibleDescription(
+            "Eingabefeld für Shell-Befehle. Pfeil hoch und Pfeil runter wechseln durch die Befehlshistorie."
+        )
         self.input.setStyleSheet(
             "QLineEdit { background: #1a1a1a; color: #cccccc; border: 1px solid #333; padding: 4px; }"
         )

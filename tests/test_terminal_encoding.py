@@ -39,6 +39,25 @@ class TerminalEncodingTests(unittest.TestCase):
         self.assertEqual(widget._input_encoding(), "utf-8")
         widget.close()
 
+    def test_terminal_controls_expose_accessible_context(self):
+        """Terminal-Controls brauchen Tooltip- und Screenreader-Kontext."""
+        widget = self._make_widget("cmd")
+        try:
+            self.assertEqual(widget.shell_combo.accessibleName(), "Terminal-Shell auswählen")
+            self.assertIn("Shell", widget.shell_combo.toolTip())
+            self.assertIn("gestartet", widget.shell_combo.accessibleDescription())
+
+            self.assertEqual(widget.clear_btn.text(), "Leeren")
+            self.assertEqual(widget.clear_btn.accessibleName(), "Terminalausgabe leeren")
+            self.assertIn("Ausgabe", widget.clear_btn.accessibleDescription())
+
+            self.assertEqual(widget.cwd_label.accessibleName(), "Terminal-Arbeitsordner")
+            self.assertEqual(widget.output.accessibleName(), "Terminalausgabe")
+            self.assertEqual(widget.input.accessibleName(), "Terminal-Befehl")
+            self.assertIn("Befehlshistorie", widget.input.accessibleDescription())
+        finally:
+            widget.close()
+
     # --- set_working_dir encoding-Konsistenz ---
 
     @unittest.skipUnless(sys.platform == "win32", "Windows-only")

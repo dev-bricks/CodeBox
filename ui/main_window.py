@@ -67,7 +67,7 @@ class MainWindow(QMainWindow):
         toolbar.addAction("Öffnen", self.open_file)
         toolbar.addAction("Speichern", self.save_file)
         toolbar.addSeparator()
-        toolbar.addAction("Run", self.run_current)
+        toolbar.addAction("Ausführen", self.run_current)
 
         # Sprach-Auswahl in Toolbar
         self.lang_combo = QComboBox()

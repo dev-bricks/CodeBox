@@ -68,6 +68,24 @@ class OutputPanelSignalTests(unittest.TestCase):
             "stop_btn muss nach run_command() enabled sein",
         )
 
+    def test_output_controls_expose_accessible_context(self):
+        """Ausgabe-Controls brauchen deutsche Labels und Assistenzkontext."""
+        self.assertEqual(self.panel.run_btn.text(), "Ausführen")
+        self.assertEqual(self.panel.run_btn.toolTip(), "Aktuelle Datei ausführen")
+        self.assertEqual(self.panel.run_btn.accessibleName(), "Aktuelle Datei ausführen")
+        self.assertIn("Sprachprovider", self.panel.run_btn.accessibleDescription())
+
+        self.assertEqual(self.panel.stop_btn.text(), "Stoppen")
+        self.assertEqual(self.panel.stop_btn.accessibleName(), "Ausführung stoppen")
+        self.assertIn("laufenden Prozess", self.panel.stop_btn.accessibleDescription())
+
+        self.assertEqual(self.panel.clear_btn.text(), "Leeren")
+        self.assertEqual(self.panel.clear_btn.accessibleName(), "Ausgabe leeren")
+        self.assertIn("Meldungen", self.panel.clear_btn.accessibleDescription())
+
+        self.assertEqual(self.panel.status_label.accessibleName(), "Ausführungsstatus")
+        self.assertEqual(self.panel.output.accessibleName(), "Programmausgabe")
+
 
 if __name__ == "__main__":
     unittest.main()

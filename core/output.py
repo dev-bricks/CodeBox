@@ -26,19 +26,38 @@ class OutputPanel(QWidget):
         # Toolbar
         toolbar = QHBoxLayout()
         self.status_label = QLabel("Bereit")
+        self.status_label.setAccessibleName("Ausführungsstatus")
+        self.status_label.setAccessibleDescription(
+            "Zeigt, ob ein Programm gestartet wurde, läuft oder beendet ist."
+        )
         toolbar.addWidget(self.status_label)
         toolbar.addStretch()
 
-        self.run_btn = QPushButton("Run")
+        self.run_btn = QPushButton("Ausführen")
         self.run_btn.setEnabled(False)
+        self.run_btn.setToolTip("Aktuelle Datei ausführen")
+        self.run_btn.setAccessibleName("Aktuelle Datei ausführen")
+        self.run_btn.setAccessibleDescription(
+            "Startet die aktuell geöffnete Datei, sobald ein passender Sprachprovider verfügbar ist."
+        )
         toolbar.addWidget(self.run_btn)
 
-        self.stop_btn = QPushButton("Stop")
+        self.stop_btn = QPushButton("Stoppen")
         self.stop_btn.setEnabled(False)
+        self.stop_btn.setToolTip("Laufenden Prozess stoppen")
+        self.stop_btn.setAccessibleName("Ausführung stoppen")
+        self.stop_btn.setAccessibleDescription(
+            "Beendet den aktuell laufenden Prozess im Ausgabebereich."
+        )
         self.stop_btn.clicked.connect(self.stop_process)
         toolbar.addWidget(self.stop_btn)
 
-        self.clear_btn = QPushButton("Clear")
+        self.clear_btn = QPushButton("Leeren")
+        self.clear_btn.setToolTip("Ausgabe leeren")
+        self.clear_btn.setAccessibleName("Ausgabe leeren")
+        self.clear_btn.setAccessibleDescription(
+            "Entfernt alle bisherigen Meldungen aus dem Ausgabebereich."
+        )
         self.clear_btn.clicked.connect(self.clear)
         toolbar.addWidget(self.clear_btn)
 
@@ -47,6 +66,11 @@ class OutputPanel(QWidget):
         # Output-Text
         self.output = QTextEdit()
         self.output.setReadOnly(True)
+        self.output.setToolTip("Programm-Ausgabe und Fehlermeldungen")
+        self.output.setAccessibleName("Programmausgabe")
+        self.output.setAccessibleDescription(
+            "Zeigt Standardausgabe, Fehlerausgabe und Prozessstatus der ausgeführten Datei."
+        )
         self.output.setFont(QFont("Consolas", 10))
         self.output.setStyleSheet(
             "QTextEdit { background-color: #1a1a1a; color: #d4d4d4; border: none; }"
