@@ -6,6 +6,8 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![Platform: Windows](https://img.shields.io/badge/platform-Windows-lightgrey.svg)]()
 [![LSP Ready](https://img.shields.io/badge/LSP-ready-purple.svg)]()
+[![Tests](https://img.shields.io/badge/tests-70%20passed-brightgreen.svg)]()
+[![llms.txt](https://img.shields.io/badge/llms.txt-available-green.svg)](llms.txt)
 
 [Deutsch](README_de.md) | English
 
@@ -13,6 +15,9 @@ CodeBox is a local-first desktop IDE for Windows developers who want a
 lightweight PySide6 code editor with tabs, a project tree, an integrated
 terminal, Git helpers, syntax highlighting, and Language Server Protocol
 diagnostics.
+
+> [!NOTE]
+> For AI agents and automated discovery, see [llms.txt](llms.txt) for machine-readable context, architecture summaries, and navigation pointers.
 
 ## Start here
 

@@ -5,6 +5,12 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [Unreleased]
 
+### Wartung & Hygiene (2026-07-25)
+
+- `pyproject.toml` mit PEP 621 Metadaten, Pytest-Konfiguration (`pythonpath = "."`) und optionalen Abhängigkeiten (`lsp`, `remote`, `test`) angelegt.
+- `llms.txt` Last-checked Timestamp auf 2026-07-25 aktualisiert.
+- `README.md` & `README_de.md` um KI-/LLM-Integrationshinweis (`> [!NOTE]`) und erweiterte Badges ergänzt.
+
 ### Hinzugefügt
 
 - `features/project_view.py`: Git-Status-Indikatoren (M / S / SM / U / D / R) werden

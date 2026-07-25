@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "CodeBox"
+version = "0.1.0"
+description = "Lightweight local PySide6 desktop code editor with LSP diagnostics, tabs, project tree, and integrated terminal"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "dev-bricks Maintainers" }
+]
+keywords = [
+    "pyside6",
+    "code-editor",
+    "desktop-ide",
+    "local-first",
+    "lsp",
+    "terminal",
+    "python",
+    "dev-tools"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: X11 Applications :: Qt",
+    "Environment :: Win32 (MS Windows)",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Code Editors",
+    "Topic :: Software Development :: Integrated Development Environments (IDE)"
+]
+dependencies = [
+    "PySide6>=6.5.0",
+]
+
+[project.optional-dependencies]
+lsp = [
+    "python-lsp-server[all]>=1.7.0",
+]
+remote = [
+    "paramiko>=3.0.0",
+]
+test = [
+    "pytest>=7.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/dev-bricks/CodeBox"
+Documentation = "https://github.com/dev-bricks/CodeBox#readme"
+Repository = "https://github.com/dev-bricks/CodeBox.git"
+Issues = "https://github.com/dev-bricks/CodeBox/issues"
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra"
