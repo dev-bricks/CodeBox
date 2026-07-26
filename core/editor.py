@@ -98,19 +98,17 @@ class CodeEditor(QPlainTextEdit):
             self.set_completer_words(words)
 
     def insert_completion(self, completion: str):
-        tc = self.textCursor()
-        extra = len(completion) - len(self.completer.completionPrefix())
-        if extra <= 0:
+        if not completion:
             return
+        tc = self.textCursor()
         tc.movePosition(QTextCursor.MoveOperation.Left)
         tc.movePosition(QTextCursor.MoveOperation.EndOfWord)
-        # Snippet-Prüfung
+        tc.movePosition(QTextCursor.MoveOperation.StartOfWord, QTextCursor.MoveMode.KeepAnchor)
+        tc.removeSelectedText()
         if self._provider and completion in self._provider.get_snippets():
-            tc.movePosition(QTextCursor.MoveOperation.StartOfWord, QTextCursor.MoveMode.KeepAnchor)
-            tc.removeSelectedText()
             tc.insertText(self._provider.get_snippets()[completion])
         else:
-            tc.insertText(completion[-extra:])
+            tc.insertText(completion)
         self.setTextCursor(tc)
 
     def text_under_cursor(self) -> str:
@@ -200,7 +198,7 @@ class CodeEditor(QPlainTextEdit):
         cursor = self.textCursor()
         text = self.toPlainText()
         pos = cursor.position()
-        if pos >= len(text):
+        if pos > len(text):
             self.highlightCurrentLine()
             return
 

@@ -29,6 +29,8 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ### Behoben
 
+- `core/editor.py`: Behoben: (1) Bracket-Matching am Dokumentende (EOF) filterte Cursortyp bei `pos == len(text)` aus, wodurch schließende Klammern am Dateiende nicht hervorgehoben wurden. (2) `insert_completion()` ersetzte bei case-insensitiver Auto-Completion oder Wort-Ersetzung bisher nur Suffix-Texte statt das Präfix-Wort exakt zu ersetzen. 2 neue Regressionstests in `tests/test_editor_auto_close.py`.
+- `features/git_integration.py`: `GitRepo.get_status()` entpackt jetzt von Git zitiere Pfade (z. B. bei Dateinamen mit Leerzeichen oder Sonderzeichen) und umbenannte Pfade (`"old.py" -> "new.py"`) via `parse_porcelain_path()`. Zudem werden C-Style Escape-Sequenzen unescaped und `errors="replace"` bei Subprocess-Output genutzt. Git-Status-Badges in `ProjectView` funktionieren dadurch auch bei Pfaden mit Leerzeichen oder Sonderzeichen. 3 neue Regressionstests in `tests/test_git_status_parsing.py`.
 - `features/remote_editor.py`: SSH/SFTP-Verbindungen laden bekannte Hostkeys und
   lehnen unbekannte Hostkeys jetzt ab, statt sie automatisch zu akzeptieren.
 - `features/terminal.py` (B-012): `_start_shell()` trennte die Signale
@@ -58,6 +60,9 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - `stale.yml` hinzugefügt: Issues und PRs werden nach 30 Tagen als stale markiert und nach 37 Tagen automatisch geschlossen.
 
 ### Dokumentation
+- `THIRD_PARTY_LICENSES.txt` ergänzt die direkte Runtime-Lizenzinventur für
+  `PySide6` und das transitive Qt-for-Python-Wheel-Set; ein Guard-Test schützt
+  das Inventar gegen Dependency-Drift.
 - `README.md` als klaren englischen Einstieg mit Start-Here-Tabelle,
   Screenshot-Alt-Text und Suchabgrenzung neu strukturiert; `README_de.md` als
   deutsche Einstiegsseite ergänzt. `llms.txt` auf den Marketing-Check vom

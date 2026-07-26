@@ -115,6 +115,26 @@ class AutoCloseQuoteTests(unittest.TestCase):
         self.assertEqual(text, "(line1\nline2)",
                          f"Erwartete '(line1\\nline2)', bekommen: {text!r}")
 
+    def test_match_brackets_at_eof(self):
+        """Bracket matching at EOF: Cursor after closing bracket at EOF must highlight brackets."""
+        self.editor.setPlainText("foo()")
+        cursor = self.editor.textCursor()
+        cursor.setPosition(5)  # Position 5 (EOF, after closing paren)
+        self.editor.setTextCursor(cursor)
+        self.editor.matchBrackets()
+        self.assertEqual(len(self.editor.bracket_selections), 2,
+                         "Both opening and closing brackets must be highlighted at EOF")
+
+    def test_insert_completion_case_insensitive(self):
+        """Auto-completion replacement: Inserting completion must replace prefix with exact case."""
+        self.editor.setPlainText("PR")
+        cursor = self.editor.textCursor()
+        cursor.setPosition(2)
+        self.editor.setTextCursor(cursor)
+        self.editor.insert_completion("print")
+        text = self.editor.toPlainText()
+        self.assertEqual(text, "print", f"Erwartet 'print', bekommen {text!r}")
+
 
 if __name__ == "__main__":
     unittest.main()
