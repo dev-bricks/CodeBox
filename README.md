@@ -29,6 +29,20 @@ diagnostics.
 | Add diagnostics or completion | Install a local language server such as `python-lsp-server[all]` |
 | Understand the roadmap | [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) |
 
+
+## System Architecture
+
+```mermaid
+graph TD
+    UI["PySide6 Main Window (main.py)"] --> Tabs["Editor Tabs & Syntax Highlighting"]
+    UI --> Tree["Project Tree & Git Status Overlay"]
+    UI --> Term["Integrated Terminal (QProcess)"]
+    UI --> Theme["Fusion Theme & Dark/Light Styling"]
+    Tabs --> LSP["LSP Client & Diagnostics Thread"]
+    Tabs --> Storage["File Storage & UTF-8 Encoding"]
+    Tree --> Git["Git Status Porcelain Resolver"]
+```
+
 ## Why CodeBox
 
 - Local-first: edit files on your machine without cloud accounts or telemetry.

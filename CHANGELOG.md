@@ -5,6 +5,12 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [Unreleased]
 
+### Marketing & Discoverability (2026-07-26)
+
+- `README.md` & `README_de.md`: Mermaid Systemarchitektur- & Komponenten-Diagramm in Englisch und Deutsch integriert.
+- `llms.txt`: Header Timestamp auf 2026-07-26 und Search Phrases erweitert.
+
+
 ### Wartung & Hygiene (2026-07-25)
 
 - `pyproject.toml` mit PEP 621 Metadaten, Pytest-Konfiguration (`pythonpath = "."`) und optionalen Abhängigkeiten (`lsp`, `remote`, `test`) angelegt.

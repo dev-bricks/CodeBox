@@ -28,6 +28,20 @@ Syntax-Highlighting und Language-Server-Diagnostics suchen.
 | Diagnostics oder Completion nutzen | Lokalen Language Server wie `python-lsp-server[all]` installieren |
 | Roadmap verstehen | [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) |
 
+
+## Systemarchitektur
+
+```mermaid
+graph TD
+    UI["PySide6 Hauptfenster (main.py)"] --> Tabs["Editor-Tabs & Syntax-Highlighting"]
+    UI --> Tree["Projektbaum & Git-Status-Overlay"]
+    UI --> Term["Integriertes Terminal (QProcess)"]
+    UI --> Theme["Fusion-Design & Dark/Light-Styling"]
+    Tabs --> LSP["LSP-Client & Diagnostics-Thread"]
+    Tabs --> Storage["Dateispeicher & UTF-8-Kodierung"]
+    Tree --> Git["Git-Status-Porcelain-Resolver"]
+```
+
 ## Warum CodeBox
 
 - Local-first: Dateien bleiben auf dem eigenen Rechner, ohne Cloudkonto oder Telemetrie.
