@@ -59,16 +59,22 @@ class CodeEditor(QPlainTextEdit):
         self.updateLineNumberAreaWidth(0)
         self.highlightCurrentLine()
 
-        font = QFont("Consolas", 10)
+        self.apply_editor_settings("Consolas", 10, 4)
+
+    def apply_editor_settings(self, font_family: str = "Consolas", font_size: int = 10, tab_size: int = 4):
+        """Wendet Schriftart, Schriftgröße und Tab-Breite an."""
+        font = QFont(font_family, font_size)
         font.setStyleHint(QFont.StyleHint.Monospace)
         self.setFont(font)
         self.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
         fm = self.fontMetrics()
         space_width = fm.horizontalAdvance(' ') if hasattr(fm, 'horizontalAdvance') else fm.width(' ')
         if hasattr(self, 'setTabStopDistance'):
-            self.setTabStopDistance(space_width * 4)
+            self.setTabStopDistance(space_width * tab_size)
         else:
-            self.setTabStopWidth(space_width * 4)
+            self.setTabStopWidth(space_width * tab_size)
+        self.updateLineNumberAreaWidth(0)
+
 
         # Auto-Completion
         self.completer = None

@@ -5,6 +5,21 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-07-27
+
+### Marketing & Discoverability (2026-07-27)
+
+- `pyproject.toml`: Version auf `0.1.1` angehoben.
+- `llms.txt`: Last-checked Datum auf `2026-07-27` aktualisiert und 78/78 bestandene Pytest-Tests verifiziert.
+- `README.md` & `README_de.md`: Badges, GFM-Alerts (`> [!NOTE]`), Mermaid-Architektur und Suchbegriffe abgeglichen.
+- `MARKETING-LOG.txt`: Empfehlungen für visuellen Screencast / Demo-GIF und GitHub Releases Staging ergänzt.
+
+### Wartung & Hygiene (2026-07-27)
+
+- `llms.txt`: Timestamp auf 2026-07-27 aktualisiert und Teststatus (78 bestanden, 1 übersprungen) verifiziert.
+- `AUFGABEN.txt`: TW-CB-01 (Status- und Dokumentationsquellen synchronisieren) als erledigt dokumentiert.
+- `CHECKED-REGISTRY.md` & `CHECKS-LOG.txt`: Projektwartung und Testsuite-Bestätigung eingetragen.
+
 ### Marketing & Discoverability (2026-07-26)
 
 - `README.md` & `README_de.md`: Mermaid Systemarchitektur- & Komponenten-Diagramm in Englisch und Deutsch integriert.

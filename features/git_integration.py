@@ -60,6 +60,27 @@ class GitFileStatus:
         return ""
 
 
+def parse_porcelain_path(raw_path: str) -> str:
+    """Parses a file path from git status --porcelain output, handling renames and C-style quotes.
+
+    Git quotes paths with spaces or special characters in double quotes and C-escapes them.
+    Renamed files have the format: "old_path" -> "new_path" or old_path -> new_path.
+    """
+    raw = raw_path.strip()
+    if " -> " in raw:
+        raw = raw.split(" -> ")[-1].strip()
+
+    if raw.startswith('"') and raw.endswith('"'):
+        raw = raw[1:-1]
+        raw = (
+            raw.replace(r'\"', '"')
+            .replace(r'\\', '\\')
+            .replace(r'\t', '\t')
+            .replace(r'\n', '\n')
+        )
+    return raw
+
+
 class GitRepo:
     """Interface to a git repository via CLI."""
 
@@ -75,6 +96,7 @@ class GitRepo:
                 capture_output=True,
                 text=True,
                 encoding="utf-8",
+                errors="replace",
                 timeout=10,
             )
             if result.returncode == 0:
@@ -109,10 +131,7 @@ class GitRepo:
                 continue
             x = line[0]  # index status
             y = line[1]  # worktree status
-            filepath = line[3:].strip()
-            # Handle renamed files (old -> new)
-            if " -> " in filepath:
-                filepath = filepath.split(" -> ")[-1]
+            filepath = parse_porcelain_path(line[3:])
 
             status = GitFileStatus(
                 path=filepath,

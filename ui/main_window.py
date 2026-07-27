@@ -17,6 +17,7 @@ from features.project_view import ProjectView
 from languages import get_provider_for_extension, get_provider_by_name, get_all_providers
 from features.lsp_client import LSPManager
 from version import format_window_title
+from config import load_settings, save_settings
 
 
 class MainWindow(QMainWindow):
@@ -27,6 +28,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
+        self._settings = load_settings()
         self.setWindowTitle(format_window_title())
         self.setGeometry(100, 100, 1200, 800)
         self._lsp_manager = LSPManager()
@@ -36,6 +38,7 @@ class MainWindow(QMainWindow):
 
         self.setup_ui()
         self.setup_shortcuts()
+        self._apply_settings()
         self.new_file()
 
     def setup_ui(self):
@@ -55,6 +58,9 @@ class MainWindow(QMainWindow):
         edit_menu.addSeparator()
         edit_menu.addAction("Suchen", self._find, "Ctrl+F")
         edit_menu.addAction("Gehe zu Zeile", self._goto_line, "Ctrl+G")
+        edit_menu.addSeparator()
+        edit_menu.addAction("Einstellungen...", self.open_settings_dialog, "Ctrl+,")
+
 
         run_menu = menubar.addMenu("Ausführen")
         run_menu.addAction("Ausführen", self.run_current, "F5")
@@ -154,6 +160,11 @@ class MainWindow(QMainWindow):
         tab = self.tab_widget.new_tab()
         self.output.run_btn.setEnabled(False)
         self._connect_cursor(tab)
+        if hasattr(self, '_settings') and self._settings and tab and tab.editor:
+            font_family = self._settings.get("font_family", "Consolas")
+            font_size = int(self._settings.get("font_size", 10))
+            tab_size = int(self._settings.get("tab_size", 4))
+            tab.editor.apply_editor_settings(font_family, font_size, tab_size)
 
     def open_file(self):
         path, _ = QFileDialog.getOpenFileName(
@@ -171,6 +182,11 @@ class MainWindow(QMainWindow):
             return None
 
         tab = self.tab_widget.open_file(path)
+        if tab and tab.editor and hasattr(self, '_settings') and self._settings:
+            font_family = self._settings.get("font_family", "Consolas")
+            font_size = int(self._settings.get("font_size", 10))
+            tab_size = int(self._settings.get("tab_size", 4))
+            tab.editor.apply_editor_settings(font_family, font_size, tab_size)
         if tab and tab.provider:
             self.lang_label.setText(tab.provider.get_name())
             self.output.run_btn.setEnabled(True)
@@ -377,9 +393,36 @@ class MainWindow(QMainWindow):
         if ok:
             cursor = tab.editor.textCursor()
             cursor.movePosition(QTextCursor.Start)
-            cursor.movePosition(QTextCursor.Down, QTextCursor.MoveAnchor, line - 1)
             tab.editor.setTextCursor(cursor)
             tab.editor.centerCursor()
+
+    def open_settings_dialog(self):
+        """Öffnet den Einstellungsdialog und übernimmt geänderte Optionen."""
+        from ui.settings_dialog import SettingsDialog
+        dialog = SettingsDialog(self)
+        if dialog.exec():
+            self._settings = dialog.get_settings()
+            self._apply_settings()
+
+    def _apply_settings(self):
+        """Wendet geladene oder geänderte Einstellungen auf Hauptfenster, Theme und Tabs an."""
+        if not hasattr(self, '_settings') or not self._settings:
+            return
+
+        font_family = self._settings.get("font_family", "Consolas")
+        font_size = int(self._settings.get("font_size", 10))
+        tab_size = int(self._settings.get("tab_size", 4))
+        theme = self._settings.get("theme", "dark")
+
+        # Theme anwenden
+        from features.theme_manager import apply_theme
+        apply_theme(QApplication.instance(), theme)
+
+        # Editor-Einstellungen auf alle offenen Tabs anwenden
+        for idx in range(self.tab_widget.count()):
+            tab = self.tab_widget.tabs.get(idx)
+            if tab and tab.editor:
+                tab.editor.apply_editor_settings(font_family, font_size, tab_size)
 
     # ---- Ausführen ----
 

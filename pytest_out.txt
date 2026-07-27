@@ -1,0 +1,28 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.1.1, pluggy-1.6.0
+rootdir: C:\Users\lukas\OneDrive\.TOPICS\.SOFTWARE\CODING\DEV_CodeBox
+configfile: pyproject.toml
+testpaths: tests
+plugins: anyio-4.14.0, asyncio-1.4.0, flask-1.3.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 79 items
+
+tests\test_bug_regressions.py ...                                        [  3%]
+tests\test_editor_auto_close.py .........                                [ 15%]
+tests\test_git_project_view_status.py ..........                         [ 27%]
+tests\test_git_status_parsing.py .........                               [ 39%]
+tests\test_lsp_client.py ........                                        [ 49%]
+tests\test_lsp_runtime.py s                                              [ 50%]
+tests\test_output_panel.py .....                                         [ 56%]
+tests\test_project_view.py ....                                          [ 62%]
+tests\test_remote_editor.py ....                                         [ 67%]
+tests\test_save_failure_guards.py .........                              [ 78%]
+tests\test_settings.py ...                                               [ 82%]
+tests\test_startup_args.py ..                                            [ 84%]
+tests\test_tab_reordering.py ....                                        [ 89%]
+tests\test_terminal_encoding.py .......                                  [ 98%]
+tests\test_third_party_licenses.py .                                     [100%]
+
+=========================== short test summary info ===========================
+SKIPPED [1] tests\test_lsp_runtime.py:15: Set CODEBOX_LSP_RUNTIME=1 and install python-lsp-server[all] to run.
+======================= 78 passed, 1 skipped in 10.14s ========================

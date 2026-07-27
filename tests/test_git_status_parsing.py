@@ -1,7 +1,7 @@
 """Regressionstests für GitFileStatus-Parsing in features/git_integration.py."""
 import unittest
 
-from features.git_integration import GitRepo, GitFileStatus
+from features.git_integration import GitRepo, GitFileStatus, parse_porcelain_path
 
 
 def _make_status(x: str, y: str, path: str = "file.py") -> GitFileStatus:
@@ -63,7 +63,7 @@ class GitFileStatusIconTests(unittest.TestCase):
         line = raw_line
         x = line[0]
         y = line[1]
-        filepath = line[3:].strip()
+        filepath = parse_porcelain_path(line[3:])
 
         status = GitFileStatus(
             path=filepath,
@@ -79,6 +79,24 @@ class GitFileStatusIconTests(unittest.TestCase):
         self.assertFalse(status.is_modified,
                          "Rein gestagete Datei (X=M, Y=space): is_modified muss False sein")
         self.assertEqual(status.status_icon, "S")
+
+    def test_parse_porcelain_path_unquotes_spaces(self):
+        """Dateipfade mit Anführungszeichen (z.B. wegen Leerzeichen) werden entpackt."""
+        raw = ' M "src/my file with space.py"'
+        parsed = parse_porcelain_path(raw[3:])
+        self.assertEqual(parsed, "src/my file with space.py")
+
+    def test_parse_porcelain_path_handles_renamed_quoted(self):
+        """Umbenannte Dateien mit Anführungszeichen liefern den neuen entpackten Pfad."""
+        raw = 'R  "old name.py" -> "new name.py"'
+        parsed = parse_porcelain_path(raw[3:])
+        self.assertEqual(parsed, "new name.py")
+
+    def test_parse_porcelain_path_c_escapes(self):
+        """C-Style Escape-Sequenzen in git porcelain Pfaden werden aufgelöst."""
+        raw = r' M "src/file \"quoted\".py"'
+        parsed = parse_porcelain_path(raw[3:])
+        self.assertEqual(parsed, 'src/file "quoted".py')
 
 
 if __name__ == "__main__":
