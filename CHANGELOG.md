@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-07-27
+
+### Changed
+- Documented the actual local CLI contract in `API_STATUS.md` and corrected
+  outdated REST/OpenAPI claims in both READMEs. CodeBox currently supports
+  startup-file handoff only; no REST, OpenAPI, token, or remote-control
+  surface exists.
+
 Alle wesentlichen Änderungen an CodeBox werden hier dokumentiert.
 Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 

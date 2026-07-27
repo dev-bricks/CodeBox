@@ -63,7 +63,7 @@ graph TD
 - Multiple editor tabs, search, and go-to-line navigation
 - Robust tab handling with drag-and-drop reordering and save-failure guards
 - Theme system via `features/theme_manager.py`
-- REST API and CLI foundation for later remote control
+- Local startup interface: `python main.py --open <path>` (REST and OpenAPI are not implemented)
 - LSP diagnostics and completion for installed language servers
 
 ## Installation

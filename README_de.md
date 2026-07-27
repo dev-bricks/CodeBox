@@ -62,7 +62,7 @@ graph TD
 - Mehrere Tabs, Suchfunktion und Gehe-zu-Zeile
 - Robuste Tab-Verwaltung mit Drag-and-drop-Reordering und Save-Failure-Guards
 - Theme-System über `features/theme_manager.py`
-- REST-API-/CLI-Grundlage für spätere Fernsteuerung
+- Lokale Startschnittstelle: `python main.py --open <pfad>` (REST und OpenAPI sind nicht implementiert)
 - LSP-Diagnostics und Completion-Anbindung für installierte Language Server
 
 ## Installation
