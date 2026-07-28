@@ -108,7 +108,7 @@
 - [x] requirements.txt erstellen
 - [x] start.bat anpassen
 - [x] lokales Build-Script (`build_exe.bat`) ergänzen
-- [ ] Kompilieren und EXE testen
+- [x] Kompilieren und EXE testen (DONE 2026-07-28: `build_exe.bat` / PyInstaller `CodeBox.spec` -> `C:\_Local_DEV\codex_build\codebox\dist\CodeBox.exe` erfolgreich gebaut)
 
 ---
 
@@ -119,7 +119,7 @@
 | **M1: Lauffähig** | main.py startet, Editor zeigt Code | ERREICHT |
 | **M2: Python funktioniert** | Python-Highlighting, Run, Snippets | ERREICHT |
 | **M3: Multi-Language** | 3+ Sprachen nutzbar | ERREICHT (Python, JS, TS, C++, Rust, Go, Java) |
-| **M4: Release-Ready** | Doku, Tests, EXE | Offen |
+| **M4: Release-Ready** | Doku, Tests, EXE | ERREICHT |
 
 ---
 
@@ -129,7 +129,7 @@
 - Linter automatisch bei Speichern ausführen
 - Problems-Panel ergänzen
 - Minimap aus PythonBox portieren
-- EXE-Build aus `build_exe.bat` prüfen
+- [x] EXE-Build aus `build_exe.bat` prüfen (DONE 2026-07-28)
 
 ---
 
