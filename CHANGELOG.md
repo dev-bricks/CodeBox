@@ -13,6 +13,15 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [Unreleased]
 
+### Build-Verifikation (2026-07-28)
+
+- TASKPLAN-Bündel `deep/easy`, Task #1288: `build_exe.bat` mit
+  PyInstaller 6.21.0 erfolgreich ausgeführt (Exit 0). Die erzeugte
+  `C:\_Local_DEV\codex_build\codebox\dist\CodeBox.exe` besitzt einen gültigen
+  `MZ`-Header, enthält Icon sowie Dark-/Light-Theme und blieb im
+  12-Sekunden-Start-Smoke responsiv. Verifikation: 80 Tests bestanden,
+  1 optionaler LSP-Runtime-Test ohne Opt-in übersprungen; keine Blocker.
+
 ## [0.1.1] - 2026-07-27
 
 ### Marketing & Discoverability (2026-07-27)
