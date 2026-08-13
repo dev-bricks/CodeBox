@@ -165,6 +165,9 @@ class MainWindow(QMainWindow):
             font_size = int(self._settings.get("font_size", 10))
             tab_size = int(self._settings.get("tab_size", 4))
             tab.editor.apply_editor_settings(font_family, font_size, tab_size)
+            tab.editor.set_minimap_visible(
+                bool(self._settings.get("show_minimap", True))
+            )
 
     def open_file(self):
         path, _ = QFileDialog.getOpenFileName(
@@ -187,6 +190,9 @@ class MainWindow(QMainWindow):
             font_size = int(self._settings.get("font_size", 10))
             tab_size = int(self._settings.get("tab_size", 4))
             tab.editor.apply_editor_settings(font_family, font_size, tab_size)
+            tab.editor.set_minimap_visible(
+                bool(self._settings.get("show_minimap", True))
+            )
         if tab and tab.provider:
             self.lang_label.setText(tab.provider.get_name())
             self.output.run_btn.setEnabled(True)
@@ -423,6 +429,9 @@ class MainWindow(QMainWindow):
             tab = self.tab_widget.tabs.get(idx)
             if tab and tab.editor:
                 tab.editor.apply_editor_settings(font_family, font_size, tab_size)
+                tab.editor.set_minimap_visible(
+                    bool(self._settings.get("show_minimap", True))
+                )
 
     # ---- Ausführen ----
 

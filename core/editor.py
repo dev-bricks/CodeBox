@@ -25,6 +25,146 @@ class LineNumberArea(QWidget):
         self.codeEditor.lineNumberAreaPaintEvent(event)
 
 
+class Minimap(QWidget):
+    """Kompakte Code-Vorschau mit synchronisiertem Editor-Viewport.
+
+    Die Vorschau malt alle Dokumentzeilen in eine schmale, nicht editierbare
+    Fläche. Ein Klick oder Ziehen positioniert die vertikale Scrollbar des
+    Haupteditors an der entsprechenden Dokumentstelle.
+    """
+
+    WIDTH = 110
+
+    def __init__(self, editor: "CodeEditor", parent=None):
+        super().__init__(parent or editor)
+        self.editor = editor
+        self.viewport_rect = QRect()
+        self._dragging = False
+        self.setFixedWidth(self.WIDTH)
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setToolTip("Minimap: klicken oder ziehen, um zu navigieren")
+        self.setStyleSheet(
+            "QWidget { background-color: #1a1a1a; "
+            "border-left: 1px solid #333; }"
+        )
+
+        editor.textChanged.connect(self.update)
+        editor.cursorPositionChanged.connect(self.update)
+        editor.blockCountChanged.connect(lambda _count: self.update())
+        editor.updateRequest.connect(self._editor_update_requested)
+        editor.verticalScrollBar().valueChanged.connect(lambda _value: self.update())
+        editor.document().contentsChanged.connect(self.update)
+
+    def _editor_update_requested(self, _rect, _dy):
+        """Zeichnet die Vorschau nach Scroll- und Viewport-Updates neu."""
+        self.update()
+
+    def _document_lines(self):
+        document = self.editor.document()
+        block = document.firstBlock()
+        lines = []
+        while block.isValid():
+            lines.append(block.text())
+            block = block.next()
+        return lines or [""]
+
+    def _visible_block_range(self, line_count):
+        first = self.editor.firstVisibleBlock()
+        if not first.isValid():
+            return 0, min(1, line_count)
+
+        start = max(0, first.blockNumber())
+        end = min(line_count, start + 1)
+        block = first
+        viewport_height = self.editor.viewport().height()
+        while block.isValid():
+            top = int(self.editor.blockBoundingGeometry(block)
+                      .translated(self.editor.contentOffset()).top())
+            bottom = top + int(self.editor.blockBoundingRect(block).height())
+            if top > viewport_height:
+                break
+            if bottom >= 0:
+                end = min(line_count, block.blockNumber() + 1)
+            block = block.next()
+        return start, max(start + 1, end)
+
+    def _update_viewport_rect(self, line_count):
+        start, end = self._visible_block_range(line_count)
+        height = max(1, self.height())
+        top = int(start * height / line_count)
+        bottom = int(end * height / line_count)
+        self.viewport_rect = QRect(0, top, self.width(), max(4, bottom - top))
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.fillRect(event.rect(), QColor(26, 26, 26))
+
+        lines = self._document_lines()
+        line_count = len(lines)
+        self._update_viewport_rect(line_count)
+        height = max(1, self.height())
+        width = max(1, self.width() - 8)
+        max_chars = max(1, max((len(line) for line in lines), default=1))
+
+        for index, line in enumerate(lines):
+            y = int(index * height / line_count)
+            next_y = int((index + 1) * height / line_count)
+            line_height = max(1, next_y - y)
+            text = line.expandtabs(4).strip()
+            if not text:
+                continue
+            bar_width = max(2, min(width, 3 + int(width * len(text) / max_chars)))
+            if text.startswith(("#", "//", "/*", "*")):
+                color = QColor(82, 120, 82)
+            elif text.startswith(("def ", "class ", "function ")):
+                color = QColor(90, 140, 205)
+            else:
+                color = QColor(125, 125, 125)
+            painter.fillRect(4, y, bar_width, max(1, min(2, line_height)), color)
+
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(QColor(100, 100, 200, 70))
+        painter.drawRect(self.viewport_rect)
+        painter.setBrush(Qt.BrushStyle.NoBrush)
+        painter.setPen(QColor(120, 120, 220))
+        painter.drawRect(self.viewport_rect)
+
+        current_line = self.editor.textCursor().blockNumber()
+        if 0 <= current_line < line_count:
+            y = int(current_line * height / line_count)
+            painter.fillRect(2, y, self.width() - 4, max(1, int(height / line_count)),
+                             QColor(210, 210, 120, 110))
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self._dragging = True
+            self._scroll_to_position(event.position().y())
+            event.accept()
+            return
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        if self._dragging and event.buttons() & Qt.MouseButton.LeftButton:
+            self._scroll_to_position(event.position().y())
+            event.accept()
+            return
+        super().mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self._dragging = False
+            event.accept()
+            return
+        super().mouseReleaseEvent(event)
+
+    def _scroll_to_position(self, y):
+        """Setzt die Editor-Scrollbar auf die geklickte Dokumentposition."""
+        ratio = max(0.0, min(1.0, float(y) / max(1, self.height())))
+        scrollbar = self.editor.verticalScrollBar()
+        scrollbar.setValue(round(ratio * scrollbar.maximum()))
+
+
 class CodeEditor(QPlainTextEdit):
     """Code-Editor mit Zeilennummern, Highlighting, Auto-Completion und Bracket Matching"""
 
@@ -48,6 +188,8 @@ class CodeEditor(QPlainTextEdit):
         self.linter_errors: List[Dict] = []
 
         self.lineNumberArea = LineNumberArea(self)
+        self.minimap = Minimap(self)
+        self._minimap_visible = True
 
         self.blockCountChanged.connect(self.updateLineNumberAreaWidth)
         self.updateRequest.connect(self.updateLineNumberArea)
@@ -75,10 +217,20 @@ class CodeEditor(QPlainTextEdit):
             self.setTabStopWidth(space_width * tab_size)
         self.updateLineNumberAreaWidth(0)
 
-
         # Auto-Completion
         self.completer = None
         self._provider = None
+
+    def set_minimap_visible(self, visible: bool):
+        """Zeigt oder verbirgt die Minimap und aktualisiert den Randabstand."""
+        self._minimap_visible = bool(visible)
+        self.minimap.setVisible(self._minimap_visible)
+        self.updateLineNumberAreaWidth(0)
+        self.minimap.update()
+
+    def is_minimap_visible(self) -> bool:
+        """Gibt zurück, ob die Minimap für diesen Editor sichtbar sein soll."""
+        return self._minimap_visible
 
     def set_completer_words(self, words: List[str]):
         """Setzt die Completion-Wörter"""
@@ -271,7 +423,18 @@ class CodeEditor(QPlainTextEdit):
         return 20 + char_width * digits
 
     def updateLineNumberAreaWidth(self, _):
-        self.setViewportMargins(self.lineNumberAreaWidth(), 0, 0, 0)
+        right_margin = self.minimap.width() if self._minimap_visible else 0
+        self.setViewportMargins(self.lineNumberAreaWidth(), 0, right_margin, 0)
+        self._position_minimap()
+
+    def _position_minimap(self):
+        if not hasattr(self, "minimap"):
+            return
+        cr = self.contentsRect()
+        width = self.minimap.width()
+        self.minimap.setGeometry(
+            QRect(cr.right() - width + 1, cr.top(), width, cr.height())
+        )
 
     def updateLineNumberArea(self, rect, dy):
         if dy:
@@ -287,6 +450,7 @@ class CodeEditor(QPlainTextEdit):
         self.lineNumberArea.setGeometry(
             QRect(cr.left(), cr.top(), self.lineNumberAreaWidth(), cr.height())
         )
+        self._position_minimap()
 
     def lineNumberAreaPaintEvent(self, event):
         painter = QPainter(self.lineNumberArea)
