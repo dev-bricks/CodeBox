@@ -1,8 +1,6 @@
 """Regressionstests für SFTPSession in features/remote_editor.py."""
-import os
-import tempfile
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 
 def _make_session():

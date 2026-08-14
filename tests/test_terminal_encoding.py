@@ -1,6 +1,5 @@
 """Tests für terminal.py Encoding-Konsistenz."""
 import sys
-import types
 import unittest
 from unittest.mock import patch, MagicMock
 

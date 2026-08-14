@@ -369,7 +369,8 @@ class ProjectView(QWidget):
 
     def _reveal_in_explorer(self, path: Path):
         """Öffnet den Ordner im System-Dateimanager."""
-        import subprocess, sys
+        import subprocess
+        import sys
         target = str(path.parent if path.is_file() else path)
         try:
             if sys.platform == "win32":

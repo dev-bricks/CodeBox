@@ -1,8 +1,8 @@
 # CodeBox - local PySide6 desktop code editor
 
-## Last-checked: 2026-07-27
+## Last-checked: 2026-08-14
 
-> CodeBox is a local-first desktop IDE for Windows developers who want a lightweight PySide6 code editor with tabs, a project tree, an integrated terminal, Git helpers, syntax highlighting, and Language Server Protocol diagnostics.
+> CodeBox is a local-first desktop IDE for Windows developers who want a lightweight PySide6 code editor with tabs, a project tree, an integrated terminal, Git helpers, syntax highlighting, Language Server Protocol diagnostics, and an extensible JSON/Python language plugin system.
 
 Part of the dev-bricks family. Python, MIT.
 
@@ -11,16 +11,19 @@ Part of the dev-bricks family. Python, MIT.
 - [README.md](https://github.com/dev-bricks/CodeBox/blob/main/README.md): Primary documentation, installation guide, features, and setup instructions.
 - [README_de.md](https://github.com/dev-bricks/CodeBox/blob/main/README_de.md): German entry point with localized installation, feature, privacy, and status notes.
 - [CHANGELOG.md](https://github.com/dev-bricks/CodeBox/blob/main/CHANGELOG.md): Project release history and updates.
-- [DEVELOPMENT_PLAN.md](https://github.com/dev-bricks/CodeBox/blob/main/DEVELOPMENT_PLAN.md): Architectural roadmap and planned improvements.
+- [DEVELOPMENT_PLAN.md](https://github.com/dev-bricks/CodeBox/blob/main/DEVELOPMENT_PLAN.md): Architectural roadmap and completed milestones.
 - [LICENSE](https://github.com/dev-bricks/CodeBox/blob/main/LICENSE): MIT license text.
 
 ## Features
 
-- **Syntax Highlighting**: Supports Python, JavaScript, TypeScript, C++, Rust, Go, and Java.
-- **Integrated Terminal**: Native shell integration (cmd/powershell/bash) with command history and styled outputs.
-- **Project Tree**: File tree with proxy filters, custom context menus, and file system watcher.
+- **Multi-Language Highlighting**: Built-in providers for Python, JavaScript, TypeScript, C++, Rust, Go, and Java.
+- **Extensible Plugin System**: Declarative JSON language plugins and Python-based plugins with auto-discovery and live reloading (`plugins/`, `~/.codebox/plugins/`).
+- **Plugins & Shortcuts Dialogs**: Interactive GUI dialogs for managing language plugins (`Ctrl+Shift+P`) and reviewing keyboard shortcuts (`F1`).
 - **LSP Diagnostics & Completion**: Full thread-safe Qt integration with local language servers (e.g. pylsp, typescript-language-server).
-- **Tab Reordering**: Robust drag-and-drop tab management with save failure guards.
+- **Linter & Problems Panel**: Asynchronous Ruff/flake8/ESLint execution on save with a centralized problems panel.
+- **Integrated Terminal**: Native shell integration (cmd/powershell/bash) with command history and styled outputs.
+- **Project Tree**: File tree with proxy filters, custom context menus, and Git status porcelain overlays.
+- **Minimap & Code Navigation**: Synchronized minimap code preview, bracket auto-closing, and go-to-line navigation.
 - **Theme System**: Fusion palette combined with dynamic light/dark stylesheet configurations.
 
 ## Commands
@@ -28,7 +31,7 @@ Part of the dev-bricks family. Python, MIT.
 - `python main.py`: Launches the CodeBox desktop interface.
 - `python main.py --open <file>`: Launches and directly opens a target file path.
 - `build_exe.bat`: Uses PyInstaller to bundle the application into a standalone executable.
-- `python -m pytest`: Runs the automated test suite.
+- `python -m pytest`: Runs the automated test suite (95 passed, 1 skipped).
 
 ## Related Projects (dev-bricks & ellmos family)
 
@@ -55,9 +58,9 @@ PySide6 code editor with LSP diagnostics
 lightweight IDE no cloud Python
 CodeBox desktop editor tabs terminal
 Python desktop IDE Language Server Protocol
+CodeBox plugin system declarative language
 dev-bricks editor dev tools
 CodeBox local desktop IDE
-PySide6 code editor with LSP diagnostics
 ```
 
 ## External Discovery Notes
@@ -66,4 +69,4 @@ PySide6 code editor with LSP diagnostics
 - Web search showed GitHub organization/topic visibility, but no robust independent external listing for the direct repo yet.
 - The strongest disambiguators are `dev-bricks`, `PySide6`, `local-first`, `Windows desktop IDE`, and `Language Server Protocol`.
 
-## Last-checked: 2026-07-27
+## Last-checked: 2026-08-14

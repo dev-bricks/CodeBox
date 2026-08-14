@@ -6,15 +6,15 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![Platform: Windows](https://img.shields.io/badge/platform-Windows-lightgrey.svg)]()
 [![LSP Ready](https://img.shields.io/badge/LSP-ready-purple.svg)]()
-[![Tests](https://img.shields.io/badge/tests-78%20passed-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-95%20passed-brightgreen.svg)]()
 [![llms.txt](https://img.shields.io/badge/llms.txt-available-green.svg)](llms.txt)
 
 [Deutsch](README_de.md) | English
 
 CodeBox is a local-first desktop IDE for Windows developers who want a
 lightweight PySide6 code editor with tabs, a project tree, an integrated
-terminal, Git helpers, syntax highlighting, and Language Server Protocol
-diagnostics.
+terminal, Git helpers, syntax highlighting, Language Server Protocol
+diagnostics, and an extensible JSON/Python language plugin system.
 
 > [!NOTE]
 > For AI agents and automated discovery, see [llms.txt](llms.txt) for machine-readable context, architecture summaries, and navigation pointers.
@@ -25,6 +25,8 @@ diagnostics.
 | --- | --- |
 | Run the editor from source | `pip install -r requirements.txt` and `python main.py` |
 | Open a file directly | `python main.py --open path/to/file.py` |
+| Manage plugins & languages | `Ctrl+Shift+P` or menu *Edit -> Plugins & Languages...* |
+| View keyboard shortcuts | `F1` or menu *Help -> Keyboard Shortcuts* |
 | Build a local Windows executable | `build_exe.bat` |
 | Add diagnostics or completion | Install a local language server such as `python-lsp-server[all]` |
 | Understand the roadmap | [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) |
@@ -38,7 +40,10 @@ graph TD
     UI --> Tree["Project Tree & Git Status Overlay"]
     UI --> Term["Integrated Terminal (QProcess)"]
     UI --> Theme["Fusion Theme & Dark/Light Styling"]
+    UI --> Plugins["Plugin Manager & Declarative Providers"]
+    UI --> Dialogs["Plugins & Shortcuts Dialogs"]
     Tabs --> LSP["LSP Client & Diagnostics Thread"]
+    Tabs --> Linter["Background Linter & Problems Panel"]
     Tabs --> Storage["File Storage & UTF-8 Encoding"]
     Tree --> Git["Git Status Porcelain Resolver"]
 ```
@@ -47,7 +52,8 @@ graph TD
 
 - Local-first: edit files on your machine without cloud accounts or telemetry.
 - PySide6 desktop stack: native Windows app behavior with a small Python codebase.
-- Multi-language workflow: Python, JavaScript, TypeScript, C++, Rust, Go and Java.
+- Multi-language workflow: Python, JavaScript, TypeScript, C++, Rust, Go, Java, and dynamic plugin languages.
+- Extensible: create new language definitions in minutes via declarative JSON files (`plugins/*.json`).
 - LSP-ready: diagnostics and completion can connect to installed language servers.
 - Dev-bricks ecosystem: companion to PythonBox and DevCenter for small local tools.
 
@@ -58,13 +64,16 @@ graph TD
 ## Features
 
 - Syntax highlighting for Python, JavaScript, TypeScript, C++, Rust, Go, and Java
+- Extensible Plugin System for JSON declarative and Python language providers (`plugins/`, `~/.codebox/plugins/`)
+- Interactive Plugin Manager (`Ctrl+Shift+P`) and Keyboard Shortcuts Reference (`F1`)
 - Integrated terminal with shell selection and command history
 - Project file tree with filtering and context menus
-- Multiple editor tabs, search, and go-to-line navigation
+- Multiple editor tabs, search, minimap preview, and go-to-line navigation
 - Robust tab handling with drag-and-drop reordering and save-failure guards
-- Theme system via `features/theme_manager.py`
+- Theme system via `features/theme_manager.py` with dark/light options
 - Local startup interface: `python main.py --open <path>` (REST and OpenAPI are not implemented)
 - LSP diagnostics and completion for installed language servers
+- Optional Ruff/flake8/ESLint diagnostics triggered after saving, shown in the Problems panel
 
 ## Installation
 
@@ -155,10 +164,12 @@ Already usable:
 
 Open for the next larger expansion:
 
-- Runtime test with an installed LSP server
-- Linter/problems panel
 - Plugin system for additional languages
 - Remote editing over SSH/SFTP
+
+The opt-in LSP runtime test covers Diagnostics, Completion and Hover when
+`python-lsp-server[all]` is installed. Optional linters remain inactive when
+no supported linter is installed.
 
 ## Privacy
 

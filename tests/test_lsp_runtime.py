@@ -22,8 +22,10 @@ class PythonLSPRuntimeTests(unittest.TestCase):
         uri = path.resolve().as_uri()
         diagnostics = []
         completions = []
+        hover_results = []
         diag_event = threading.Event()
         completion_event = threading.Event()
+        hover_event = threading.Event()
 
         def on_diagnostics(params):
             if params.get("uri") != uri:
@@ -40,6 +42,10 @@ class PythonLSPRuntimeTests(unittest.TestCase):
                 for item in items
             ]
             completion_event.set()
+
+        def on_hover(result):
+            hover_results[:] = [result]
+            hover_event.set()
 
         try:
             self.assertTrue(client.start())
@@ -62,6 +68,13 @@ class PythonLSPRuntimeTests(unittest.TestCase):
             client.request_completion(uri, 1, 5, callback=on_completion)
             self.assertTrue(completion_event.wait(10), "No completion response received.")
             self.assertIn("path", {item for item in completions if item})
+
+            hover_text = "import os\nos.path"
+            path.write_text(hover_text, encoding="utf-8")
+            client.did_change(uri, hover_text, version=3)
+            client.request_hover(uri, 1, 3, callback=on_hover)
+            self.assertTrue(hover_event.wait(10), "No hover response received.")
+            self.assertTrue(hover_results, "Hover response was empty.")
         finally:
             client.stop()
 

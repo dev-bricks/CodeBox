@@ -6,14 +6,15 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![Plattform: Windows](https://img.shields.io/badge/platform-Windows-lightgrey.svg)]()
 [![LSP Ready](https://img.shields.io/badge/LSP-ready-purple.svg)]()
-[![Tests](https://img.shields.io/badge/tests-78%20passed-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-95%20passed-brightgreen.svg)]()
 [![llms.txt](https://img.shields.io/badge/llms.txt-available-green.svg)](llms.txt)
 
 [English](README.md) | Deutsch
 
 CodeBox ist eine lokale Desktop-IDE für Windows-Entwickler, die einen leichten
 PySide6-Codeeditor mit Tabs, Projektbaum, integriertem Terminal, Git-Hilfen,
-Syntax-Highlighting und Language-Server-Diagnostics suchen.
+Syntax-Highlighting, Language-Server-Diagnostics und einem erweiterbaren
+JSON/Python-Plugin-System für Sprachen suchen.
 
 > [!NOTE]
 > Für KI-Agenten und die automatische Erfassung steht unter [llms.txt](llms.txt) eine maschinenlesbare Übersicht mit Systemkontext, Architektur-Shortcuts und Modulreferenzen bereit.
@@ -24,6 +25,8 @@ Syntax-Highlighting und Language-Server-Diagnostics suchen.
 | --- | --- |
 | Editor aus dem Quellcode starten | `pip install -r requirements.txt` und `python main.py` |
 | Datei direkt öffnen | `python main.py --open pfad/zur/datei.py` |
+| Plugins & Sprachen verwalten | `Ctrl+Shift+P` oder Menü *Bearbeiten -> Plugins & Sprachen...* |
+| Tastenkürzel einsehen | `F1` oder Menü *Hilfe -> Tastenkürzel-Übersicht* |
 | Lokale Windows-EXE bauen | `build_exe.bat` |
 | Diagnostics oder Completion nutzen | Lokalen Language Server wie `python-lsp-server[all]` installieren |
 | Roadmap verstehen | [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) |
@@ -37,7 +40,10 @@ graph TD
     UI --> Tree["Projektbaum & Git-Status-Overlay"]
     UI --> Term["Integriertes Terminal (QProcess)"]
     UI --> Theme["Fusion-Design & Dark/Light-Styling"]
+    UI --> Plugins["Plugin-Manager & Deklarative Provider"]
+    UI --> Dialogs["Plugins- & Shortcuts-Dialoge"]
     Tabs --> LSP["LSP-Client & Diagnostics-Thread"]
+    Tabs --> Linter["Hintergrund-Linter & Problems-Panel"]
     Tabs --> Storage["Dateispeicher & UTF-8-Kodierung"]
     Tree --> Git["Git-Status-Porcelain-Resolver"]
 ```
@@ -46,7 +52,8 @@ graph TD
 
 - Local-first: Dateien bleiben auf dem eigenen Rechner, ohne Cloudkonto oder Telemetrie.
 - PySide6-Desktop-Stack: native Windows-App mit kleiner Python-Codebasis.
-- Mehrsprachiger Workflow: Python, JavaScript, TypeScript, C++, Rust, Go und Java.
+- Mehrsprachiger Workflow: Python, JavaScript, TypeScript, C++, Rust, Go, Java und dynamische Plugin-Sprachen.
+- Erweiterbar: Eigene Sprachdefinitionen in wenigen Minuten per deklarativem JSON (`plugins/*.json`).
 - LSP-ready: Diagnostics und Completion können an installierte Language Server anbinden.
 - Dev-bricks-Ökosystem: Begleiter zu PythonBox und DevCenter für kleine lokale Tools.
 
@@ -57,13 +64,16 @@ graph TD
 ## Funktionen
 
 - Syntax-Highlighting für Python, JavaScript, TypeScript, C++, Rust, Go und Java
+- Erweiterbares Plugin-System für deklarative JSON- und Python-Sprach-Plugins (`plugins/`, `~/.codebox/plugins/`)
+- Interaktiver Plugin-Manager (`Ctrl+Shift+P`) und Tastenkürzel-Übersicht (`F1`)
 - Integriertes Terminal mit Shell-Auswahl und History
 - Projekt-Dateibaum mit Filter und Kontextmenü
-- Mehrere Tabs, Suchfunktion und Gehe-zu-Zeile
+- Mehrere Tabs, Suchfunktion, Minimap-Vorschau und Gehe-zu-Zeile
 - Robuste Tab-Verwaltung mit Drag-and-drop-Reordering und Save-Failure-Guards
-- Theme-System über `features/theme_manager.py`
+- Theme-System über `features/theme_manager.py` mit Dark/Light-Unterstützung
 - Lokale Startschnittstelle: `python main.py --open <pfad>` (REST und OpenAPI sind nicht implementiert)
 - LSP-Diagnostics und Completion-Anbindung für installierte Language Server
+- Optionale Ruff-/flake8-/ESLint-Diagnosen nach dem Speichern im Problems-Panel
 
 ## Installation
 
@@ -130,9 +140,10 @@ Stabil nutzbar sind der mehrsprachige Editor, Projektbaum und Terminal,
 Fenstertitel über `version.py`, Light-/Dark-Theme-Wechsel und robuste
 Speichern-/Schließen-/Ausführen-Flows.
 
-Offen für die nächste Ausbaustufe sind Runtime-Tests mit installiertem
-LSP-Server, ein Linter-/Problems-Panel, ein Plugin-System für weitere Sprachen
-und Remote Editing über SSH/SFTP.
+Offen für die nächste Ausbaustufe sind ein Plugin-System für weitere Sprachen
+und Remote Editing über SSH/SFTP. Der optionale LSP-Runtime-Test deckt
+Diagnostics, Completion und Hover mit installiertem `python-lsp-server[all]`
+ab; ohne unterstützten Linter bleibt die Speichern-Funktion unverändert.
 
 ## Datenschutz
 

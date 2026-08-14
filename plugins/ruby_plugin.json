@@ -1,0 +1,43 @@
+{
+  "name": "Ruby",
+  "version": "1.0.0",
+  "author": "CodeBox Community",
+  "description": "Sprachunterstützung für Ruby und Rake-Skripte",
+  "extensions": ["rb", "rake"],
+  "keywords": [
+    "alias", "and", "begin", "break", "case", "class", "def", "defined?",
+    "do", "else", "elsif", "end", "ensure", "false", "for", "if", "in",
+    "module", "next", "nil", "not", "or", "redo", "rescue", "retry",
+    "return", "self", "super", "then", "true", "undef", "unless",
+    "until", "when", "while", "yield"
+  ],
+  "builtins": [
+    "puts", "print", "p", "gets", "require", "require_relative", "raise",
+    "attr_accessor", "attr_reader", "attr_writer", "include", "extend",
+    "lambda", "proc", "loop", "fail", "catch", "throw"
+  ],
+  "snippets": {
+    "def": "def method_name(args)\n  \nend",
+    "class": "class ClassName\n  def initialize\n    \n  end\nend",
+    "if": "if condition\n  \nend",
+    "each": "items.each do |item|\n  \nend"
+  },
+  "run_command": ["ruby", "{file}"],
+  "debug_command": null,
+  "linter_command": ["rubocop", "{file}"],
+  "comment_style": ["#", ["=begin", "=end"]],
+  "bracket_pairs": {
+    "(": ")",
+    "[": "]",
+    "{": "}"
+  },
+  "auto_close_pairs": {
+    "(": ")",
+    "[": "]",
+    "{": "}",
+    "\"": "\"",
+    "'": "'"
+  },
+  "indent_triggers": ["def", "class", "module", "do", "if", "unless", "case"],
+  "dedent_triggers": ["end", "else", "elsif", "rescue", "ensure"]
+}

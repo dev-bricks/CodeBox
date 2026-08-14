@@ -9,15 +9,27 @@ from PySide6.QtWidgets import (
     QMessageBox, QTabWidget
 )
 from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QTextCursor
 
 from core.tabs import TabWidget
 from core.output import OutputPanel
 from features.terminal import TerminalWidget
 from features.project_view import ProjectView
-from languages import get_provider_for_extension, get_provider_by_name, get_all_providers
+from languages import (
+    get_provider_for_extension,
+    get_provider_by_name,
+    get_all_providers,
+    add_provider_listener,
+    remove_provider_listener,
+)
 from features.lsp_client import LSPManager
-from version import format_window_title
-from config import load_settings, save_settings
+from features.linter import LinterManager
+from features.plugin_manager import PluginManager
+from ui.problems_panel import ProblemsPanel
+from ui.plugins_dialog import PluginsDialog
+from ui.shortcuts_dialog import ShortcutsDialog
+from version import format_window_title, APP_VERSION
+from config import load_settings
 
 
 class MainWindow(QMainWindow):
@@ -33,8 +45,16 @@ class MainWindow(QMainWindow):
         self.setGeometry(100, 100, 1200, 800)
         self._lsp_manager = LSPManager()
         self._lsp_tabs_by_uri = {}
+        self._linter_manager = LinterManager(self)
+        self._problems_by_tab = {}
         self.lspDiagnosticsReceived.connect(self._apply_lsp_diagnostics)
         self.lspCompletionsReceived.connect(self._apply_lsp_completions)
+        self._linter_manager.lintFinished.connect(self._apply_linter_results)
+
+        # Plugin-Manager & Auto-Discovery
+        self._plugin_manager = PluginManager()
+        self._plugin_manager.discover_and_load_all()
+        add_provider_listener(self._on_providers_updated)
 
         self.setup_ui()
         self.setup_shortcuts()
@@ -59,8 +79,8 @@ class MainWindow(QMainWindow):
         edit_menu.addAction("Suchen", self._find, "Ctrl+F")
         edit_menu.addAction("Gehe zu Zeile", self._goto_line, "Ctrl+G")
         edit_menu.addSeparator()
+        edit_menu.addAction("Plugins & Sprachen...", self.open_plugins_dialog, "Ctrl+Shift+P")
         edit_menu.addAction("Einstellungen...", self.open_settings_dialog, "Ctrl+,")
-
 
         run_menu = menubar.addMenu("Ausführen")
         run_menu.addAction("Ausführen", self.run_current, "F5")
@@ -102,6 +122,13 @@ class MainWindow(QMainWindow):
                 lambda checked=False, t=theme_name: apply_theme(QApplication.instance(), t)
             )
 
+        # ---- Hilfe-Menü ----
+        help_menu = menubar.addMenu("Hilfe")
+        help_menu.addAction("Tastenkürzel-Übersicht", self.open_shortcuts_dialog, "F1")
+        help_menu.addAction("Plugins & Sprachen...", self.open_plugins_dialog)
+        help_menu.addSeparator()
+        help_menu.addAction("Über CodeBox...", self._about_dialog)
+
         # ---- Central Widget ----
         central = QWidget()
         self.setCentralWidget(central)
@@ -132,6 +159,10 @@ class MainWindow(QMainWindow):
 
         self.terminal = TerminalWidget()
         self.bottom_tabs.addTab(self.terminal, "Terminal")
+
+        self.problems = ProblemsPanel()
+        self.problems.problemActivated.connect(self._activate_problem)
+        self.bottom_tabs.addTab(self.problems, "Probleme")
 
         self.v_splitter.addWidget(self.bottom_tabs)
         self.v_splitter.setSizes([600, 200])
@@ -260,9 +291,10 @@ class MainWindow(QMainWindow):
             start = diagnostic.get("range", {}).get("start", {})
             errors.append({
                 "line": start.get("line", 0) + 1,
-                "col": start.get("character", 0),
+                "col": start.get("character", 0) + 1,
                 "message": diagnostic.get("message", ""),
                 "severity": severity_map.get(diagnostic.get("severity", 1), "error"),
+                "source": "LSP",
             })
         self.lspDiagnosticsReceived.emit(tab, errors)
 
@@ -283,7 +315,74 @@ class MainWindow(QMainWindow):
 
     def _apply_lsp_diagnostics(self, tab, errors):
         if self._is_live_tab(tab):
-            tab.editor.set_linter_errors(errors)
+            tab._lsp_errors = list(errors or [])
+            self._refresh_problems(tab)
+
+    def _apply_linter_results(self, tab, file_path, token, errors):
+        """Apply an asynchronous save-triggered linter result if still current."""
+        if not self._is_live_tab(tab):
+            return
+        current_path = getattr(tab, "file_path", None)
+        if not current_path or Path(current_path).resolve() != Path(file_path).resolve():
+            return
+        if token != getattr(tab, "_linter_token", token):
+            return
+        tab._lint_errors = list(errors or [])
+        self._refresh_problems(tab)
+
+    def _refresh_problems(self, changed_tab=None):
+        """Refresh gutter markers and the combined Problems panel."""
+        all_problems = []
+        live_tabs = []
+        for idx in range(self.tab_widget.count()):
+            tab = self.tab_widget.tabs.get(idx)
+            if not tab:
+                continue
+            live_tabs.append(tab)
+            problems = []
+            file_path = str(getattr(tab, "file_path", "") or "")
+            for item in list(getattr(tab, "_lsp_errors", []) or []) + list(getattr(tab, "_lint_errors", []) or []):
+                normalized = dict(item)
+                normalized.setdefault("path", file_path)
+                normalized.setdefault("source", "LSP")
+                normalized["tab"] = tab
+                problems.append(normalized)
+            tab.editor.set_linter_errors(problems)
+            self._problems_by_tab[tab] = problems
+            all_problems.extend(problems)
+        for tab in list(self._problems_by_tab):
+            if tab not in live_tabs:
+                self._problems_by_tab.pop(tab, None)
+        if hasattr(self, "problems"):
+            self.problems.set_problems(all_problems)
+
+    def _activate_problem(self, problem):
+        """Select the owning tab and place the cursor at a problem."""
+        tab = problem.get("tab") if isinstance(problem, dict) else None
+        if not tab or not self._is_live_tab(tab):
+            path = problem.get("path") if isinstance(problem, dict) else None
+            tab = next((
+                self.tab_widget.tabs.get(idx)
+                for idx in range(self.tab_widget.count())
+                if self.tab_widget.tabs.get(idx)
+                and str(self.tab_widget.tabs[idx].file_path or "") == str(path or "")
+            ), None)
+        if not tab:
+            return
+        for idx in range(self.tab_widget.count()):
+            if self.tab_widget.tabs.get(idx) is tab:
+                self.tab_widget.setCurrentIndex(idx)
+                break
+        line = max(1, int(problem.get("line", 1)))
+        col = max(1, int(problem.get("col", 1)))
+        block = tab.editor.document().findBlockByNumber(line - 1)
+        if not block.isValid():
+            return
+        cursor = tab.editor.textCursor()
+        cursor.setPosition(block.position() + min(col - 1, len(block.text())))
+        tab.editor.setTextCursor(cursor)
+        tab.editor.centerCursor()
+        tab.editor.setFocus()
 
     def _apply_lsp_completions(self, tab, words):
         if not self._is_live_tab(tab):
@@ -362,9 +461,23 @@ class MainWindow(QMainWindow):
         self.output.run_btn.setEnabled(bool(tab.provider))
         if tab.file_path and tab.provider and not getattr(tab, "_lsp_client", None):
             self._connect_lsp(tab, tab.file_path)
-        # LSP: didSave melden
-        if hasattr(tab, '_lsp_client') and tab._lsp_client:
+        self._after_tab_saved(tab)
+
+    def _after_tab_saved(self, tab):
+        """Notify LSP and run the optional linter after a successful save."""
+        if not tab or not tab.file_path:
+            return
+        if tab.provider and not getattr(tab, "_lsp_client", None):
+            self._connect_lsp(tab, tab.file_path)
+        if getattr(tab, "_lsp_client", None):
             tab._lsp_client.did_save(tab._lsp_uri, tab.editor.toPlainText())
+        if tab.provider:
+            tab._linter_token = self._linter_manager.lint(
+                tab, tab.provider.get_name(), tab.file_path
+            )
+        else:
+            tab._lint_errors = []
+            self._refresh_problems(tab)
 
     # ---- Bearbeiten-Aktionen ----
 
@@ -389,7 +502,6 @@ class MainWindow(QMainWindow):
 
     def _goto_line(self):
         from PySide6.QtWidgets import QInputDialog
-        from PySide6.QtGui import QTextCursor
         tab = self.tab_widget.current_tab()
         if not tab:
             return
@@ -401,6 +513,27 @@ class MainWindow(QMainWindow):
             cursor.movePosition(QTextCursor.Start)
             tab.editor.setTextCursor(cursor)
             tab.editor.centerCursor()
+
+    def open_plugins_dialog(self):
+        """Öffnet den Dialog zur Verwaltung von Plugins und Sprachen."""
+        dialog = PluginsDialog(self._plugin_manager, self)
+        dialog.exec()
+
+    def open_shortcuts_dialog(self):
+        """Öffnet die Tastenkürzel-Übersicht."""
+        dialog = ShortcutsDialog(self)
+        dialog.exec()
+
+    def _about_dialog(self):
+        """Zeigt Informationen über CodeBox an."""
+        QMessageBox.about(
+            self,
+            "Über CodeBox",
+            f"<b>CodeBox IDE v{APP_VERSION}</b><br><br>"
+            "Eine moderne, leichtgewichtige Multi-Language IDE mit Unterstützung für "
+            "Python, JavaScript, TypeScript, C/C++, Rust, Go, Java und erweiterbare Sprach-Plugins.<br><br>"
+            "Features: LSP-Unterstützung, Linter, Terminal, Projektbaum, Minimap und Plugin-System."
+        )
 
     def open_settings_dialog(self):
         """Öffnet den Einstellungsdialog und übernimmt geänderte Optionen."""
@@ -443,6 +576,7 @@ class MainWindow(QMainWindow):
         # Automatisch speichern vor dem Ausführen
         if not tab.save():
             return
+        self._after_tab_saved(tab)
         if tab.provider:
             cmd = tab.provider.get_run_command(str(tab.file_path))
             self.output.run_command(cmd)
@@ -527,7 +661,26 @@ class MainWindow(QMainWindow):
             self.bottom_tabs.setCurrentWidget(self.terminal)
             self.terminal.input.setFocus()
 
+    def _on_providers_updated(self):
+        """Aktualisiert die Sprachauswahl in der Toolbar bei Registry-Änderungen."""
+        if not hasattr(self, "lang_combo"):
+            return
+        current = self.lang_combo.currentText()
+        self.lang_combo.blockSignals(True)
+        self.lang_combo.clear()
+        self.lang_combo.addItem("(Auto)")
+        for p in get_all_providers():
+            self.lang_combo.addItem(p.get_name())
+        idx = self.lang_combo.findText(current)
+        if idx >= 0:
+            self.lang_combo.setCurrentIndex(idx)
+        else:
+            self.lang_combo.setCurrentIndex(0)
+        self.lang_combo.blockSignals(False)
+
     def closeEvent(self, event):
+        # Listener entfernen
+        remove_provider_listener(self._on_providers_updated)
         # Alle Tabs auf ungespeicherte Änderungen prüfen
         unsaved = []
         for idx in range(self.tab_widget.count()):
@@ -548,5 +701,6 @@ class MainWindow(QMainWindow):
         if hasattr(self, 'terminal'):
             self.terminal.close()
         # LSP-Server stoppen
+        self._linter_manager.stop_all()
         self._lsp_manager.stop_all()
         event.accept()

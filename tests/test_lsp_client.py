@@ -86,7 +86,6 @@ class LSPClientStopRobustnessTests(unittest.TestCase):
         """_reader_thread.join() muss aufgerufen werden, auch wenn der Prozess
         beim Warten auf das Ende beide Male TimeoutExpired wirft."""
         import subprocess
-        import threading
         import types
 
         client = LSPClient("Python")

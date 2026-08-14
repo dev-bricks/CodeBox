@@ -1,7 +1,7 @@
 """Regressionstests für GitFileStatus-Parsing in features/git_integration.py."""
 import unittest
 
-from features.git_integration import GitRepo, GitFileStatus, parse_porcelain_path
+from features.git_integration import GitFileStatus, parse_porcelain_path
 
 
 def _make_status(x: str, y: str, path: str = "file.py") -> GitFileStatus:

@@ -3,7 +3,7 @@
 """Settings Dialog for CodeBox"""
 
 from PySide6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QFormLayout, QLabel,
+    QDialog, QVBoxLayout, QFormLayout, QLabel,
     QSpinBox, QCheckBox, QComboBox, QDialogButtonBox, QFontComboBox
 )
 from PySide6.QtGui import QFont

@@ -13,6 +13,27 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [Unreleased]
 
+### Plugin-System, Deklarative Sprachen & Shortcuts-Dialog (2026-08-14)
+
+- `features/plugin_manager.py`: Neuer Plugin-Manager für automatische Entdeckung und Verwaltung von benutzerdefinierten und projektweiten Sprach-Plugins (`plugins/`, `~/.codebox/plugins/`).
+- `languages/declarative.py`: `DeclarativeLanguageProvider` ermöglicht das Definieren vollständiger Sprachunterstützung (Keywords, Builtins, Snippets, Run-/Debug-Commands, Comment-Styles, Auto-Close-Paare und Indent-Trigger) über schlanke JSON-Dateien ohne Python-Code.
+- `languages/__init__.py`: Dynamische Provider-Registrierung (`register_provider`, `unregister_provider`, `reset_providers`) mit Listener-Pattern (`add_provider_listener`, `remove_provider_listener`) für reaktive Toolbar- und Editor-Aktualisierung.
+- `ui/plugins_dialog.py`: Neuer interaktiver Plugin- & Sprachverwaltungs-Dialog (`Ctrl+Shift+P` / Menü *Bearbeiten* & *Hilfe*) mit Tabellenansicht, Detailinspektion, Template-Generator und Schnellumschaltung.
+- `ui/shortcuts_dialog.py`: Neuer interaktiver Shortcuts-Dialog (`F1` / Menü *Hilfe*) mit Such- und Filterleiste über alle Tastenkombinationen.
+- `plugins/lua_plugin.json` & `plugins/ruby_plugin.json`: Beispielhafte deklarative Sprach-Plugins für Lua und Ruby integriert.
+- `tests/test_plugin_system.py`: Umfassende Testsuite mit 8 neuen Unit-Tests für Provider-Registrierung, Declarative-Parsing, Plugin-Manager-Laden/Entladen, Dialog-UI und Window-Events.
+- Testsuite auf 95 bestandene Tests ausgebaut (100% grün).
+
+### LSP, Linter und Problems-Panel (2026-08-11)
+
+- `tests/test_lsp_runtime.py` verifiziert die optionale Python-LSP-Integration
+  mit Diagnostics, Completion und Hover gegen `python-lsp-server[all]`.
+- `features/linter.py` erkennt optionale Ruff-/flake8-/ESLint-Installationen,
+  normalisiert deren Befunde und führt sie nach dem Speichern außerhalb des
+  UI-Threads aus.
+- `ui/problems_panel.py` zeigt LSP- und Linter-Befunde gemeinsam an und springt
+  per Doppelklick zur betroffenen Datei-/Zeilenposition.
+
 ### Build-Verifikation (2026-07-28)
 
 - TASKPLAN-Bündel `deep/easy`, Task #1288: `build_exe.bat` mit

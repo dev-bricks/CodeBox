@@ -1,0 +1,43 @@
+{
+  "name": "Lua",
+  "version": "1.0.0",
+  "author": "CodeBox Community",
+  "description": "Leichtgewichtige Sprachunterstützung für Lua",
+  "extensions": ["lua"],
+  "keywords": [
+    "and", "break", "do", "else", "elseif", "end", "false", "for",
+    "function", "goto", "if", "in", "local", "nil", "not", "or",
+    "repeat", "return", "then", "true", "until", "while"
+  ],
+  "builtins": [
+    "assert", "collectgarbage", "dofile", "error", "_G", "getmetatable",
+    "ipairs", "load", "loadfile", "next", "pairs", "pcall", "print",
+    "rawequal", "rawget", "rawlen", "rawset", "require", "select",
+    "setmetatable", "tonumber", "tostring", "type", "_VERSION", "xpcall",
+    "string", "table", "math", "io", "os", "debug", "utf8", "coroutine"
+  ],
+  "snippets": {
+    "fn": "local function name(args)\n    \nend",
+    "if": "if condition then\n    \nend",
+    "for": "for i = 1, #items do\n    \nend",
+    "forp": "for k, v in pairs(table) do\n    \nend"
+  },
+  "run_command": ["lua", "{file}"],
+  "debug_command": null,
+  "linter_command": ["luacheck", "{file}"],
+  "comment_style": ["--", ["--[[", "--]]"]],
+  "bracket_pairs": {
+    "(": ")",
+    "[": "]",
+    "{": "}"
+  },
+  "auto_close_pairs": {
+    "(": ")",
+    "[": "]",
+    "{": "}",
+    "\"": "\"",
+    "'": "'"
+  },
+  "indent_triggers": ["then", "do", "function", "repeat", "else", "elseif"],
+  "dedent_triggers": ["end", "until", "else", "elseif"]
+}

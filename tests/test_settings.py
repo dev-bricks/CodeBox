@@ -3,7 +3,6 @@
 """Unit-Tests für CodeBox Einstellungs-Persistenz und Dialog (TW-CB-05)"""
 
 import pytest
-from pathlib import Path
 from PySide6.QtWidgets import QApplication
 
 from config import DEFAULT_SETTINGS, load_settings, save_settings

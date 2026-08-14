@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import warnings
-from pathlib import Path
 from unittest.mock import Mock, patch
 
 from PySide6.QtWidgets import QApplication, QMessageBox
@@ -194,7 +193,7 @@ def test_connect_cursor_emits_no_runtime_warning_on_reconnect():
 
     runtime_warnings = [w for w in caught if issubclass(w.category, RuntimeWarning)]
     assert not runtime_warnings, (
-        f"_connect_cursor() hat unerwartete RuntimeWarnings ausgelöst: "
+        "_connect_cursor() hat unerwartete RuntimeWarnings ausgelöst: "
         + ", ".join(str(w.message) for w in runtime_warnings)
     )
     assert hasattr(tab, "_cursor_slot"), "_cursor_slot muss nach _connect_cursor gesetzt sein"

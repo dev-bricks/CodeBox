@@ -1,8 +1,7 @@
 """Regressionstests für ProjectView und Pfadsync im Hauptfenster."""
-from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
-from PySide6.QtWidgets import QApplication, QMessageBox
+from PySide6.QtWidgets import QApplication
 
 from features.project_view import ProjectView
 from ui.main_window import MainWindow
