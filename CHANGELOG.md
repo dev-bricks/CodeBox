@@ -11,7 +11,15 @@
 Alle wesentlichen Änderungen an CodeBox werden hier dokumentiert.
 Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
-## [Unreleased]
+## [0.1.2] - 2026-08-16
+
+### Technische Hygiene, Metadaten & Discoverability (2026-08-16)
+
+- `tests/test_metadata.py`: Automatisierte Metadaten-, Manifest- und Plugin-Integritätstestsuite ergänzt (Version-Parität `pyproject.toml`, `version.py`, `CHANGELOG.md`, Required-Fields, Core-Docs, Plugin-JSON-Validierung).
+- `version.py`: Version und `__version__` auf `0.1.2` synchronisiert.
+- `pyproject.toml`: Version auf `0.1.2` aktualisiert.
+- `README.md` & `README_de.md`: Shields.io Badges um `dev-bricks` Ecosystem- und `open-bricks` Umbrella-Zugehörigkeit sowie aktualisierten Teststatus (99 passed, 1 skipped) erweitert.
+- `llms.txt`: Last-checked Zeitstempel auf `2026-08-16` und Teststand synchronisiert.
 
 ### Plugin-System, Deklarative Sprachen & Shortcuts-Dialog (2026-08-14)
 
@@ -22,7 +30,7 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - `ui/shortcuts_dialog.py`: Neuer interaktiver Shortcuts-Dialog (`F1` / Menü *Hilfe*) mit Such- und Filterleiste über alle Tastenkombinationen.
 - `plugins/lua_plugin.json` & `plugins/ruby_plugin.json`: Beispielhafte deklarative Sprach-Plugins für Lua und Ruby integriert.
 - `tests/test_plugin_system.py`: Umfassende Testsuite mit 8 neuen Unit-Tests für Provider-Registrierung, Declarative-Parsing, Plugin-Manager-Laden/Entladen, Dialog-UI und Window-Events.
-- Testsuite auf 95 bestandene Tests ausgebaut (100% grün).
+- Testsuite auf 99 bestandene Tests ausgebaut (100% grün).
 
 ### LSP, Linter und Problems-Panel (2026-08-11)
 
