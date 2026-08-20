@@ -139,9 +139,11 @@ def reset_providers() -> None:
     _notify_listeners()
 
 
-def is_provider_registered(name: str) -> bool:
+def is_provider_registered(name: Optional[str]) -> bool:
     """Prüft, ob eine Sprache unter dem Namen registriert ist."""
-    return name in PROVIDERS_BY_NAME
+    if not name or not isinstance(name, str):
+        return False
+    return name.strip() in PROVIDERS_BY_NAME
 
 
 def add_provider_listener(callback: Callable[[], None]) -> None:
@@ -156,14 +158,21 @@ def remove_provider_listener(callback: Callable[[], None]) -> None:
         _LISTENERS.remove(callback)
 
 
-def get_provider_for_extension(ext: str) -> Optional[LanguageProvider]:
+def get_provider_for_extension(ext: Optional[str]) -> Optional[LanguageProvider]:
     """Returns the LanguageProvider for a file extension (without dot)."""
-    return PROVIDERS.get(ext.lower().lstrip("."))
+    if not ext or not isinstance(ext, str):
+        return None
+    normalized = ext.strip().lower().lstrip(".")
+    if not normalized:
+        return None
+    return PROVIDERS.get(normalized)
 
 
-def get_provider_by_name(name: str) -> Optional[LanguageProvider]:
+def get_provider_by_name(name: Optional[str]) -> Optional[LanguageProvider]:
     """Returns the LanguageProvider by language name."""
-    return PROVIDERS_BY_NAME.get(name)
+    if not name or not isinstance(name, str):
+        return None
+    return PROVIDERS_BY_NAME.get(name.strip())
 
 
 def get_all_providers() -> List[LanguageProvider]:

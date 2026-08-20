@@ -27,31 +27,43 @@ class UniversalHighlighter(QSyntaxHighlighter):
             self._build_rules()
         self.rehighlight()
 
+    @staticmethod
+    def _keyword_pattern(word: str) -> str:
+        """Erzeugt ein sicheres Regex-Muster mit passenden Wortgrenzen für Keywords."""
+        prefix = r'\b' if re.match(r'^\w', word) else r'(?<!\S)'
+        suffix = r'\b' if re.search(r'\w$', word) else r'(?!\w)'
+        return f"{prefix}{re.escape(word)}{suffix}"
+
     def _build_rules(self):
         """Erstellt Highlighting-Regeln aus dem Provider"""
         self.highlighting_rules = []
+        if not self.provider:
+            return
 
         # Keywords (Blau, Fett)
         kw_fmt = QTextCharFormat()
         kw_fmt.setForeground(QColor(86, 156, 214))
         kw_fmt.setFontWeight(QFont.Weight.Bold)
         for word in self.provider.get_keywords():
-            self.highlighting_rules.append(
-                (QRegularExpression(r'\b' + word + r'\b'), kw_fmt)
-            )
+            if word:
+                self.highlighting_rules.append(
+                    (QRegularExpression(self._keyword_pattern(word)), kw_fmt)
+                )
 
         # Builtins (Gelb)
         bi_fmt = QTextCharFormat()
         bi_fmt.setForeground(QColor(220, 220, 170))
         for word in self.provider.get_builtins():
-            self.highlighting_rules.append(
-                (QRegularExpression(r'\b' + word + r'\b'), bi_fmt)
-            )
+            if word:
+                self.highlighting_rules.append(
+                    (QRegularExpression(self._keyword_pattern(word)), bi_fmt)
+                )
 
         # Decorators / Preprocessor (Lila)
         dec_fmt = QTextCharFormat()
         dec_fmt.setForeground(QColor(189, 147, 249))
-        comment_char = self.provider.get_comment_style()[0]
+        comment_style = self.provider.get_comment_style()
+        comment_char = comment_style[0] if (comment_style and len(comment_style) > 0) else ""
         if comment_char == '#':
             self.highlighting_rules.append(
                 (QRegularExpression(r'@[^\n]+'), dec_fmt)

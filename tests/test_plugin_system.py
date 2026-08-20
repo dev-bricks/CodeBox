@@ -261,3 +261,90 @@ def test_main_window_updates_on_provider_change(qapp):
     assert window.lang_combo.findText("CustomLang") == -1
 
     window.close()
+
+
+def test_highlighter_keyword_escaping_and_boundaries(qapp):
+    from PySide6.QtGui import QTextDocument
+    from core.highlighter import UniversalHighlighter
+    from pathlib import Path
+
+    ruby_json = Path(__file__).resolve().parent.parent / "plugins" / "ruby_plugin.json"
+    assert ruby_json.exists()
+    provider = DeclarativeLanguageProvider.from_json_file(ruby_json)
+
+    doc = QTextDocument()
+    hl = UniversalHighlighter(doc, provider)
+    doc.setPlainText("if defined? x\n  define = 1\nend")
+
+    # Prüfe Zeile 2: '  define = 1'
+    # 'define' darf NICHT als Keyword 'defined?' gematcht werden
+    block2 = doc.findBlockByLineNumber(1)
+    for r, fmt in hl.highlighting_rules:
+        it = r.globalMatch(block2.text())
+        while it.hasNext():
+            m = it.next()
+            assert m.captured() != "define", "Variable 'define' must not match 'defined?'"
+
+    # Prüfe Zeile 1: 'if defined? x' -> 'defined?' muss vollständig matchen
+    block1 = doc.findBlockByLineNumber(0)
+    matched_keywords = []
+    for r, fmt in hl.highlighting_rules:
+        it = r.globalMatch(block1.text())
+        while it.hasNext():
+            m = it.next()
+            matched_keywords.append(m.captured())
+    assert "defined?" in matched_keywords
+    assert "if" in matched_keywords
+
+
+def test_declarative_comment_style_variations():
+    # String format
+    p1 = DeclarativeLanguageProvider.from_dict({"name": "Lang1", "extensions": ["l1"], "comment_style": "#"})
+    assert p1.get_comment_style() == ("#", None)
+
+    # 1-Element list
+    p2 = DeclarativeLanguageProvider.from_dict({"name": "Lang2", "extensions": ["l2"], "comment_style": ["--"]})
+    assert p2.get_comment_style() == ("--", None)
+
+    # Flat 3-element list
+    p3 = DeclarativeLanguageProvider.from_dict({
+        "name": "Lang3", "extensions": ["l3"], "comment_style": ["--", "--[[", "--]]"]
+    })
+    assert p3.get_comment_style() == ("--", ("--[[", "--]]"))
+
+    # Dict format without multi
+    p4 = DeclarativeLanguageProvider.from_dict({
+        "name": "Lang4", "extensions": ["l4"], "comment_style": {"single": ";"}
+    })
+    assert p4.get_comment_style() == (";", None)
+
+
+def test_safe_provider_lookups():
+    assert get_provider_for_extension(None) is None
+    assert get_provider_for_extension("") is None
+    assert get_provider_for_extension("   ") is None
+    assert get_provider_by_name(None) is None
+    assert get_provider_by_name("") is None
+    assert is_provider_registered(None) is False
+    assert is_provider_registered("") is False
+
+
+def test_plugin_manager_cleanup_on_vanished_file(tmp_path):
+    mgr = PluginManager(plugin_dirs=[tmp_path])
+    json_plugin = tmp_path / "temp_plugin.json"
+    json_plugin.write_text(json.dumps({
+        "name": "TempLang",
+        "extensions": ["tmpl"],
+        "keywords": ["test"],
+    }), encoding="utf-8")
+
+    loaded = mgr.discover_and_load_all()
+    assert len(loaded) == 1
+    assert is_provider_registered("TempLang")
+
+    # Datei löschen und erneut scannen
+    json_plugin.unlink()
+    loaded_after = mgr.discover_and_load_all()
+    assert len(loaded_after) == 0
+    assert not is_provider_registered("TempLang")
+

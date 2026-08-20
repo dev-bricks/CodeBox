@@ -13,6 +13,15 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [0.1.2] - 2026-08-16
 
+### Bugfixes & Plugin-Resilienz (2026-08-20)
+
+- `core/highlighter.py`: Regex-Mustererstellung in `UniversalHighlighter` (`_keyword_pattern`) gehärtet, sodass Keywords und Builtins mit Satzzeichen/Metazeichen (z.B. Rubys `defined?` oder C++-Symbole) mit `re.escape()` maskiert und mit sicheren Wortgrenzen gematcht werden. Verhindert Fehl-Highlighting von Variablennamen (`define`) und unvollständiges Keyword-Highlighting.
+- `languages/declarative.py`: Parsing von `comment_style` in `DeclarativeLanguageProvider.from_dict` erweitert, sodass Einzelstring- (`#`), 1-Element-Listen (`["--"]`), 3-Element-Flachlisten (`["--", "--[[", "--]]"]`) und Dictionary-Formate deterministisch ausgewertet werden.
+- `features/plugin_manager.py`: `discover_and_load_all()` bereinigt gelöschte Plugin-Dateien beim Re-Scan; `_load_python_plugin()` registriert Provider aus `PluginInfo`-Rückgaben von `setup()` ab.
+- `languages/__init__.py`: Null- und Whitespace-Sicherheit für `get_provider_for_extension`, `get_provider_by_name` und `is_provider_registered`.
+- `ui/plugins_dialog.py`: Abbruch-Verhalten bei Vorlagenerstellung korrigiert; Detailanzeige gegen leere Provider-Felder abgesichert.
+- `tests/test_plugin_system.py`: 4 neue Testsuiten für Keyword-Escaping, Kommentarstil-Variationen, Provider-Lookups und Plugin-Dateibereinigung (103 passed, 1 skipped).
+
 ### Technische Hygiene, Metadaten & Discoverability (2026-08-16)
 
 - `tests/test_metadata.py`: Automatisierte Metadaten-, Manifest- und Plugin-Integritätstestsuite ergänzt (Version-Parität `pyproject.toml`, `version.py`, `CHANGELOG.md`, Required-Fields, Core-Docs, Plugin-JSON-Validierung).

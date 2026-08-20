@@ -177,15 +177,22 @@ class PluginsDialog(QDialog):
             kw_count = len(provider.get_keywords())
             bi_count = len(provider.get_builtins())
             snip_count = len(provider.get_snippets())
-            run_cmd = " ".join(provider.get_run_command("beispiel.ext"))
+            run_cmd_list = provider.get_run_command("beispiel.ext")
+            run_cmd = " ".join(str(part) for part in run_cmd_list) if run_cmd_list else "-"
             comment = provider.get_comment_style()
+            comment_single = comment[0] if (comment and len(comment) > 0 and comment[0]) else "-"
+            comment_multi = (
+                f"{comment[1][0]} ... {comment[1][1]}"
+                if (comment and len(comment) > 1 and comment[1] and len(comment[1]) >= 2)
+                else "Keine"
+            )
 
             lines = [
                 f"<b>Sprache:</b> {name}",
                 f"<b>Dateiendungen:</b> {exts}",
                 f"<b>Keywords:</b> {kw_count} | <b>Built-ins:</b> {bi_count} | <b>Snippets:</b> {snip_count}",
                 f"<b>Ausführen-Befehl:</b> <code>{run_cmd}</code>",
-                f"<b>Kommentar-Zeichen:</b> <code>{comment[0]}</code>",
+                f"<b>Kommentar-Zeichen:</b> <code>{comment_single}</code> (Mehrzeilig: <code>{comment_multi}</code>)",
             ]
             if plugin_info:
                 if plugin_info.description:
@@ -239,9 +246,14 @@ class PluginsDialog(QDialog):
         ext, ok = QInputDialog.getText(
             self, "Dateiendungen", f"Dateiendungen für {name} kommagetrennt (z.B. {name.lower()}, {name.lower()}s):"
         )
-        if not ok or not ext.strip():
-            ext = name.lower()
-        extensions = [e.strip().lstrip(".") for e in ext.split(",") if e.strip()]
+        if not ok:
+            return
+        if not ext.strip():
+            extensions = [name.lower()]
+        else:
+            extensions = [e.strip().lstrip(".") for e in ext.split(",") if e.strip()]
+        if not extensions:
+            extensions = [name.lower()]
 
         try:
             primary_dir = self.plugin_manager.get_primary_plugin_dir()

@@ -99,7 +99,15 @@ class PluginManager:
     def discover_and_load_all(self) -> List[PluginInfo]:
         """
         Durchsucht alle konfigurierten Verzeichnisse nach .json- und .py-Plugins.
+        Bereinigt zuvor geladene Plugins, deren Dateien nicht mehr existieren.
         """
+        # Vorhandene Plugin-Dateien auf Existenz prüfen und gelöschte bereinigen
+        for name, info in list(self._plugins.items()):
+            if info.file_path and not Path(info.file_path).exists():
+                self.unload_plugin(name)
+                self._plugins.pop(name, None)
+                self._failed_plugins.pop(info.file_path, None)
+
         loaded = []
         for directory in self._plugin_dirs:
             if directory.exists() and directory.is_dir():
@@ -186,7 +194,12 @@ class PluginManager:
                 if isinstance(setup_res, LanguageProvider):
                     provider = setup_res
                 elif isinstance(setup_res, PluginInfo):
+                    if setup_res.provider:
+                        register_provider(setup_res.provider, override=True)
+                    if not setup_res.file_path:
+                        setup_res.file_path = str(file_path)
                     self._plugins[setup_res.name] = setup_res
+                    self._failed_plugins.pop(str(file_path), None)
                     return setup_res
                 else:
                     provider = getattr(module, "PROVIDER", None)

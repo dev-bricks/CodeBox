@@ -153,18 +153,34 @@ class DeclarativeLanguageProvider(LanguageProvider):
         comment_multi_start = "/*"
         comment_multi_end = "*/"
         comment_style = data.get("comment_style")
-        if isinstance(comment_style, (list, tuple)) and len(comment_style) >= 1:
-            comment_single = str(comment_style[0])
-            if len(comment_style) >= 2 and isinstance(comment_style[1], (list, tuple)) and len(comment_style[1]) >= 2:
-                comment_multi_start = str(comment_style[1][0])
-                comment_multi_end = str(comment_style[1][1])
-            elif len(comment_style) >= 2 and comment_style[1] is None:
+        if isinstance(comment_style, str):
+            comment_single = comment_style
+            comment_multi_start = None
+            comment_multi_end = None
+        elif isinstance(comment_style, (list, tuple)):
+            if len(comment_style) >= 1:
+                comment_single = str(comment_style[0])
+            if len(comment_style) >= 2:
+                second = comment_style[1]
+                if isinstance(second, (list, tuple)) and len(second) >= 2:
+                    comment_multi_start = str(second[0]) if second[0] else None
+                    comment_multi_end = str(second[1]) if second[1] else None
+                elif second is None:
+                    comment_multi_start = None
+                    comment_multi_end = None
+                elif len(comment_style) >= 3 and isinstance(second, str) and isinstance(comment_style[2], str):
+                    comment_multi_start = str(second)
+                    comment_multi_end = str(comment_style[2])
+                else:
+                    comment_multi_start = None
+                    comment_multi_end = None
+            else:
                 comment_multi_start = None
                 comment_multi_end = None
         elif isinstance(comment_style, dict):
             comment_single = str(comment_style.get("single", "//"))
-            comment_multi_start = comment_style.get("multi_start", "/*")
-            comment_multi_end = comment_style.get("multi_end", "*/")
+            comment_multi_start = comment_style.get("multi_start")
+            comment_multi_end = comment_style.get("multi_end")
 
         return cls(
             name=name,
