@@ -78,7 +78,11 @@ class ShortcutsDialog(QDialog):
         top_layout.addStretch()
 
         self.search_input = QLineEdit()
+        self.search_input.setObjectName("shortcuts_search_input")
         self.search_input.setPlaceholderText("Filtern nach Funktion oder Tastenkürzel...")
+        self.search_input.setToolTip("Suchbegriff eingeben, um Tastenkürzel oder Aktionen zu filtern")
+        self.search_input.setAccessibleName("Tastenkürzel filtern")
+        self.search_input.setAccessibleDescription("Filtert die Liste der Tastenkürzel in Echtzeit nach Kategorie, Aktion, Tastenkürzel oder Beschreibung")
         self.search_input.setClearButtonEnabled(True)
         self.search_input.textChanged.connect(self.filter_table)
         top_layout.addWidget(self.search_input)
@@ -86,6 +90,7 @@ class ShortcutsDialog(QDialog):
 
         # Tabelle
         self.table = QTableWidget()
+        self.table.setObjectName("shortcuts_table")
         self.table.setColumnCount(4)
         self.table.setHorizontalHeaderLabels(["Kategorie", "Aktion", "Tastenkürzel", "Beschreibung"])
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
@@ -95,12 +100,17 @@ class ShortcutsDialog(QDialog):
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        self.table.setAccessibleName("Tastenkürzel-Tabelle")
+        self.table.setAccessibleDescription("Tabelle aller verfügbaren Tastenkombinationen mit Kategorie, Aktion, Tastenkürzel und Beschreibung")
         layout.addWidget(self.table)
 
         # Buttons
         btn_layout = QHBoxLayout()
         btn_layout.addStretch()
         self.btn_close = QPushButton("Schließen")
+        self.btn_close.setObjectName("shortcuts_close_button")
+        self.btn_close.setToolTip("Schließt die Tastenkürzel-Übersicht")
+        self.btn_close.setAccessibleName("Tastenkürzel-Übersicht schließen")
         self.btn_close.clicked.connect(self.accept)
         btn_layout.addWidget(self.btn_close)
         layout.addLayout(btn_layout)

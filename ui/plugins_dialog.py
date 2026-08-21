@@ -62,6 +62,7 @@ class PluginsDialog(QDialog):
 
         # Tabelle
         self.table = QTableWidget()
+        self.table.setObjectName("plugins_table")
         self.table.setColumnCount(5)
         self.table.setHorizontalHeaderLabels(["Sprache", "Typ", "Version", "Endungen", "Status"])
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
@@ -72,6 +73,8 @@ class PluginsDialog(QDialog):
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        self.table.setAccessibleName("Installierte Sprach-Plugins und Provider")
+        self.table.setAccessibleDescription("Liste aller registrierten Sprachen und Plugins mit Typ, Version, Dateiendungen und Status")
         self.table.itemSelectionChanged.connect(self._on_selection_changed)
         splitter.addWidget(self.table)
 
@@ -79,8 +82,11 @@ class PluginsDialog(QDialog):
         details_box = QGroupBox("Plugin-Details")
         details_layout = QVBoxLayout(details_box)
         self.details_text = QTextEdit()
+        self.details_text.setObjectName("plugin_details_text")
         self.details_text.setReadOnly(True)
         self.details_text.setPlaceholderText("Wähle ein Plugin oder eine Sprache aus der Liste für Details...")
+        self.details_text.setAccessibleName("Plugin-Details")
+        self.details_text.setAccessibleDescription("Detaillierte Beschreibung, Syntaxmuster und Konfiguration des ausgewählten Plugins")
         details_layout.addWidget(self.details_text)
         splitter.addWidget(details_box)
 
@@ -91,20 +97,32 @@ class PluginsDialog(QDialog):
         btn_layout = QHBoxLayout()
 
         self.btn_open_folder = QPushButton("Plugin-Ordner öffnen")
+        self.btn_open_folder.setObjectName("btn_open_plugin_folder")
+        self.btn_open_folder.setToolTip("Öffnet das lokale Verzeichnis für externe Plugins im Datei-Explorer")
+        self.btn_open_folder.setAccessibleName("Plugin-Ordner öffnen")
         self.btn_open_folder.clicked.connect(self._open_plugin_folder)
         btn_layout.addWidget(self.btn_open_folder)
 
         self.btn_create = QPushButton("Neues JSON-Plugin...")
+        self.btn_create.setObjectName("btn_create_plugin")
+        self.btn_create.setToolTip("Erstellt eine neue JSON-Plugin-Vorlage für eine Sprache")
+        self.btn_create.setAccessibleName("Neues JSON-Plugin erstellen")
         self.btn_create.clicked.connect(self._create_plugin_template)
         btn_layout.addWidget(self.btn_create)
 
         self.btn_reload = QPushButton("Neu laden")
+        self.btn_reload.setObjectName("btn_reload_plugins")
+        self.btn_reload.setToolTip("Lädt alle Sprach-Plugins aus dem Plugin-Verzeichnis neu")
+        self.btn_reload.setAccessibleName("Plugins neu laden")
         self.btn_reload.clicked.connect(self._reload_plugins)
         btn_layout.addWidget(self.btn_reload)
 
         btn_layout.addStretch()
 
         self.btn_close = QPushButton("Schließen")
+        self.btn_close.setObjectName("btn_close_plugins_dialog")
+        self.btn_close.setToolTip("Schließt den Plugin-Dialog")
+        self.btn_close.setAccessibleName("Plugin-Dialog schließen")
         self.btn_close.clicked.connect(self.accept)
         btn_layout.addWidget(self.btn_close)
 

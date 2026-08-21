@@ -28,6 +28,9 @@ class SettingsDialog(QDialog):
         # Font Family
         self.font_combo = QFontComboBox()
         self.font_combo.setFontFilters(QFontComboBox.FontFilter.MonospacedFonts)
+        self.font_combo.setToolTip("Schriftart für den Editor auswählen")
+        self.font_combo.setAccessibleName("Schriftart")
+        self.font_combo.setAccessibleDescription("Wählt die Schriftart für den Code-Editor aus (nichtproportionale Schriften)")
         current_font = self._settings.get("font_family", "Consolas")
         self.font_combo.setCurrentFont(QFont(current_font))
         form_layout.addRow(QLabel("Schriftart:"), self.font_combo)
@@ -35,17 +38,26 @@ class SettingsDialog(QDialog):
         # Font Size
         self.font_size_spin = QSpinBox()
         self.font_size_spin.setRange(6, 72)
+        self.font_size_spin.setToolTip("Schriftgröße in Punkt (6-72 pt)")
+        self.font_size_spin.setAccessibleName("Schriftgröße")
+        self.font_size_spin.setAccessibleDescription("Legt die Schriftgröße im Code-Editor in Punkt fest")
         self.font_size_spin.setValue(int(self._settings.get("font_size", 10)))
         form_layout.addRow(QLabel("Schriftgröße:"), self.font_size_spin)
 
         # Tab Size
         self.tab_size_spin = QSpinBox()
         self.tab_size_spin.setRange(1, 8)
+        self.tab_size_spin.setToolTip("Tabulatorbreite in Leerzeichen (1-8)")
+        self.tab_size_spin.setAccessibleName("Tab-Breite")
+        self.tab_size_spin.setAccessibleDescription("Anzahl der Leerzeichen pro Tabulatorschritt")
         self.tab_size_spin.setValue(int(self._settings.get("tab_size", 4)))
         form_layout.addRow(QLabel("Tab-Breite (Leerzeichen):"), self.tab_size_spin)
 
         # Theme
         self.theme_combo = QComboBox()
+        self.theme_combo.setToolTip("Farbschema für die Benutzeroberfläche auswählen")
+        self.theme_combo.setAccessibleName("Farbschema")
+        self.theme_combo.setAccessibleDescription("Wählt das visuelle Design (Hell, Dunkel oder Monokai) aus")
         themes = get_available_themes()
         for theme in themes:
             self.theme_combo.addItem(theme.capitalize(), theme)
@@ -57,11 +69,17 @@ class SettingsDialog(QDialog):
 
         # Auto Save
         self.auto_save_cb = QCheckBox("Dateien beim Ausführen automatisch speichern")
+        self.auto_save_cb.setToolTip("Speichert geänderte Dateien automatisch vor dem Ausführen")
+        self.auto_save_cb.setAccessibleName("Dateien beim Ausführen automatisch speichern")
+        self.auto_save_cb.setAccessibleDescription("Aktiviert das automatische Sichern von Änderungen vor jedem Programmlauf")
         self.auto_save_cb.setChecked(bool(self._settings.get("auto_save", False)))
         form_layout.addRow(self.auto_save_cb)
 
         # Show Minimap
         self.minimap_cb = QCheckBox("Minimap anzeigen")
+        self.minimap_cb.setToolTip("Blendet die Code-Übersichtskarte am rechten Rand des Editors ein oder aus")
+        self.minimap_cb.setAccessibleName("Minimap anzeigen")
+        self.minimap_cb.setAccessibleDescription("Schaltet die verkleinerte Dokumentvorschau im Editor ein oder aus")
         self.minimap_cb.setChecked(bool(self._settings.get("show_minimap", True)))
         form_layout.addRow(self.minimap_cb)
 

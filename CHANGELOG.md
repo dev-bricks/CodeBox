@@ -13,7 +13,13 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [0.1.2] - 2026-08-16
 
-### Bugfixes & Plugin-Resilienz (2026-08-20)
+### UX, Barrierefreiheit & Accessibility-Härtung (2026-08-21)
+
+- `ui/main_window.py`: StatusTips auf allen Menü- und Toolbar-Aktionen (`Neu`, `Öffnen`, `Speichern`, `Beenden`, `Rückgängig`, `Wiederherstellen`, `Suchen`, `Gehe zu Zeile`, `Plugins`, `Einstellungen`, `Ausführen`, `Stoppen`, `Projektbaum`, `Terminal`, `Tastenkürzel`, `Über`); `setToolTip()`, `setWhatsThis()`, `setAccessibleName()` und `setAccessibleDescription()` für Hauptleiste, Sprach-Auswahl (`lang_combo`), Statusleisten-Widgets (`pos_label`, `lang_label`, `enc_label`) und Reiter im unteren Bedienpanel (`bottom_tabs`).
+- `core/tabs.py`: `TabWidget` mit `accessibleName` / `accessibleDescription` versehen und dynamische Tab-Tooltips mit absolutem Dateipfad beim Öffnen, Neuanlegen, Speichern und Drag-and-Drop-Umsortieren implementiert.
+- `ui/settings_dialog.py`: Tooltips und `accessibleName` / `accessibleDescription` für alle Einstellungsfelder (`font_combo`, `font_size_spin`, `tab_size_spin`, `theme_combo`, `auto_save_cb`, `minimap_cb`) integriert.
+- `ui/shortcuts_dialog.py` & `ui/plugins_dialog.py`: Barrierefreie Beschriftungen, Tooltips und Beschreibungen für Filter-Eingabefelder, Tabellen, Detailboxen und Aktions-Buttons ergänzt.
+- `tests/test_ui_ux_accessibility.py`: Neue automatisierte UX- und Accessibility-Vertragstestsuite mit 6 Tests für Toolbar, Tabs, Statusbar, Einstellungen, Shortcuts, Plugins und Panels (109 passed, 1 skipped).
 
 - `core/highlighter.py`: Regex-Mustererstellung in `UniversalHighlighter` (`_keyword_pattern`) gehärtet, sodass Keywords und Builtins mit Satzzeichen/Metazeichen (z.B. Rubys `defined?` oder C++-Symbole) mit `re.escape()` maskiert und mit sicheren Wortgrenzen gematcht werden. Verhindert Fehl-Highlighting von Variablennamen (`define`) und unvollständiges Keyword-Highlighting.
 - `languages/declarative.py`: Parsing von `comment_style` in `DeclarativeLanguageProvider.from_dict` erweitert, sodass Einzelstring- (`#`), 1-Element-Listen (`["--"]`), 3-Element-Flachlisten (`["--", "--[[", "--]]"]`) und Dictionary-Formate deterministisch ausgewertet werden.

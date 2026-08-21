@@ -66,42 +66,79 @@ class MainWindow(QMainWindow):
         menubar = self.menuBar()
 
         file_menu = menubar.addMenu("Datei")
-        file_menu.addAction("Neu", self.new_file, "Ctrl+N")
-        file_menu.addAction("Öffnen...", self.open_file, "Ctrl+O")
-        file_menu.addAction("Speichern", self.save_file, "Ctrl+S")
+        act_new = file_menu.addAction("Neu", self.new_file, "Ctrl+N")
+        act_new.setStatusTip("Erstellt eine neue leere Datei")
+        act_open = file_menu.addAction("Öffnen...", self.open_file, "Ctrl+O")
+        act_open.setStatusTip("Öffnet eine bestehende Datei von der Festplatte")
+        act_save = file_menu.addAction("Speichern", self.save_file, "Ctrl+S")
+        act_save.setStatusTip("Speichert die aktuelle Datei")
         file_menu.addSeparator()
-        file_menu.addAction("Beenden", self.close, "Ctrl+Q")
+        act_quit = file_menu.addAction("Beenden", self.close, "Ctrl+Q")
+        act_quit.setStatusTip("Schließt die CodeBox-Anwendung")
 
         edit_menu = menubar.addMenu("Bearbeiten")
-        edit_menu.addAction("Rückgängig", self._undo, "Ctrl+Z")
-        edit_menu.addAction("Wiederherstellen", self._redo, "Ctrl+Y")
+        act_undo = edit_menu.addAction("Rückgängig", self._undo, "Ctrl+Z")
+        act_undo.setStatusTip("Macht die letzte Änderung rückgängig")
+        act_redo = edit_menu.addAction("Wiederherstellen", self._redo, "Ctrl+Y")
+        act_redo.setStatusTip("Stellt die letzte rückgängig gemachte Änderung wieder her")
         edit_menu.addSeparator()
-        edit_menu.addAction("Suchen", self._find, "Ctrl+F")
-        edit_menu.addAction("Gehe zu Zeile", self._goto_line, "Ctrl+G")
+        act_find = edit_menu.addAction("Suchen", self._find, "Ctrl+F")
+        act_find.setStatusTip("Sucht nach Text im aktuellen Dokument")
+        act_goto = edit_menu.addAction("Gehe zu Zeile", self._goto_line, "Ctrl+G")
+        act_goto.setStatusTip("Springt zu einer bestimmten Zeilennummer")
         edit_menu.addSeparator()
-        edit_menu.addAction("Plugins & Sprachen...", self.open_plugins_dialog, "Ctrl+Shift+P")
-        edit_menu.addAction("Einstellungen...", self.open_settings_dialog, "Ctrl+,")
+        act_plugins = edit_menu.addAction("Plugins & Sprachen...", self.open_plugins_dialog, "Ctrl+Shift+P")
+        act_plugins.setStatusTip("Öffnet die Verwaltung für Sprach-Erweiterungen und Plugins")
+        act_settings = edit_menu.addAction("Einstellungen...", self.open_settings_dialog, "Ctrl+,")
+        act_settings.setStatusTip("Öffnet die Programmeinstellungen")
 
         run_menu = menubar.addMenu("Ausführen")
-        run_menu.addAction("Ausführen", self.run_current, "F5")
-        run_menu.addAction("Stoppen", self._stop_run, "Shift+F5")
+        act_run = run_menu.addAction("Ausführen", self.run_current, "F5")
+        act_run.setStatusTip("Führt das aktuelle Skript oder Programm aus")
+        act_stop = run_menu.addAction("Stoppen", self._stop_run, "Shift+F5")
+        act_stop.setStatusTip("Bricht den laufenden Ausführungsprozess ab")
 
         # ---- Toolbar ----
         toolbar = QToolBar("Hauptleiste")
+        toolbar.setObjectName("main_toolbar")
         self.addToolBar(toolbar)
-        toolbar.addAction("Neu", self.new_file)
-        toolbar.addAction("Öffnen", self.open_file)
-        toolbar.addAction("Speichern", self.save_file)
+
+        self.action_new = toolbar.addAction("Neu", self.new_file)
+        self.action_new.setToolTip("Neue Datei erstellen (Ctrl+N)")
+        self.action_new.setStatusTip("Erstellt eine neue leere Datei")
+        self.action_new.setWhatsThis("Erstellt eine neue leere Datei im Editor")
+
+        self.action_open = toolbar.addAction("Öffnen", self.open_file)
+        self.action_open.setToolTip("Datei öffnen (Ctrl+O)")
+        self.action_open.setStatusTip("Öffnet eine bestehende Datei von der Festplatte")
+        self.action_open.setWhatsThis("Öffnet eine bestehende Datei von der Festplatte")
+
+        self.action_save = toolbar.addAction("Speichern", self.save_file)
+        self.action_save.setToolTip("Aktuelle Datei speichern (Ctrl+S)")
+        self.action_save.setStatusTip("Speichert die aktive Datei auf die Festplatte")
+        self.action_save.setWhatsThis("Speichert die aktive Datei auf die Festplatte")
+
         toolbar.addSeparator()
-        toolbar.addAction("Ausführen", self.run_current)
+
+        self.action_run = toolbar.addAction("Ausführen", self.run_current)
+        self.action_run.setToolTip("Aktuelle Datei ausführen (F5)")
+        self.action_run.setStatusTip("Führt das aktuelle Skript oder Programm aus")
+        self.action_run.setWhatsThis("Führt das aktuelle Skript oder Programm aus")
 
         # Sprach-Auswahl in Toolbar
         self.lang_combo = QComboBox()
+        self.lang_combo.setObjectName("lang_combo")
         self.lang_combo.addItem("(Auto)")
         for p in get_all_providers():
             self.lang_combo.addItem(p.get_name())
         self.lang_combo.currentTextChanged.connect(self._on_language_changed)
-        toolbar.addWidget(QLabel("  Sprache: "))
+        self.lang_combo.setToolTip("Programmiersprache für Syntax-Highlighting und Ausführung auswählen")
+        self.lang_combo.setAccessibleName("Programmiersprache")
+        self.lang_combo.setAccessibleDescription("Wählt die Programmiersprache für Syntax-Highlighting und Ausführung")
+
+        self.lang_label_toolbar = QLabel("  Sprache: ")
+        self.lang_label_toolbar.setToolTip("Auswahl der aktiven Programmiersprache")
+        toolbar.addWidget(self.lang_label_toolbar)
         toolbar.addWidget(self.lang_combo)
 
         # ---- Ansicht-Menü ----
@@ -109,25 +146,32 @@ class MainWindow(QMainWindow):
         self._toggle_project_action = view_menu.addAction(
             "Projektbaum", self._toggle_project_view, "Ctrl+B"
         )
+        self._toggle_project_action.setStatusTip("Blendet den Datei- und Projektbaum ein oder aus")
+
         self._toggle_terminal_action = view_menu.addAction(
             "Terminal", self._toggle_terminal, "Ctrl+`"
         )
+        self._toggle_terminal_action.setStatusTip("Blendet das integrierte Terminal ein oder aus")
 
         # Theme-Submenü
         from features.theme_manager import get_available_themes, apply_theme
         theme_menu = view_menu.addMenu("Theme")
         for theme_name in get_available_themes():
-            theme_menu.addAction(
+            t_act = theme_menu.addAction(
                 theme_name.capitalize(),
                 lambda checked=False, t=theme_name: apply_theme(QApplication.instance(), t)
             )
+            t_act.setStatusTip(f"Farbschema auf '{theme_name.capitalize()}' umstellen")
 
         # ---- Hilfe-Menü ----
         help_menu = menubar.addMenu("Hilfe")
-        help_menu.addAction("Tastenkürzel-Übersicht", self.open_shortcuts_dialog, "F1")
-        help_menu.addAction("Plugins & Sprachen...", self.open_plugins_dialog)
+        act_shortcuts = help_menu.addAction("Tastenkürzel-Übersicht", self.open_shortcuts_dialog, "F1")
+        act_shortcuts.setStatusTip("Öffnet die Übersicht aller verfügbaren Tastenkombinationen")
+        act_help_plugins = help_menu.addAction("Plugins & Sprachen...", self.open_plugins_dialog)
+        act_help_plugins.setStatusTip("Öffnet die Übersicht der installierten Sprach-Plugins")
         help_menu.addSeparator()
-        help_menu.addAction("Über CodeBox...", self._about_dialog)
+        act_about = help_menu.addAction("Über CodeBox...", self._about_dialog)
+        act_about.setStatusTip("Zeigt Versions- und Programminformationen über CodeBox an")
 
         # ---- Central Widget ----
         central = QWidget()
@@ -153,16 +197,23 @@ class MainWindow(QMainWindow):
 
         # Unteres Panel: Tabs mit Output und Terminal
         self.bottom_tabs = QTabWidget()
+        self.bottom_tabs.setObjectName("bottom_tabs")
+        self.bottom_tabs.setAccessibleName("Unteres Bedienpanel")
+        self.bottom_tabs.setAccessibleDescription("Bereich mit Reitern für Ausgabe, Terminal und Probleme")
+
         self.output = OutputPanel()
         self.output.run_btn.clicked.connect(self.run_current)
         self.bottom_tabs.addTab(self.output, "Ausgabe")
+        self.bottom_tabs.setTabToolTip(0, "Programmausgabe und Fehlermeldungen anzeigen")
 
         self.terminal = TerminalWidget()
         self.bottom_tabs.addTab(self.terminal, "Terminal")
+        self.bottom_tabs.setTabToolTip(1, "Integriertes Befehlszeilenterminal")
 
         self.problems = ProblemsPanel()
         self.problems.problemActivated.connect(self._activate_problem)
         self.bottom_tabs.addTab(self.problems, "Probleme")
+        self.bottom_tabs.setTabToolTip(2, "LSP- und Linter-Diagnosen und Fehlermeldungen")
 
         self.v_splitter.addWidget(self.bottom_tabs)
         self.v_splitter.setSizes([600, 200])
@@ -176,8 +227,20 @@ class MainWindow(QMainWindow):
         self.status_bar = QStatusBar()
         self.setStatusBar(self.status_bar)
         self.pos_label = QLabel("Zeile 1, Spalte 1")
+        self.pos_label.setToolTip("Aktuelle Cursor-Position (Zeile, Spalte)")
+        self.pos_label.setAccessibleName("Cursorposition")
+        self.pos_label.setAccessibleDescription("Zeigt die aktuelle Zeilen- und Spaltennummer des Cursors im Editor")
+
         self.lang_label = QLabel("Keine Sprache")
+        self.lang_label.setToolTip("Aktive Programmiersprache für Highlighting und LSP")
+        self.lang_label.setAccessibleName("Aktive Sprache")
+        self.lang_label.setAccessibleDescription("Zeigt die aktuell aktive Programmiersprache")
+
         self.enc_label = QLabel("UTF-8")
+        self.enc_label.setToolTip("Dateikodierung (UTF-8)")
+        self.enc_label.setAccessibleName("Dateikodierung")
+        self.enc_label.setAccessibleDescription("Zeigt die Zeichenkodierung der geöffneten Datei")
+
         self.status_bar.addPermanentWidget(self.pos_label)
         self.status_bar.addPermanentWidget(self.lang_label)
         self.status_bar.addPermanentWidget(self.enc_label)

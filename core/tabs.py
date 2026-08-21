@@ -72,6 +72,9 @@ class TabWidget(QTabWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.setObjectName("editor_tab_widget")
+        self.setAccessibleName("Editor-Tabs")
+        self.setAccessibleDescription("Reiterleiste für geöffnete Code-Dateien")
         self.setTabsClosable(True)
         self.setMovable(True)
         self.tabs: dict = {}  # index -> EditorTab
@@ -89,6 +92,7 @@ class TabWidget(QTabWidget):
             for tab in old_tabs:
                 if tab.editor is widget:
                     self.tabs[i] = tab
+                    self.setTabToolTip(i, str(tab.file_path) if tab.file_path else "Neues Dokument (ungespeichert)")
                     break
 
     def open_file(self, file_path: Path) -> EditorTab:
@@ -103,6 +107,7 @@ class TabWidget(QTabWidget):
         tab = EditorTab(file_path)
         idx = self.addTab(tab.editor, tab.title)
         self.tabs[idx] = tab
+        self.setTabToolTip(idx, str(file_path))
         self.setCurrentIndex(idx)
 
         tab.editor.modificationChanged.connect(
@@ -115,6 +120,7 @@ class TabWidget(QTabWidget):
         tab = EditorTab()
         idx = self.addTab(tab.editor, "Unbenannt")
         self.tabs[idx] = tab
+        self.setTabToolTip(idx, "Neues Dokument (ungespeichert)")
         self.setCurrentIndex(idx)
         tab.editor.modificationChanged.connect(
             lambda _: self._update_tab_title(tab)
@@ -165,4 +171,5 @@ class TabWidget(QTabWidget):
         for idx in range(self.count()):
             if self.tabs.get(idx) is tab:
                 self.setTabText(idx, tab.title)
+                self.setTabToolTip(idx, str(tab.file_path) if tab.file_path else "Neues Dokument (ungespeichert)")
                 break
