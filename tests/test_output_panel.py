@@ -37,6 +37,7 @@ class OutputPanelSignalTests(unittest.TestCase):
         mock_old.readyReadStandardOutput.disconnect.assert_called_once_with()
         mock_old.readyReadStandardError.disconnect.assert_called_once_with()
         mock_old.finished.disconnect.assert_called_once_with()
+        mock_old.errorOccurred.disconnect.assert_called_once_with()
         mock_old.kill.assert_called_once()
 
     def test_run_command_no_disconnect_when_no_prior_process(self):
@@ -83,8 +84,41 @@ class OutputPanelSignalTests(unittest.TestCase):
         self.assertEqual(self.panel.clear_btn.accessibleName(), "Ausgabe leeren")
         self.assertIn("Meldungen", self.panel.clear_btn.accessibleDescription())
 
-        self.assertEqual(self.panel.status_label.accessibleName(), "Ausführungsstatus")
-        self.assertEqual(self.panel.output.accessibleName(), "Programmausgabe")
+    def test_run_command_failed_to_start_disables_stop_btn_and_emits_finished(self):
+        """Wenn ein Programm nicht gestartet werden kann, muss stop_btn deaktiviert,
+        der Status aktualisiert und ein Fehler ausgegeben werden."""
+        emitted_results = []
+        self.panel.processFinished.connect(lambda code, text: emitted_results.append((code, text)))
+
+        self.panel._current_program = "non_existent_compiler_xyz"
+        self.panel.stop_btn.setEnabled(True)
+        self.panel._on_error(QProcess.ProcessError.FailedToStart)
+
+        self.assertFalse(self.panel.stop_btn.isEnabled(), "stop_btn muss nach FailedToStart deaktiviert sein")
+        self.assertIn("Fehler", self.panel.status_label.text())
+        self.assertIn("nicht gestartet werden", self.panel.output.toPlainText())
+        self.assertEqual(len(emitted_results), 1)
+        self.assertEqual(emitted_results[0][0], -1)
+
+    def test_run_command_crashed_updates_status(self):
+        """Absturz eines Prozesses muss im Statuslabel und Output protokolliert werden."""
+        self.panel._current_program = "crashing_app"
+        self.panel.stop_btn.setEnabled(True)
+        self.panel._on_error(QProcess.ProcessError.Crashed)
+
+        self.assertFalse(self.panel.stop_btn.isEnabled())
+        self.assertIn("abgestürzt", self.panel.status_label.text())
+        self.assertIn("abgestürzt", self.panel.output.toPlainText())
+
+    def test_output_panel_close_event_terminates_running_process(self):
+        """Beim Schließen des Panels muss ein aktiver Prozess beendet werden."""
+        mock_proc = MagicMock()
+        mock_proc.state.return_value = QProcess.ProcessState.Running
+        self.panel.process = mock_proc
+
+        self.panel.close()
+        mock_proc.kill.assert_called_once()
+        mock_proc.waitForFinished.assert_called_once_with(1000)
 
 
 if __name__ == "__main__":

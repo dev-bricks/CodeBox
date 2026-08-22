@@ -89,6 +89,7 @@ class OutputPanel(QWidget):
                 self.process.readyReadStandardOutput,
                 self.process.readyReadStandardError,
                 self.process.finished,
+                self.process.errorOccurred,
             ):
                 try:
                     sig.disconnect()
@@ -96,6 +97,7 @@ class OutputPanel(QWidget):
                     pass
             if self.process.state() != QProcess.ProcessState.NotRunning:
                 self.process.kill()
+                self.process.waitForFinished(1000)
 
         self.output.clear()
         self.status_label.setText(f"Ausführung: {' '.join(command)}")
@@ -105,14 +107,17 @@ class OutputPanel(QWidget):
         self.process.readyReadStandardOutput.connect(self._on_stdout)
         self.process.readyReadStandardError.connect(self._on_stderr)
         self.process.finished.connect(self._on_finished)
+        self.process.errorOccurred.connect(self._on_error)
 
         program = command[0]
+        self._current_program = program
         args = command[1:] if len(command) > 1 else []
         self.process.start(program, args)
 
     def stop_process(self):
         if self.process and self.process.state() != QProcess.ProcessState.NotRunning:
             self.process.kill()
+            self.process.waitForFinished(1000)
             self.append_text("\n--- Prozess abgebrochen ---\n", color="#ff8888")
 
     def clear(self):
@@ -148,3 +153,23 @@ class OutputPanel(QWidget):
         self.append_text(f"\n--- Prozess beendet ({status}) ---\n",
                          color="#88ff88" if exit_code == 0 else "#ff8888")
         self.processFinished.emit(exit_code, self.output.toPlainText())
+
+    def _on_error(self, error):
+        self.stop_btn.setEnabled(False)
+        program = getattr(self, "_current_program", "Programm")
+        if error == QProcess.ProcessError.FailedToStart:
+            self.status_label.setText("Fehler: Programm konnte nicht gestartet werden")
+            self.append_text(
+                f"\n--- Fehler: Programm '{program}' konnte nicht gestartet werden (Befehl nicht gefunden oder keine Ausführungsrechte) ---\n",
+                color="#ff8888",
+            )
+            self.processFinished.emit(-1, self.output.toPlainText())
+        elif error == QProcess.ProcessError.Crashed:
+            self.status_label.setText("Fehler: Prozess abgestürzt")
+            self.append_text(f"\n--- Fehler: Prozess '{program}' ist abgestürzt ---\n", color="#ff8888")
+
+    def closeEvent(self, event):
+        if self.process and self.process.state() != QProcess.ProcessState.NotRunning:
+            self.process.kill()
+            self.process.waitForFinished(1000)
+        super().closeEvent(event)

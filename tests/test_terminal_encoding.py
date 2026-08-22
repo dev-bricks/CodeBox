@@ -85,6 +85,40 @@ class TerminalEncodingTests(unittest.TestCase):
                          "set_working_dir() muss denselben cp1252-Encoding-Pfad wie _execute_command() nutzen")
         widget.close()
 
+    @unittest.skipUnless(sys.platform == "win32", "Windows-only")
+    def test_set_working_dir_powershell_does_not_use_d_flag(self):
+        """Regression: PowerShell kennt keinen /d Schalter für Set-Location/cd.
+        set_working_dir() muss für PowerShell 'cd \"path\"' ohne '/d' senden."""
+        widget = self._make_widget("powershell")
+
+        from PySide6.QtCore import QProcess
+        written = []
+        mock_proc = MagicMock()
+        mock_proc.state.return_value = QProcess.ProcessState.Running
+        mock_proc.write.side_effect = lambda data: written.append(data)
+        widget.process = mock_proc
+
+        path = "C:/Projects/CodeBox"
+        widget.set_working_dir(path)
+
+        self.assertEqual(len(written), 1)
+        encoded_cmd = written[0]
+        expected = f'cd "{path}"\n'.encode("utf-8", errors="replace")
+        self.assertEqual(encoded_cmd, expected,
+                         "PowerShell darf keinen /d-Schalter erhalten")
+        widget.close()
+
+    @unittest.skipUnless(sys.platform == "win32", "Windows-only")
+    def test_output_encoding_matches_shell(self):
+        """_output_encoding() muss für cmd cp1252 und für PowerShell utf-8 liefern."""
+        widget_cmd = self._make_widget("cmd")
+        self.assertEqual(widget_cmd._output_encoding(), "cp1252")
+        widget_cmd.close()
+
+        widget_ps = self._make_widget("powershell")
+        self.assertEqual(widget_ps._output_encoding(), "utf-8")
+        widget_ps.close()
+
 
 class TerminalStartShellTests(unittest.TestCase):
     """Regressionstests für _start_shell() Signal-Verwaltung (B-012)."""
@@ -117,6 +151,7 @@ class TerminalStartShellTests(unittest.TestCase):
         mock_old.readyReadStandardOutput.disconnect.assert_called_once_with()
         mock_old.readyReadStandardError.disconnect.assert_called_once_with()
         mock_old.finished.disconnect.assert_called_once_with()
+        mock_old.errorOccurred.disconnect.assert_called_once_with()
         mock_old.kill.assert_called_once()
         widget.close()
 
@@ -149,6 +184,14 @@ class TerminalStartShellTests(unittest.TestCase):
             mock_cls.return_value = MagicMock()
             widget._start_shell()
         # Kein AttributeError, kein Kill-Aufruf — Test besteht wenn kein Fehler
+        widget.close()
+
+    def test_terminal_on_error_failed_to_start(self):
+        """errorOccurred mit FailedToStart soll eine Fehlermeldung ausgeben."""
+        from PySide6.QtCore import QProcess
+        widget = self._make_widget_no_shell()
+        widget._on_error(QProcess.ProcessError.FailedToStart)
+        self.assertIn("Fehler: Shell konnte nicht gestartet werden", widget.output.toPlainText())
         widget.close()
 
 

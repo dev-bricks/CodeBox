@@ -164,6 +164,7 @@ class TerminalWidget(QWidget):
                 self.process.readyReadStandardOutput,
                 self.process.readyReadStandardError,
                 self.process.finished,
+                self.process.errorOccurred,
             ):
                 try:
                     sig.disconnect()
@@ -178,6 +179,7 @@ class TerminalWidget(QWidget):
         self.process.readyReadStandardOutput.connect(self._on_stdout)
         self.process.readyReadStandardError.connect(self._on_stderr)
         self.process.finished.connect(self._on_finished)
+        self.process.errorOccurred.connect(self._on_error)
 
         program, args = self._get_shell_command()
         self.process.start(program, args)
@@ -190,6 +192,14 @@ class TerminalWidget(QWidget):
 
     def _input_encoding(self) -> str:
         """Encoding für Eingaben an die Shell — cp1252 für cmd/Windows, sonst utf-8."""
+        if sys.platform == "win32":
+            shell = self.shell_combo.currentText() if hasattr(self, "shell_combo") else "cmd"
+            if shell == "cmd":
+                return "cp1252"
+        return "utf-8"
+
+    def _output_encoding(self) -> str:
+        """Encoding für Shell-Ausgaben — cp1252 für cmd/Windows, sonst utf-8."""
         if sys.platform == "win32":
             shell = self.shell_combo.currentText() if hasattr(self, "shell_combo") else "cmd"
             if shell == "cmd":
@@ -253,21 +263,26 @@ class TerminalWidget(QWidget):
         self.cwd_label.setText(path)
         if self.process and self.process.state() == QProcess.ProcessState.Running:
             encoding = self._input_encoding()
-            if sys.platform == "win32":
+            shell = self.shell_combo.currentText() if hasattr(self, "shell_combo") else "cmd"
+            if sys.platform == "win32" and shell == "cmd":
                 self.process.write(f"cd /d \"{path}\"\n".encode(encoding, errors='replace'))
             else:
                 self.process.write(f"cd \"{path}\"\n".encode(encoding, errors='replace'))
 
     def _on_stdout(self):
-        data = self.process.readAllStandardOutput().data().decode('utf-8', errors='replace')
+        data = self.process.readAllStandardOutput().data().decode(self._output_encoding(), errors='replace')
         self.append_text(data)
 
     def _on_stderr(self):
-        data = self.process.readAllStandardError().data().decode('utf-8', errors='replace')
+        data = self.process.readAllStandardError().data().decode(self._output_encoding(), errors='replace')
         self.append_text(data, "#ff8888")
 
     def _on_finished(self, exit_code, exit_status):
         self.append_text(f"\n--- Shell beendet (Code {exit_code}) ---\n", "#888888")
+
+    def _on_error(self, error):
+        if error == QProcess.ProcessError.FailedToStart:
+            self.append_text("--- Fehler: Shell konnte nicht gestartet werden ---\n", "#ff8888")
 
     def closeEvent(self, event):
         if self.process:

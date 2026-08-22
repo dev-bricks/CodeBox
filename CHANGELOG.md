@@ -13,6 +13,12 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [0.1.2] - 2026-08-16
 
+### Terminal- & Prozess-Streaming-Härtung (2026-08-22)
+
+- `features/terminal.py`: Verzeichniswechsel via `set_working_dir()` für PowerShell korrigiert (PowerShell unterstützt keinen `/d`-Schalter von cmd.exe; `cd` führte zuvor zu `PositionalParameterNotFound`-Fehlern und verweigerte das Wechseln des Arbeitsordners). Output-Dekodierung in `_on_stdout` und `_on_stderr` auf dynamisches `_output_encoding()` (cp1252 für cmd unter Windows, sonst utf-8) umgestellt. Signalverwaltung um `errorOccurred` und sauberes Exception-Handling erweitert.
+- `core/output.py`: `OutputPanel` mit `errorOccurred`-Signalbehandlung (`_on_error`) gegen hängende Stop-Buttons und unterdrückte Fehlermeldungen bei nicht auffindbaren Compilern/Programmen (`FailedToStart`, `Crashed`) abgesichert. `waitForFinished(1000)` nach `kill()` und `closeEvent` für zuverlässige Prozessbereinigung ergänzt.
+- `tests/test_terminal_encoding.py` & `tests/test_output_panel.py`: 6 neue Regressionstests für PowerShell-Verzeichniswechsel, Output-Encoding, Signal-Entkopplung, Fehlerausgabe und Prozessbeendigung ergänzt (115 passed, 1 skipped).
+
 ### UX, Barrierefreiheit & Accessibility-Härtung (2026-08-21)
 
 - `ui/main_window.py`: StatusTips auf allen Menü- und Toolbar-Aktionen (`Neu`, `Öffnen`, `Speichern`, `Beenden`, `Rückgängig`, `Wiederherstellen`, `Suchen`, `Gehe zu Zeile`, `Plugins`, `Einstellungen`, `Ausführen`, `Stoppen`, `Projektbaum`, `Terminal`, `Tastenkürzel`, `Über`); `setToolTip()`, `setWhatsThis()`, `setAccessibleName()` und `setAccessibleDescription()` für Hauptleiste, Sprach-Auswahl (`lang_combo`), Statusleisten-Widgets (`pos_label`, `lang_label`, `enc_label`) und Reiter im unteren Bedienpanel (`bottom_tabs`).
