@@ -103,7 +103,7 @@ def test_bilingual_readme_parity_and_anchors() -> None:
         assert "img.shields.io/badge/License-MIT" in text or "img.shields.io/badge/Lizenz-MIT" in text
         assert "ecosystem-dev--bricks" in text
         assert "part%20of-open--bricks" in text
-        assert "tests-120%20passed" in text
+        assert "tests-164%20passed" in text
         assert "llms.txt" in text
         assert "SECURITY.md" in text
 

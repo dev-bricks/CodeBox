@@ -127,6 +127,24 @@
 
 ---
 
+## Phase 5: High-End Refactoring & Hardening - ERLEDIGT (2026-08-24)
+
+### 5.1 Syntax Highlighting State-Machine - DONE (2026-08-24)
+- [x] `core/highlighter.py`: Multi-Line Docstrings (`"""`, `'''`) und Block-Kommentare (`/* ... */`) über Blockgrenzen hinweg via Qt `QSyntaxHighlighter` State-Machine (`previousBlockState`, `setCurrentBlockState`).
+
+### 5.2 Smart Block Editing & Shortcuts - DONE (2026-08-24)
+- [x] `core/editor.py`: Multi-Line Block Indentation (`Tab`), Dedentation (`Shift+Tab`), Line Comment Toggle (`Ctrl+/`, `Ctrl+#`), Line Duplication (`Ctrl+D`), Line Movement (`Alt+Up`, `Alt+Down`).
+- [x] `ui/main_window.py`: Bearbeiten-Menüeinträge und präzise Block-Navigation für `_goto_line`.
+- [x] `ui/shortcuts_dialog.py`: Dokumentation aller neuen Editor-Tastenkürzel in der F1-Übersicht.
+
+### 5.3 Minimap Performance Optimization - DONE (2026-08-24)
+- [x] `core/editor.py`: Caching von Dokumentzeilen und maximalen Spaltenbreiten in `Minimap` mit ereignisgesteuerter Cache-Invalidierung.
+
+### 5.4 Testsuite-Erweiterung - DONE (2026-08-24)
+- [x] 4 neue Testmodule (Highlighter Multi-Line, Block Editing/Comment, Minimap Performance, Goto Line Navigation) -> 164 Tests passed (100% grün).
+
+---
+
 ## Meilensteine
 
 | Meilenstein | Kriterien | Status |
@@ -135,6 +153,7 @@
 | **M2: Python funktioniert** | Python-Highlighting, Run, Snippets | ERREICHT |
 | **M3: Multi-Language** | 3+ Sprachen nutzbar | ERREICHT (Python, JS, TS, C++, Rust, Go, Java, Lua, Ruby) |
 | **M4: Release-Ready** | Doku, Tests, Plugin-System, EXE | ERREICHT |
+| **M5: High-End Hardened** | Multi-Line Highlighter, Block Editing, Minimap Cache, 164 Tests | ERREICHT (2026-08-24) |
 
 ---
 
@@ -146,4 +165,4 @@
 
 ---
 
-*Plan erstellt: 2026-01-26 | Vollständig abgeschlossen: 2026-08-14 durch Antigravity Agent*
+*Plan erstellt: 2026-01-26 | High-End gehärtet: 2026-08-24 durch Antigravity Agent*

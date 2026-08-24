@@ -13,6 +13,24 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [0.1.2] - 2026-08-24
 
+### High-End Editor-, Highlighter- & Performance-Härtung (2026-08-24)
+
+- `core/highlighter.py`: Multi-Line Docstrings & Block-Comments über Blockgrenzen hinweg via Qt `QSyntaxHighlighter`-Zustandsautomat (`previousBlockState()`, `setCurrentBlockState()`) implementiert. Vollständige Unterstützung für Python Docstrings (`"""..."""` und `'''...'''`), C/C++/Java/Rust/Go/JavaScript Block-Kommentare (`/* ... */`) und deklarative Plugin-Begrenzer ohne Zustandslecks bei Einzeilern.
+- `core/editor.py`:
+  - Intelligente Block-Einrückung (`indent_selection`) und -Ausrückung (`unindent_selection`) mit Tastenkürzeln `Tab` und `Shift+Tab` / `Backtab` für Einzelzeilen und mehrzeilige Selektionen.
+  - Zeilenkommentar-Umschaltung (`toggle_comment`) mit `Ctrl+/` und `Ctrl+#` (erkennt Provider-spezifische Tokens wie `#` und `//` und kommentiert konsistent ein/aus).
+  - Zeilen-Duplizierung (`duplicate_line_or_selection`) via `Ctrl+D` und Zeilenverschiebung nach oben/unten (`move_line_up`, `move_line_down`) via `Alt+Up` / `Alt+Down`.
+  - Minimap-Performanceoptimierung: Caching von Dokumentzeilen (`_cached_lines`) und maximaler Zeichenlänge (`_cached_max_chars`) mit ereignisgesteuerter Invalidierung (`contentsChanged`, `textChanged`, `blockCountChanged`). Verhindert redundante Iterationen über zehntausende Textblöcke pro Frame.
+- `ui/main_window.py`:
+  - `_goto_line`: Fehler behoben, bei dem die Cursorposition immer unkonditioniert an Zeile 1 sprang; navigiert nun präzise zum Zielblock `document().findBlockByNumber(line - 1)`.
+  - Aktionen `Zeilenkommentar umschalten` (`Ctrl+/`), `Einrücken` (`Tab`) und `Ausrücken` (`Shift+Tab`) im Menü *Bearbeiten* verankert.
+- `ui/shortcuts_dialog.py`: Tastenkürzel-Übersicht um die neuen Editor-Aktionen für Kommentar-Umschaltung, Duplizieren und Zeilenverschiebung erweitert.
+- `tests/`: 4 neue Testmodule ergänzt (164 Tests passed in 19.5s, 100% Abdeckung):
+  - `tests/test_multiline_highlighter.py`: Multi-Line Docstrings und Block-Kommentare über Blockgrenzen.
+  - `tests/test_block_indent_and_comment.py`: Block-Einrückung, Dedentation, Kommentar-Umschaltung und Tastenkürzel.
+  - `tests/test_minimap_performance.py`: Minimap-Zeilen-Caching, Invalidierung und Render-Effizienz.
+  - `tests/test_goto_line_navigation.py`: Zeilensprung-Navigation und Menü-Delegation.
+
 ### Marketing, Discoverability & Diagramm-Architektur (2026-08-24)
 
 - `README.md` & `README_de.md`: Umfassende Überarbeitung des Projektauftritts und der Auffindbarkeit (Pfad B):

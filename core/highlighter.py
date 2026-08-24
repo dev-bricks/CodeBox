@@ -16,6 +16,7 @@ class UniversalHighlighter(QSyntaxHighlighter):
         super().__init__(document)
         self.provider = provider
         self.highlighting_rules = []
+        self.multiline_rules = []
         if provider:
             self._build_rules()
 
@@ -23,6 +24,7 @@ class UniversalHighlighter(QSyntaxHighlighter):
         """Wechselt den Language-Provider"""
         self.provider = provider
         self.highlighting_rules = []
+        self.multiline_rules = []
         if provider:
             self._build_rules()
         self.rehighlight()
@@ -37,6 +39,7 @@ class UniversalHighlighter(QSyntaxHighlighter):
     def _build_rules(self):
         """Erstellt Highlighting-Regeln aus dem Provider"""
         self.highlighting_rules = []
+        self.multiline_rules = []
         if not self.provider:
             return
 
@@ -113,9 +116,89 @@ class UniversalHighlighter(QSyntaxHighlighter):
                 (QRegularExpression(escaped + r'[^\n]*'), cmt_fmt)
             )
 
+        # Mehrzeilen-Kommentare / Docstrings (Block State Machine)
+        multi_pair = comment_style[1] if (comment_style and len(comment_style) > 1) else None
+        if multi_pair and len(multi_pair) == 2 and multi_pair[0] and multi_pair[1]:
+            start_delim, end_delim = multi_pair
+            self.multiline_rules.append((
+                1,
+                QRegularExpression(re.escape(start_delim)),
+                QRegularExpression(re.escape(end_delim)),
+                cmt_fmt
+            ))
+            # Wenn Python: zusätzlich einfache Triple-Quotes ('''...''') unterstützen
+            if start_delim == '"""':
+                self.multiline_rules.append((
+                    2,
+                    QRegularExpression(re.escape("'''")),
+                    QRegularExpression(re.escape("'''")),
+                    cmt_fmt
+                ))
+
     def highlightBlock(self, text: str):
+        # 1. Standard Einzelzeilen-Regeln anwenden
         for pattern, fmt in self.highlighting_rules:
             match_iterator = pattern.globalMatch(text)
             while match_iterator.hasNext():
                 match = match_iterator.next()
                 self.setFormat(match.capturedStart(), match.capturedLength(), fmt)
+
+        # 2. Mehrzeilen-Blöcke (Kommentare / Docstrings) anwenden
+        if not self.multiline_rules:
+            self.setCurrentBlockState(0)
+            return
+
+        self.setCurrentBlockState(0)
+        previous_state = self.previousBlockState()
+
+        # Prüfen, ob wir uns bereits in einem Mehrzeilen-Zustand befinden
+        active_rule = None
+        if previous_state > 0:
+            for rule in self.multiline_rules:
+                if rule[0] == previous_state:
+                    active_rule = rule
+                    break
+
+        start_index = 0
+        if active_rule:
+            state_id, _start_exp, end_exp, fmt = active_rule
+            end_match = end_exp.match(text, start_index)
+            if not end_match.hasMatch():
+                self.setCurrentBlockState(state_id)
+                self.setFormat(0, len(text), fmt)
+                return
+            else:
+                end_pos = end_match.capturedStart()
+                match_len = end_match.capturedLength()
+                self.setFormat(0, end_pos + match_len, fmt)
+                start_index = end_pos + match_len
+
+        while start_index < len(text):
+            earliest_match = None
+            earliest_rule = None
+            for rule in self.multiline_rules:
+                _state_id, start_exp, _end_exp, _fmt = rule
+                m = start_exp.match(text, start_index)
+                if m.hasMatch():
+                    if earliest_match is None or m.capturedStart() < earliest_match.capturedStart():
+                        earliest_match = m
+                        earliest_rule = rule
+
+            if not earliest_match or not earliest_rule:
+                break
+
+            state_id, _start_exp, end_exp, fmt = earliest_rule
+            start_pos = earliest_match.capturedStart()
+            start_len = earliest_match.capturedLength()
+            end_match = end_exp.match(text, start_pos + start_len)
+
+            if not end_match.hasMatch():
+                self.setCurrentBlockState(state_id)
+                self.setFormat(start_pos, len(text) - start_pos, fmt)
+                break
+            else:
+                end_pos = end_match.capturedStart()
+                end_len = end_match.capturedLength()
+                comment_len = (end_pos + end_len) - start_pos
+                self.setFormat(start_pos, comment_len, fmt)
+                start_index = end_pos + end_len

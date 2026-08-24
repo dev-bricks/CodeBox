@@ -9,7 +9,6 @@ from PySide6.QtWidgets import (
     QMessageBox, QTabWidget
 )
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QTextCursor
 
 from core.tabs import TabWidget
 from core.output import OutputPanel
@@ -86,6 +85,13 @@ class MainWindow(QMainWindow):
         act_find.setStatusTip("Sucht nach Text im aktuellen Dokument")
         act_goto = edit_menu.addAction("Gehe zu Zeile", self._goto_line, "Ctrl+G")
         act_goto.setStatusTip("Springt zu einer bestimmten Zeilennummer")
+        edit_menu.addSeparator()
+        act_comment = edit_menu.addAction("Zeilenkommentar umschalten", self._toggle_comment, "Ctrl+/")
+        act_comment.setStatusTip("Kommentiert die aktuelle Zeile oder Auswahl aus/ein")
+        act_indent = edit_menu.addAction("Einrücken", self._indent, "Tab")
+        act_indent.setStatusTip("Rückt die aktuelle Zeile oder Auswahl ein")
+        act_dedent = edit_menu.addAction("Ausrücken", self._dedent, "Shift+Tab")
+        act_dedent.setStatusTip("Rückt die aktuelle Zeile oder Auswahl aus")
         edit_menu.addSeparator()
         act_plugins = edit_menu.addAction("Plugins & Sprachen...", self.open_plugins_dialog, "Ctrl+Shift+P")
         act_plugins.setStatusTip("Öffnet die Verwaltung für Sprach-Erweiterungen und Plugins")
@@ -566,16 +572,34 @@ class MainWindow(QMainWindow):
     def _goto_line(self):
         from PySide6.QtWidgets import QInputDialog
         tab = self.tab_widget.current_tab()
-        if not tab:
+        if not tab or not tab.editor:
             return
         line, ok = QInputDialog.getInt(
-            self, "Gehe zu Zeile", "Zeile:", 1, 1, tab.editor.blockCount()
+            self, "Gehe zu Zeile", "Zeile:", 1, 1, max(1, tab.editor.blockCount())
         )
         if ok:
-            cursor = tab.editor.textCursor()
-            cursor.movePosition(QTextCursor.Start)
-            tab.editor.setTextCursor(cursor)
-            tab.editor.centerCursor()
+            block = tab.editor.document().findBlockByNumber(line - 1)
+            if block.isValid():
+                cursor = tab.editor.textCursor()
+                cursor.setPosition(block.position())
+                tab.editor.setTextCursor(cursor)
+                tab.editor.centerCursor()
+                tab.editor.setFocus()
+
+    def _toggle_comment(self):
+        tab = self.tab_widget.current_tab()
+        if tab and tab.editor:
+            tab.editor.toggle_comment()
+
+    def _indent(self):
+        tab = self.tab_widget.current_tab()
+        if tab and tab.editor:
+            tab.editor.indent_selection()
+
+    def _dedent(self):
+        tab = self.tab_widget.current_tab()
+        if tab and tab.editor:
+            tab.editor.unindent_selection()
 
     def open_plugins_dialog(self):
         """Öffnet den Dialog zur Verwaltung von Plugins und Sprachen."""

@@ -49,25 +49,40 @@ class Minimap(QWidget):
             "border-left: 1px solid #333; }"
         )
 
-        editor.textChanged.connect(self.update)
+        self._cached_lines = None
+        self._cached_max_chars = 1
+
+        editor.textChanged.connect(self._invalidate_cache)
         editor.cursorPositionChanged.connect(self.update)
-        editor.blockCountChanged.connect(lambda _count: self.update())
+        editor.blockCountChanged.connect(lambda _count: self._invalidate_cache())
         editor.updateRequest.connect(self._editor_update_requested)
         editor.verticalScrollBar().valueChanged.connect(lambda _value: self.update())
-        editor.document().contentsChanged.connect(self.update)
+        editor.document().contentsChanged.connect(self._invalidate_cache)
 
     def _editor_update_requested(self, _rect, _dy):
         """Zeichnet die Vorschau nach Scroll- und Viewport-Updates neu."""
         self.update()
 
+    def _invalidate_cache(self):
+        self._cached_lines = None
+        self.update()
+
     def _document_lines(self):
+        if self._cached_lines is not None:
+            return self._cached_lines
         document = self.editor.document()
         block = document.firstBlock()
         lines = []
+        max_c = 1
         while block.isValid():
-            lines.append(block.text())
+            t = block.text()
+            lines.append(t)
+            if len(t) > max_c:
+                max_c = len(t)
             block = block.next()
-        return lines or [""]
+        self._cached_lines = lines or [""]
+        self._cached_max_chars = max_c
+        return self._cached_lines
 
     def _visible_block_range(self, line_count):
         first = self.editor.firstVisibleBlock()
@@ -105,7 +120,7 @@ class Minimap(QWidget):
         self._update_viewport_rect(line_count)
         height = max(1, self.height())
         width = max(1, self.width() - 8)
-        max_chars = max(1, max((len(line) for line in lines), default=1))
+        max_chars = max(1, self._cached_max_chars)
 
         for index, line in enumerate(lines):
             y = int(index * height / line_count)
@@ -191,6 +206,10 @@ class CodeEditor(QPlainTextEdit):
         self.minimap = Minimap(self)
         self._minimap_visible = True
 
+        self.completer = None
+        self._provider = None
+        self.tab_size = 4
+
         self.blockCountChanged.connect(self.updateLineNumberAreaWidth)
         self.updateRequest.connect(self.updateLineNumberArea)
         self.cursorPositionChanged.connect(self.highlightCurrentLine)
@@ -205,6 +224,7 @@ class CodeEditor(QPlainTextEdit):
 
     def apply_editor_settings(self, font_family: str = "Consolas", font_size: int = 10, tab_size: int = 4):
         """Wendet Schriftart, Schriftgröße und Tab-Breite an."""
+        self.tab_size = int(tab_size or 4)
         font = QFont(font_family, font_size)
         font.setStyleHint(QFont.StyleHint.Monospace)
         self.setFont(font)
@@ -212,14 +232,10 @@ class CodeEditor(QPlainTextEdit):
         fm = self.fontMetrics()
         space_width = fm.horizontalAdvance(' ') if hasattr(fm, 'horizontalAdvance') else fm.width(' ')
         if hasattr(self, 'setTabStopDistance'):
-            self.setTabStopDistance(space_width * tab_size)
+            self.setTabStopDistance(space_width * self.tab_size)
         else:
-            self.setTabStopWidth(space_width * tab_size)
+            self.setTabStopWidth(space_width * self.tab_size)
         self.updateLineNumberAreaWidth(0)
-
-        # Auto-Completion
-        self.completer = None
-        self._provider = None
 
     def set_minimap_visible(self, visible: bool):
         """Zeigt oder verbirgt die Minimap und aktualisiert den Randabstand."""
@@ -274,23 +290,275 @@ class CodeEditor(QPlainTextEdit):
         tc.select(QTextCursor.SelectionType.WordUnderCursor)
         return tc.selectedText()
 
+    def indent_selection(self, spaces: int = None):
+        """Rückt die aktuelle Zeile oder alle markierten Zeilen ein."""
+        if spaces is None:
+            spaces = self.tab_size
+        cursor = self.textCursor()
+        indent_str = ' ' * spaces
+
+        if not cursor.hasSelection():
+            cursor.insertText(indent_str)
+            return
+
+        start_pos = cursor.selectionStart()
+        end_pos = cursor.selectionEnd()
+
+        doc = self.document()
+        start_block = doc.findBlock(start_pos)
+        end_block = doc.findBlock(end_pos)
+
+        if end_block.position() == end_pos and end_block != start_block:
+            end_block = end_block.previous()
+
+        cursor.beginEditBlock()
+        block = start_block
+        while block.isValid():
+            tc = QTextCursor(block)
+            tc.movePosition(QTextCursor.MoveOperation.StartOfBlock)
+            tc.insertText(indent_str)
+            if block == end_block:
+                break
+            block = block.next()
+        cursor.endEditBlock()
+
+        new_cursor = self.textCursor()
+        new_cursor.setPosition(start_block.position())
+        new_cursor.setPosition(end_block.position() + end_block.length() - 1, QTextCursor.MoveMode.KeepAnchor)
+        self.setTextCursor(new_cursor)
+
+    def unindent_selection(self, spaces: int = None):
+        """Rückt die aktuelle Zeile oder alle markierten Zeilen aus (dedent)."""
+        if spaces is None:
+            spaces = self.tab_size
+        cursor = self.textCursor()
+
+        start_pos = cursor.selectionStart()
+        end_pos = cursor.selectionEnd()
+
+        doc = self.document()
+        start_block = doc.findBlock(start_pos)
+        end_block = doc.findBlock(end_pos)
+
+        if cursor.hasSelection() and end_block.position() == end_pos and end_block != start_block:
+            end_block = end_block.previous()
+
+        cursor.beginEditBlock()
+        block = start_block
+        while block.isValid():
+            text = block.text()
+            leading_spaces = 0
+            for char in text:
+                if char == ' ':
+                    leading_spaces += 1
+                elif char == '\t':
+                    leading_spaces += spaces
+                    break
+                else:
+                    break
+            remove_count = min(spaces, leading_spaces)
+            if remove_count > 0:
+                tc = QTextCursor(block)
+                tc.movePosition(QTextCursor.MoveOperation.StartOfBlock)
+                for _ in range(remove_count):
+                    tc.deleteChar()
+            if block == end_block:
+                break
+            block = block.next()
+        cursor.endEditBlock()
+
+        if cursor.hasSelection():
+            new_cursor = self.textCursor()
+            new_cursor.setPosition(start_block.position())
+            new_cursor.setPosition(end_block.position() + end_block.length() - 1, QTextCursor.MoveMode.KeepAnchor)
+            self.setTextCursor(new_cursor)
+
+    def toggle_comment(self):
+        """Schaltet den Zeilenkommentar für die aktuelle Zeile oder Auswahl um."""
+        comment_prefix = "# "
+        if self._provider:
+            style = self._provider.get_comment_style()
+            if style and style[0]:
+                comment_prefix = style[0] + " "
+
+        comment_token = comment_prefix.rstrip()
+
+        cursor = self.textCursor()
+        start_pos = cursor.selectionStart()
+        end_pos = cursor.selectionEnd()
+
+        doc = self.document()
+        start_block = doc.findBlock(start_pos)
+        end_block = doc.findBlock(end_pos)
+
+        if cursor.hasSelection() and end_block.position() == end_pos and end_block != start_block:
+            end_block = end_block.previous()
+
+        all_commented = True
+        has_non_empty = False
+        block = start_block
+        while block.isValid():
+            text = block.text().strip()
+            if text:
+                has_non_empty = True
+                if not text.startswith(comment_token):
+                    all_commented = False
+                    break
+            if block == end_block:
+                break
+            block = block.next()
+
+        if not has_non_empty:
+            all_commented = False
+
+        cursor.beginEditBlock()
+        block = start_block
+        while block.isValid():
+            text = block.text()
+            tc = QTextCursor(block)
+            tc.movePosition(QTextCursor.MoveOperation.StartOfBlock)
+
+            if all_commented:
+                stripped_left = text.lstrip()
+                if stripped_left.startswith(comment_prefix):
+                    indent = len(text) - len(stripped_left)
+                    tc.movePosition(QTextCursor.MoveOperation.Right, QTextCursor.MoveMode.MoveAnchor, indent)
+                    for _ in range(len(comment_prefix)):
+                        tc.deleteChar()
+                elif stripped_left.startswith(comment_token):
+                    indent = len(text) - len(stripped_left)
+                    tc.movePosition(QTextCursor.MoveOperation.Right, QTextCursor.MoveMode.MoveAnchor, indent)
+                    for _ in range(len(comment_token)):
+                        tc.deleteChar()
+            else:
+                if text.strip():
+                    tc.insertText(comment_prefix)
+
+            if block == end_block:
+                break
+            block = block.next()
+        cursor.endEditBlock()
+
+    def duplicate_line_or_selection(self):
+        """Dupliziert die aktuelle Zeile oder den markierten Bereich."""
+        cursor = self.textCursor()
+        if cursor.hasSelection():
+            selected = cursor.selectedText()
+            cursor.setPosition(cursor.selectionEnd())
+            cursor.insertText(selected)
+            self.setTextCursor(cursor)
+        else:
+            block = cursor.block()
+            text = block.text()
+            cursor.movePosition(QTextCursor.MoveOperation.EndOfBlock)
+            cursor.insertText("\n" + text)
+            self.setTextCursor(cursor)
+
+    def move_line_up(self):
+        """Verschiebt die aktuelle Zeile nach oben."""
+        cursor = self.textCursor()
+        block = cursor.block()
+        prev = block.previous()
+        if not prev.isValid():
+            return
+        col = cursor.positionInBlock()
+        curr_text = block.text()
+        prev_text = prev.text()
+
+        cursor.beginEditBlock()
+        tc = QTextCursor(prev)
+        tc.movePosition(QTextCursor.MoveOperation.EndOfBlock, QTextCursor.MoveMode.KeepAnchor)
+        tc.removeSelectedText()
+        tc.insertText(curr_text)
+
+        tc2 = QTextCursor(block)
+        tc2.movePosition(QTextCursor.MoveOperation.EndOfBlock, QTextCursor.MoveMode.KeepAnchor)
+        tc2.removeSelectedText()
+        tc2.insertText(prev_text)
+        cursor.endEditBlock()
+
+        new_cursor = QTextCursor(prev)
+        new_cursor.setPosition(prev.position() + min(col, len(curr_text)))
+        self.setTextCursor(new_cursor)
+
+    def move_line_down(self):
+        """Verschiebt die aktuelle Zeile nach unten."""
+        cursor = self.textCursor()
+        block = cursor.block()
+        nxt = block.next()
+        if not nxt.isValid():
+            return
+        col = cursor.positionInBlock()
+        curr_text = block.text()
+        nxt_text = nxt.text()
+
+        cursor.beginEditBlock()
+        tc = QTextCursor(block)
+        tc.movePosition(QTextCursor.MoveOperation.EndOfBlock, QTextCursor.MoveMode.KeepAnchor)
+        tc.removeSelectedText()
+        tc.insertText(nxt_text)
+
+        tc2 = QTextCursor(nxt)
+        tc2.movePosition(QTextCursor.MoveOperation.EndOfBlock, QTextCursor.MoveMode.KeepAnchor)
+        tc2.removeSelectedText()
+        tc2.insertText(curr_text)
+        cursor.endEditBlock()
+
+        new_cursor = QTextCursor(nxt)
+        new_cursor.setPosition(nxt.position() + min(col, len(curr_text)))
+        self.setTextCursor(new_cursor)
+
     def keyPressEvent(self, event):
         # Completer aktiv?
         if self.completer and self.completer.popup().isVisible():
-            if event.key() in (Qt.Key_Enter, Qt.Key_Return, Qt.Key_Escape,
-                               Qt.Key_Tab, Qt.Key_Backtab):
+            if event.key() in (Qt.Key.Key_Enter, Qt.Key.Key_Return, Qt.Key.Key_Escape,
+                               Qt.Key.Key_Tab, Qt.Key.Key_Backtab):
                 event.ignore()
                 return
 
+        # Tab & Shift+Tab / Backtab (Einrücken / Ausrücken)
+        if event.key() == Qt.Key.Key_Backtab or (
+            event.key() == Qt.Key.Key_Tab and bool(event.modifiers() & Qt.KeyboardModifier.ShiftModifier)
+        ):
+            self.unindent_selection(self.tab_size)
+            return
+
+        if event.key() == Qt.Key.Key_Tab:
+            if self.textCursor().hasSelection():
+                self.indent_selection(self.tab_size)
+            else:
+                self.textCursor().insertText(' ' * self.tab_size)
+            return
+
+        # Ctrl+/ oder Ctrl+# (Kommentar umschalten)
+        if (event.modifiers() & Qt.KeyboardModifier.ControlModifier) and (
+            event.key() in (Qt.Key.Key_Slash, Qt.Key.Key_NumberSign) or event.text() in ('/', '#')
+        ):
+            self.toggle_comment()
+            return
+
+        # Ctrl+D (Zeile/Selektion duplizieren)
+        if (event.modifiers() & Qt.KeyboardModifier.ControlModifier) and event.key() == Qt.Key.Key_D:
+            self.duplicate_line_or_selection()
+            return
+
+        # Alt+Up / Alt+Down (Zeile verschieben)
+        if (event.modifiers() & Qt.KeyboardModifier.AltModifier) and event.key() == Qt.Key.Key_Up:
+            self.move_line_up()
+            return
+        if (event.modifiers() & Qt.KeyboardModifier.AltModifier) and event.key() == Qt.Key.Key_Down:
+            self.move_line_down()
+            return
+
         # Auto-Indent bei Enter
-        if event.key() in (Qt.Key_Return, Qt.Key_Enter):
+        if event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
             cursor = self.textCursor()
             line = cursor.block().text()
             indent = len(line) - len(line.lstrip())
             # Indent-Trigger prüfen
-            triggers = self._provider.get_indent_triggers() if self._provider else [':','{']
+            triggers = self._provider.get_indent_triggers() if self._provider else [':', '{']
             if any(line.rstrip().endswith(t) for t in triggers):
-                indent += 4
+                indent += self.tab_size
             super().keyPressEvent(event)
             cursor = self.textCursor()
             cursor.insertText(' ' * indent)

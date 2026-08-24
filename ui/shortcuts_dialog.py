@@ -44,6 +44,10 @@ SHORTCUTS_DATA = [
     ("Ansicht", "Terminal umschalten", "Ctrl+`", "Blendet das integrierte Terminal ein/aus"),
 
     # Editor & Navigation
+    ("Editor", "Zeilenkommentar umschalten", "Ctrl+/", "Kommentiert die aktuelle Zeile oder Auswahl aus/ein"),
+    ("Editor", "Zeile / Auswahl duplizieren", "Ctrl+D", "Dupliziert die aktuelle Zeile oder den ausgewählten Text"),
+    ("Editor", "Zeile nach oben verschieben", "Alt+Up", "Verschiebt die aktuelle Zeile eine Zeile nach oben"),
+    ("Editor", "Zeile nach unten verschieben", "Alt+Down", "Verschiebt die aktuelle Zeile eine Zeile nach unten"),
     ("Editor", "Auto-Vervollständigung", "Ctrl+Space", "Öffnet das Autocomplete-Popup"),
     ("Editor", "Vorschlag übernehmen", "Tab / Enter", "Fügt den ausgewählten Autocomplete-Vorschlag ein"),
     ("Editor", "Einrücken", "Tab", "Rückt die aktuelle Zeile oder Auswahl ein"),

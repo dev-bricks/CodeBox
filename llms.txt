@@ -17,14 +17,15 @@ Part of the dev-bricks family. Python, MIT.
 
 ## Features & Architecture
 
-- **Multi-Language Highlighting**: Built-in providers for Python, JavaScript, TypeScript, C++, Rust, Go, and Java via punctuation-safe `UniversalHighlighter`.
+- **Multi-Language Highlighting**: Built-in providers for Python, JavaScript, TypeScript, C++, Rust, Go, and Java via state-machine-driven `UniversalHighlighter` supporting multi-line docstrings and block comments.
+- **Smart Block Editing & Shortcuts**: Multi-line block indentation (`Tab`), dedentation (`Shift+Tab`), line comment toggling (`Ctrl+/`, `Ctrl+#`), line duplication (`Ctrl+D`), and line moving (`Alt+Up`, `Alt+Down`).
 - **Extensible Plugin System**: Declarative JSON language plugins and Python-based plugins with auto-discovery and live reloading (`plugins/`, `~/.codebox/plugins/`).
 - **Plugins & Shortcuts Dialogs**: Interactive GUI dialogs for managing language plugins (`Ctrl+Shift+P`) and reviewing keyboard shortcuts (`F1`).
 - **LSP Diagnostics & Completion**: Full thread-safe Qt integration with local language servers (e.g. pylsp, typescript-language-server, rust-analyzer, clangd, gopls).
 - **Linter & Problems Panel**: Asynchronous Ruff/flake8/ESLint execution on save with a centralized problems panel.
 - **Integrated Terminal**: Native shell integration (`cmd`, `PowerShell`, `bash`) with dynamic encoding detection (cp1252 / utf-8) and directory sync.
 - **Project Tree**: File tree with proxy filters, custom context menus, and Git status porcelain overlays.
-- **Minimap & Code Navigation**: Synchronized minimap code preview, bracket auto-closing, and go-to-line navigation.
+- **Minimap & Code Navigation**: High-performance cached minimap code preview, bracket auto-closing, and precise go-to-line navigation.
 - **Theme System**: Fusion palette combined with dynamic light/dark stylesheet configurations.
 
 ## Commands
@@ -32,7 +33,7 @@ Part of the dev-bricks family. Python, MIT.
 - `python main.py`: Launches the CodeBox desktop interface.
 - `python main.py --open <file>`: Launches and directly opens a target file path.
 - `build_exe.bat`: Uses PyInstaller to bundle the application into a standalone executable (`dist/CodeBox.exe`).
-- `pytest`: Runs the automated test suite (120 passed, 1 skipped).
+- `pytest`: Runs the automated test suite (164 passed).
 - `ruff check .`: Runs the codebase linting suite.
 
 ## Related Projects (dev-bricks & ellmos family)
