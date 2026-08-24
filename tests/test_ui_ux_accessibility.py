@@ -4,6 +4,7 @@
 
 import pytest
 from PySide6.QtWidgets import QApplication
+from unittest.mock import patch
 
 from ui.main_window import MainWindow
 from ui.settings_dialog import SettingsDialog
@@ -66,6 +67,27 @@ def test_main_window_toolbar_ux_and_a11y(qapp):
         assert window.bottom_tabs.tabToolTip(2) == "LSP- und Linter-Diagnosen und Fehlermeldungen"
     finally:
         window.close()
+
+
+def test_hiding_project_view_restores_editor_focus(qapp):
+    """Der Fokus darf nicht im ausgeblendeten Projektbaum verbleiben."""
+    with patch("features.terminal.TerminalWidget._start_shell", lambda self: None):
+        window = MainWindow()
+        try:
+            window.show()
+            qapp.processEvents()
+            editor = window.tab_widget.current_tab().editor
+            window.project_view.tree.setFocus()
+            qapp.processEvents()
+            assert window.project_view.tree.hasFocus()
+
+            window._toggle_project_view()
+            qapp.processEvents()
+
+            assert not window.project_view.isVisible()
+            assert editor.hasFocus()
+        finally:
+            window.close()
 
 
 def test_tab_widget_ux_tooltips_and_a11y(qapp, tmp_path):

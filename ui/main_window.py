@@ -737,7 +737,16 @@ class MainWindow(QMainWindow):
 
     def _toggle_project_view(self):
         """Blendet den Projektbaum ein/aus."""
-        self.project_view.setVisible(not self.project_view.isVisible())
+        was_visible = self.project_view.isVisible()
+        self.project_view.setVisible(not was_visible)
+        if was_visible:
+            self._focus_active_editor()
+
+    def _focus_active_editor(self):
+        """Setzt den Tastaturfokus auf den aktiven Editor zurück."""
+        tab = self.tab_widget.current_tab()
+        if tab and tab.editor:
+            tab.editor.setFocus()
 
     def _toggle_terminal(self):
         """Blendet das untere Panel ein/aus und wechselt zum Terminal-Tab."""
