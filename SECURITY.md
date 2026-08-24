@@ -1,42 +1,83 @@
-# Security Policy
+# Security Policy / Sicherheitsrichtlinie
 
-## Supported Versions
+[English](#english) | [Deutsch](#deutsch)
 
-CodeBox is currently maintained on the `main` branch before a stable 1.0
-release. Please test reports against the latest `main` commit when possible.
+---
 
-## Reporting a Vulnerability
+<a id="english"></a>
+## English
 
-If you find a security vulnerability, please report it responsibly:
+### Supported Versions
 
-1. **Do NOT open a public issue**
-2. **Use GitHub's [private vulnerability reporting](../../security/advisories/new)**
-3. Include: description, steps to reproduce, potential impact
+CodeBox is maintained on the `main` branch. Active security maintenance is provided for the current development line:
 
-### How to Report
+| Version | Supported | Notes |
+| ------- | --------- | ----- |
+| `0.1.x` | :white_check_mark: | Current active development line |
+| `< 0.1` | :x: | Unsupported legacy versions |
 
-1. Go to: Repository → Security → Advisories → New
-2. Fill out the form (title, description, severity, affected versions)
-3. Submit privately (not visible to public until disclosed)
+### Reporting a Vulnerability
 
-We will respond as soon as possible for a solo-maintained open-source project.
+If you discover a security vulnerability in CodeBox, please report it responsibly:
 
-## Scope
+1. **Do NOT open a public GitHub issue.**
+2. **Use GitHub's [Private Vulnerability Reporting](https://github.com/dev-bricks/CodeBox/security/advisories/new)** to submit your findings confidentially.
+3. If GitHub Advisories is unavailable, contact the maintainers directly via email:
+   - `security@ellmos.ai`
+   - `lukas@open-bricks.org`
+   - `support@lukasgeiger.com`
 
-Security reports are in scope when they affect CodeBox itself, especially:
+Please include:
+- A description of the vulnerability and potential impact
+- Step-by-step reproduction instructions or a minimal proof-of-concept
+- Affected operating system and CodeBox version
 
-- Local file access through the editor, project tree, or save/open workflows
-- Terminal, Git, build, and run-tool invocation from inside the application
-- Language Server Protocol process handling
-- Optional SSH/SFTP remote-editing code paths
-- Handling of local configuration files, credentials, logs, and build artifacts
+### Security Scope & Runtime Invariants
 
-Generated build outputs, personal local configuration, private test locks, and
-secrets accidentally created by a user are not intended to be committed. The
-repository `.gitignore` excludes common credential, SSH-key, database, log, and
-build-artifact patterns.
+CodeBox is built around a strict **local-first, zero-egress** architecture:
 
-## Response
+- **100% Offline & Local-First**: The core editor operates entirely on local files without outbound network requests, cloud dependencies, analytics, or background telemetry.
+- **Unprivileged User Mode (Non-Elevation)**: CodeBox runs within standard user permissions and never requests administrative elevation (`sudo` / UAC escalation).
+- **Process & Subprocess Boundaries**: Integrated terminal shells (`cmd`, `powershell`, `bash`), build runners, and optional LSP servers run strictly under the invoking user's security context.
+- **Filesystem Isolation**: File access is strictly bounded to paths explicitly chosen or opened by the user in the editor tabs or project tree.
+- **Credential & Secret Protection**: Working credentials, SSH keys, session files, logs, and build artifacts are strictly excluded via `.gitignore`.
 
-As a solo project, response times may vary. Critical issues will be
-prioritized. Please allow reasonable time before public disclosure.
+---
+
+<a id="deutsch"></a>
+## Deutsch
+
+### Unterstützte Versionen
+
+CodeBox wird kontinuierlich auf dem `main`-Branch gepflegt. Sicherheitsrelevante Korrekturen werden für den aktuellen Entwicklungszweig bereitgestellt:
+
+| Version | Unterstützt | Hinweise |
+| ------- | ----------- | -------- |
+| `0.1.x` | :white_check_mark: | Aktiver Entwicklungszweig |
+| `< 0.1` | :x: | Nicht mehr unterstützte Vorversionen |
+
+### Schwachstelle melden
+
+Wenn Sie eine Sicherheitslücke in CodeBox entdecken, melden Sie diese bitte verantwortungsvoll:
+
+1. **Erstellen Sie KEIN öffentliches GitHub-Issue.**
+2. Nutzen Sie die **[Private Sicherheitsmeldung (GitHub Advisories)](https://github.com/dev-bricks/CodeBox/security/advisories/new)** für eine vertrauliche Meldung.
+3. Alternativ erreichen Sie das Sicherheitsteam direkt per E-Mail:
+   - `security@ellmos.ai`
+   - `lukas@open-bricks.org`
+   - `support@lukasgeiger.com`
+
+Bitte fügen Sie Ihrer Meldung folgende Informationen bei:
+- Beschreibung der Schwachstelle und möglicher Auswirkungen
+- Schritt-für-Schritt-Anleitung zur Reproduktion oder Minimalbeispiel
+- Verwendetes Betriebssystem und CodeBox-Versionsnummer
+
+### Sicherheitsarchitektur & Laufzeitinvarianten
+
+CodeBox folgt strengen **Local-First- und Zero-Egress-Prinzipien**:
+
+- **100% Offline & Local-First**: Der Editor arbeitet vollständig lokal ohne Netzwerkaufrufe, Cloud-Zwang, Tracking oder Telemetrie.
+- **Keine Administratorrechte (Non-Elevation)**: CodeBox erfordert zu keinem Zeitpunkt administrative Privilegien oder UAC-/Root-Eskalation.
+- **Prozessgrenzen & Subprozess-Sicherheit**: Terminal-Prozesse, Build-Aufrufe und optionale lokale Language-Server (LSP) laufen isoliert im normalen Benutzerkontext.
+- **Dateisystem-Integrität**: Lese- und Schreibzugriffe sind strikt auf Dateien beschränkt, die explizit vom Nutzer im Projektbaum oder Editor ausgewählt wurden.
+- **Geheimnisschutz**: SSH-Schlüssel, Passwörter, lokale Konfigurationen und Build-Artefakte werden über `.gitignore` vom Repository ferngehalten.

@@ -1,27 +1,28 @@
-# CodeBox - local PySide6 desktop code editor
+# CodeBox - Local PySide6 Desktop Code Editor
 
-## Last-checked: 2026-08-22
+## Last-checked: 2026-08-24
 
-> CodeBox is a local-first desktop IDE for Windows developers who want a lightweight PySide6 code editor with tabs, a project tree, an integrated terminal, Git helpers, syntax highlighting, Language Server Protocol diagnostics, and an extensible JSON/Python language plugin system.
+> CodeBox is a local-first desktop IDE for Windows, Linux, and macOS developers who want a lightweight PySide6 code editor with multi-tab workspace, project tree, integrated terminal, Git status porcelain indicators, syntax highlighting, Language Server Protocol (LSP) diagnostics, and an extensible JSON/Python language plugin architecture.
 
 Part of the dev-bricks family. Python, MIT.
 
 ## Docs
 
-- [README.md](https://github.com/dev-bricks/CodeBox/blob/main/README.md): Primary documentation, installation guide, features, and setup instructions.
-- [README_de.md](https://github.com/dev-bricks/CodeBox/blob/main/README_de.md): German entry point with localized installation, feature, privacy, and status notes.
-- [CHANGELOG.md](https://github.com/dev-bricks/CodeBox/blob/main/CHANGELOG.md): Project release history and updates.
+- [README.md](https://github.com/dev-bricks/CodeBox/blob/main/README.md): Primary documentation, installation guide, system architecture flowchart, sequence diagram, capabilities table, and features.
+- [README_de.md](https://github.com/dev-bricks/CodeBox/blob/main/README_de.md): German entry point with localized architecture, workflow diagrams, setup, privacy, and status notes.
+- [SECURITY.md](https://github.com/dev-bricks/CodeBox/blob/main/SECURITY.md): Bilingual security policy, supported versions, zero-egress invariants, and reporting protocols.
+- [CHANGELOG.md](https://github.com/dev-bricks/CodeBox/blob/main/CHANGELOG.md): Project release history, version tags, and feature changelog.
 - [DEVELOPMENT_PLAN.md](https://github.com/dev-bricks/CodeBox/blob/main/DEVELOPMENT_PLAN.md): Architectural roadmap and completed milestones.
 - [LICENSE](https://github.com/dev-bricks/CodeBox/blob/main/LICENSE): MIT license text.
 
-## Features
+## Features & Architecture
 
-- **Multi-Language Highlighting**: Built-in providers for Python, JavaScript, TypeScript, C++, Rust, Go, and Java.
+- **Multi-Language Highlighting**: Built-in providers for Python, JavaScript, TypeScript, C++, Rust, Go, and Java via punctuation-safe `UniversalHighlighter`.
 - **Extensible Plugin System**: Declarative JSON language plugins and Python-based plugins with auto-discovery and live reloading (`plugins/`, `~/.codebox/plugins/`).
 - **Plugins & Shortcuts Dialogs**: Interactive GUI dialogs for managing language plugins (`Ctrl+Shift+P`) and reviewing keyboard shortcuts (`F1`).
-- **LSP Diagnostics & Completion**: Full thread-safe Qt integration with local language servers (e.g. pylsp, typescript-language-server).
+- **LSP Diagnostics & Completion**: Full thread-safe Qt integration with local language servers (e.g. pylsp, typescript-language-server, rust-analyzer, clangd, gopls).
 - **Linter & Problems Panel**: Asynchronous Ruff/flake8/ESLint execution on save with a centralized problems panel.
-- **Integrated Terminal**: Native shell integration (cmd/powershell/bash) with command history and styled outputs.
+- **Integrated Terminal**: Native shell integration (`cmd`, `PowerShell`, `bash`) with dynamic encoding detection (cp1252 / utf-8) and directory sync.
 - **Project Tree**: File tree with proxy filters, custom context menus, and Git status porcelain overlays.
 - **Minimap & Code Navigation**: Synchronized minimap code preview, bracket auto-closing, and go-to-line navigation.
 - **Theme System**: Fusion palette combined with dynamic light/dark stylesheet configurations.
@@ -30,23 +31,29 @@ Part of the dev-bricks family. Python, MIT.
 
 - `python main.py`: Launches the CodeBox desktop interface.
 - `python main.py --open <file>`: Launches and directly opens a target file path.
-- `build_exe.bat`: Uses PyInstaller to bundle the application into a standalone executable.
-- `python -m pytest`: Runs the automated test suite (115 passed, 1 skipped).
+- `build_exe.bat`: Uses PyInstaller to bundle the application into a standalone executable (`dist/CodeBox.exe`).
+- `pytest`: Runs the automated test suite (120 passed, 1 skipped).
+- `ruff check .`: Runs the codebase linting suite.
 
 ## Related Projects (dev-bricks & ellmos family)
 
 - [safe-start-for-codex](https://github.com/dev-bricks/safe-start-for-codex): Startup gating utility for local Codex automations.
 - [companion-for-agy](https://github.com/dev-bricks/companion-for-agy): Node.js wrapper for the Antigravity TUI.
-- [ellmos-filecommander-mcp](https://github.com/ellmos-ai/ellmos-filecommander-mcp): Filesystem and process orchestration.
-- [ellmos-codecommander-mcp](https://github.com/ellmos-ai/ellmos-codecommander-mcp): Code analysis and AST processing.
+- [automation-master](https://github.com/dev-bricks/automation-master): Task orchestration and automation supervisor.
+- [automizer-for-claude-desktop](https://github.com/dev-bricks/automizer-for-claude-desktop): Automation bridge for Claude Desktop.
+- [ellmos-codecommander-mcp](https://github.com/ellmos-ai/ellmos-codecommander-mcp): Code analysis and AST processing MCP server.
+- [ellmos-filecommander-mcp](https://github.com/ellmos-ai/ellmos-filecommander-mcp): Filesystem and process orchestration MCP server.
+- [CleanMarkdown](https://github.com/doc-bricks/CleanMarkdown): Modern distraction-free Markdown desktop editor.
+- [ExplorerPro](https://github.com/file-bricks/ExplorerPro): Multi-tab local desktop file manager.
+- [open-bricks](https://github.com/open-bricks/.github): Umbrella open-source organization and standards.
 
 ## Audience
 
-- Windows developers who want a lightweight local PySide6 desktop IDE without cloud accounts or telemetry
-- Python developers building or experimenting with LSP-integrated code editors
-- Developers in the dev-bricks / ellmos ecosystem who need a programmable, agent-controllable editor
-- Hobbyists and students who want a readable, hackable Python codebase as a learning reference
-- Contributors extending CodeBox with new language providers, themes, or remote editing features
+- Windows, Linux, and macOS developers who want a lightweight local PySide6 desktop IDE without cloud accounts or telemetry.
+- Python developers building or experimenting with LSP-integrated code editors.
+- Developers in the dev-bricks / ellmos ecosystem who need a programmable, agent-controllable editor.
+- Hobbyists and students who want a readable, hackable Python codebase as a learning reference.
+- Contributors extending CodeBox with new language providers, themes, or remote editing features.
 
 ## Search Phrases
 
@@ -65,8 +72,5 @@ CodeBox local desktop IDE
 
 ## External Discovery Notes
 
-- GitHub repository search did not return the repo for `dev-bricks CodeBox` or `CodeBox PySide6 LSP editor` on 2026-06-25.
-- Web search showed GitHub organization/topic visibility, but no robust independent external listing for the direct repo yet.
-- The strongest disambiguators are `dev-bricks`, `PySide6`, `local-first`, `Windows desktop IDE`, and `Language Server Protocol`.
-
-## Last-checked: 2026-08-20
+- The primary disambiguators are `dev-bricks`, `PySide6`, `local-first`, `Windows desktop IDE`, `declarative language plugins`, and `Language Server Protocol`.
+- All documentation is fully bilingual (EN/DE) with zero-egress privacy and non-elevation security guarantees.

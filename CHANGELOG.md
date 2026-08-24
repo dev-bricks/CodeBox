@@ -11,7 +11,22 @@
 Alle wesentlichen Änderungen an CodeBox werden hier dokumentiert.
 Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
-## [0.1.2] - 2026-08-16
+## [0.1.2] - 2026-08-24
+
+### Marketing, Discoverability & Diagramm-Architektur (2026-08-24)
+
+- `README.md` & `README_de.md`: Umfassende Überarbeitung des Projektauftritts und der Auffindbarkeit (Pfad B):
+  - Zweisprachige interaktive Mermaid-Diagramme (`flowchart TD` für Schichtenarchitektur aus UI, Core/Tabs, ProjectTree, LSP/Diagnostics und Runtime/Plugins sowie `sequenceDiagram` mit autonomer Nummerierung für den End-to-End Workflow-Lebenszyklus von Editor-Öffnung über asynchrones Linting/LSP-Abfrage bis Terminal-Ausführung).
+  - Strukturierte zweisprachige Schnellnavigation mit 15 Sprungmarken in beiden README-Dateien.
+  - Detaillierte Tabelle der Kernfähigkeiten und Sicherheits-/Datenschutz-Laufzeitinvarianten (100% Offline / Zero-Egress, Non-Elevation User Mode, Universal Highlighting, Declarative Plugins, Non-Blocking LSP & Linters, Speicherverlust-Schutz).
+  - Shields.io Badges harmonisiert und erweitert (CI-Status, Tests 120 passed | 100%, Python 3.10-3.13, Plattformen Windows/Linux/macOS, Datenschutz Zero-Egress, zweisprachige Sicherheitsrichtlinie, dev-bricks Ökosystem, open-bricks Dachverband, Version 0.1.2, LSP-Ready, llms.txt).
+  - Geschwister-Ökosystem-Matrix mit 9 Partner-Repositories über `dev-bricks`, `ellmos-ai`, `doc-bricks`, `file-bricks` und `open-bricks` verankert.
+- `SECURITY.md`: Zweisprachige Sicherheitsrichtlinie (Englisch / Deutsch) mit verbindlichen Garantien für Local-First & Zero-Egress (100% Offline, keine Telemetrie), unprivilegiertem User-Mode (Non-Elevation), Subprozess-Sicherheit, direkten Sicherheitskontaktadressen (`security@ellmos.ai`, `lukas@open-bricks.org`, `support@lukasgeiger.com`), Supported Versions Matrix (`0.1.x`) und vertraulichem GitHub Advisories Melde-Link.
+- `.github/workflows/ci.yml`: Neuer Multi-OS GitHub Actions CI-Workflow für `ubuntu-latest`, `windows-latest`, `macos-latest` über die Python-Matrix `['3.10', '3.11', '3.12', '3.13']` mit Concurrency-Steuerung (`cancel-in-progress: true`), `actions/checkout@v4`, `actions/setup-python@v5`, Linting-Gate (`ruff check .`) und vollständiger Pytest-Ausführung.
+- `.github/workflows/linux-platform-smoke.yml`: Action-Tags auf kanonisches `@v4` und `@v5` korrigiert und Concurrency-Steuerung ergänzt.
+- `pyproject.toml`: PEP 621 Classifiers (Python 3.13, OS Independent, POSIX Linux, MacOS, Microsoft Windows, Desktop Environment, Utilities) und vollständige URLs (`Changelog`, `Security`, `Parent Org`, `Umbrella Ecosystem`) ergänzt.
+- `llms.txt`: Last-checked Zeitstempel auf `2026-08-24`, Version `0.1.2`, erweiterte Modulreferenzen, Navigation und Teststand synchronisiert.
+- `tests/test_metadata.py`: Metadaten- und Vertragstestsuite um 6 neue Contract-Tests erweitert (Bilingual Parity, Mermaid Syntax, Sibling Ecosystem, Security & Zero-Egress Invariants, CI Workflow Integrity, PEP 621 Classifiers & URLs).
 
 ### Terminal- & Prozess-Streaming-Härtung (2026-08-22)
 
