@@ -10,6 +10,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 
 from PySide6.QtCore import Qt, QTimer, Signal
+from PySide6.QtGui import QKeySequence
 from PySide6.QtWidgets import (
     QCheckBox,
     QDialog,
@@ -62,14 +63,17 @@ class FindReplaceDialog(QDialog):
         grid.setSpacing(6)
 
         # Suchen
-        self.search_label = QLabel("Suchen nach:")
+        self.search_label = QLabel("&Suchen nach:")
+        self.search_label.setToolTip("Suchfeld für Text oder regulären Ausdruck (Alt+S)")
         self.search_input = QLineEdit()
         self.search_input.setObjectName("find_search_input")
         self.search_input.setPlaceholderText("Suchbegriff oder Regex...")
         self.search_input.setClearButtonEnabled(True)
-        self.search_input.setToolTip("Suchbegriff oder regulären Ausdruck eingeben (Enter für nächsten Treffer)")
+        self.search_input.setToolTip("Suchbegriff oder regulären Ausdruck eingeben (Enter für nächsten, Shift+Enter für vorherigen Treffer)")
         self.search_input.setAccessibleName("Suchtext")
         self.search_input.setAccessibleDescription("Eingabefeld für den zu suchenden Text oder regulären Ausdruck")
+        self.search_label.setBuddy(self.search_input)
+        self.search_input.installEventFilter(self)
         self.search_input.textChanged.connect(self._schedule_update)
         self.search_input.returnPressed.connect(self.find_next)
 
@@ -77,12 +81,14 @@ class FindReplaceDialog(QDialog):
         self.btn_prev.setObjectName("find_prev_btn")
         self.btn_prev.setToolTip("Vorherigen Treffer anspringen (Shift+Enter / Shift+F3)")
         self.btn_prev.setAccessibleName("Vorheriger Treffer")
+        self.btn_prev.setAccessibleDescription("Springt zum vorherigen Treffer im Dokument (Shift+Enter oder Shift+F3)")
         self.btn_prev.clicked.connect(self.find_prev)
 
         self.btn_next = QPushButton("↓ Nächster")
         self.btn_next.setObjectName("find_next_btn")
         self.btn_next.setToolTip("Nächsten Treffer anspringen (Enter / F3)")
         self.btn_next.setAccessibleName("Nächster Treffer")
+        self.btn_next.setAccessibleDescription("Springt zum nächsten Treffer im Dokument (Enter oder F3)")
         self.btn_next.clicked.connect(self.find_next)
 
         grid.addWidget(self.search_label, 0, 0)
@@ -91,7 +97,8 @@ class FindReplaceDialog(QDialog):
         grid.addWidget(self.btn_next, 0, 3)
 
         # Ersetzen
-        self.replace_label = QLabel("Ersetzen durch:")
+        self.replace_label = QLabel("Erset&zen durch:")
+        self.replace_label.setToolTip("Eingabefeld für den Ersetzungstext (Alt+Z)")
         self.replace_input = QLineEdit()
         self.replace_input.setObjectName("find_replace_input")
         self.replace_input.setPlaceholderText("Ersetzungstext (unterstützt Regex-Gruppen \\1, \\2)...")
@@ -99,19 +106,24 @@ class FindReplaceDialog(QDialog):
         self.replace_input.setToolTip("Ersetzungstext eingeben (bei Regex: \\1, \\2 für Capture-Groups)")
         self.replace_input.setAccessibleName("Ersetzungstext")
         self.replace_input.setAccessibleDescription("Eingabefeld für den Text, durch den Treffer ersetzt werden")
+        self.replace_label.setBuddy(self.replace_input)
         self.replace_input.textChanged.connect(self._schedule_update)
         self.replace_input.returnPressed.connect(self.replace_current)
 
         self.btn_replace = QPushButton("Ersetzen")
         self.btn_replace.setObjectName("replace_btn")
+        self.btn_replace.setShortcut(QKeySequence("Alt+R"))
         self.btn_replace.setToolTip("Aktuellen Treffer ersetzen (Alt+R)")
         self.btn_replace.setAccessibleName("Treffer ersetzen")
+        self.btn_replace.setAccessibleDescription("Ersetzt das aktuell ausgewählte Vorkommen durch den Ersetzungstext (Alt+R)")
         self.btn_replace.clicked.connect(self.replace_current)
 
         self.btn_replace_all = QPushButton("Alle ersetzen")
         self.btn_replace_all.setObjectName("replace_all_btn")
+        self.btn_replace_all.setShortcut(QKeySequence("Alt+A"))
         self.btn_replace_all.setToolTip("Alle Treffer im Dokument auf einmal ersetzen (Alt+A)")
         self.btn_replace_all.setAccessibleName("Alle Treffer ersetzen")
+        self.btn_replace_all.setAccessibleDescription("Ersetzt alle Vorkommen im gesamten Dokument durch den Ersetzungstext (Alt+A)")
         self.btn_replace_all.clicked.connect(self.replace_all)
 
         grid.addWidget(self.replace_label, 1, 0)
@@ -127,22 +139,25 @@ class FindReplaceDialog(QDialog):
 
         self.cb_case = QCheckBox("Groß-/&Kleinschreibung")
         self.cb_case.setObjectName("find_case_checkbox")
-        self.cb_case.setToolTip("Groß- und Kleinschreibung exakt beachten")
+        self.cb_case.setToolTip("Groß- und Kleinschreibung exakt beachten (Alt+K)")
         self.cb_case.setAccessibleName("Groß- und Kleinschreibung beachten")
+        self.cb_case.setAccessibleDescription("Unterscheidet bei der Suche strikt zwischen Groß- und Kleinschreibung (Alt+K)")
         self.cb_case.stateChanged.connect(self._schedule_update)
         opt_layout.addWidget(self.cb_case)
 
         self.cb_words = QCheckBox("Ganzes &Wort")
         self.cb_words.setObjectName("find_words_checkbox")
-        self.cb_words.setToolTip("Nur ganze Wörter suchen (Wortgrenzen beachten)")
+        self.cb_words.setToolTip("Nur ganze Wörter suchen (Wortgrenzen beachten, Alt+W)")
         self.cb_words.setAccessibleName("Nur ganze Wörter suchen")
+        self.cb_words.setAccessibleDescription("Findet nur Vorkommen, die als eigenständige ganze Wörter vorliegen (Alt+W)")
         self.cb_words.stateChanged.connect(self._schedule_update)
         opt_layout.addWidget(self.cb_words)
 
         self.cb_regex = QCheckBox("Re&gex")
         self.cb_regex.setObjectName("find_regex_checkbox")
-        self.cb_regex.setToolTip("Suchbegriff als regulären Python-Ausdruck interpretieren")
+        self.cb_regex.setToolTip("Suchbegriff als regulären Python-Ausdruck interpretieren (Alt+G)")
         self.cb_regex.setAccessibleName("Regulären Ausdruck verwenden")
+        self.cb_regex.setAccessibleDescription("Interpretiert den Suchbegriff als regulären Python-Ausdruck mit Gruppen-Unterstützung (Alt+G)")
         self.cb_regex.stateChanged.connect(self._schedule_update)
         opt_layout.addWidget(self.cb_regex)
 
@@ -154,6 +169,7 @@ class FindReplaceDialog(QDialog):
         self.status_label = QLabel("Bereit")
         self.status_label.setObjectName("find_status_label")
         self.status_label.setAccessibleName("Suchstatus")
+        self.status_label.setAccessibleDescription("Zeigt die Anzahl der gefundenen Treffer oder Syntaxfehler an")
         status_bar_layout.addWidget(self.status_label)
         status_bar_layout.addStretch()
 
@@ -161,8 +177,10 @@ class FindReplaceDialog(QDialog):
         self.btn_toggle_preview.setObjectName("toggle_preview_btn")
         self.btn_toggle_preview.setCheckable(True)
         self.btn_toggle_preview.setChecked(True)
-        self.btn_toggle_preview.setToolTip("Voransicht der Treffer und Ersetzungen ein-/ausblenden")
+        self.btn_toggle_preview.setShortcut(QKeySequence("Alt+V"))
+        self.btn_toggle_preview.setToolTip("Voransicht der Treffer und Ersetzungen ein-/ausblenden (Alt+V)")
         self.btn_toggle_preview.setAccessibleName("Voransicht umschalten")
+        self.btn_toggle_preview.setAccessibleDescription("Schaltet die tabellarische Voransicht aller Ersetzungen ein oder aus (Alt+V)")
         self.btn_toggle_preview.toggled.connect(self._on_toggle_preview)
         status_bar_layout.addWidget(self.btn_toggle_preview)
         root_layout.addLayout(status_bar_layout)
@@ -185,9 +203,10 @@ class FindReplaceDialog(QDialog):
         self.preview_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
         self.preview_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.preview_table.setAccessibleName("Voransichtstabelle")
-        self.preview_table.setAccessibleDescription("Tabelle der gefundenen Treffer mit Zeile, Spalte und Vorschau der Ersetzung")
+        self.preview_table.setAccessibleDescription("Tabelle der gefundenen Treffer mit Zeile, Spalte und Vorschau der Ersetzung (Enter auf Zeile springt zum Treffer)")
         self.preview_table.itemClicked.connect(self._on_table_item_activated)
         self.preview_table.itemDoubleClicked.connect(self._on_table_item_activated)
+        self.preview_table.itemActivated.connect(self._on_table_item_activated)
         preview_layout.addWidget(self.preview_table)
 
         root_layout.addWidget(self.preview_group, 1)
@@ -199,9 +218,23 @@ class FindReplaceDialog(QDialog):
         self.btn_close.setObjectName("find_close_btn")
         self.btn_close.setToolTip("Suchdialog schließen (Esc)")
         self.btn_close.setAccessibleName("Dialog schließen")
+        self.btn_close.setAccessibleDescription("Schließt den Suchen- und Ersetzen-Dialog und kehrt zum Editor zurück (Esc)")
         self.btn_close.clicked.connect(self.close)
         bottom_layout.addWidget(self.btn_close)
         root_layout.addLayout(bottom_layout)
+
+        # Logische Tab-Reihenfolge (Barrierefreie Tastaturnavigation)
+        self.setTabOrder(self.search_input, self.btn_prev)
+        self.setTabOrder(self.btn_prev, self.btn_next)
+        self.setTabOrder(self.btn_next, self.replace_input)
+        self.setTabOrder(self.replace_input, self.btn_replace)
+        self.setTabOrder(self.btn_replace, self.btn_replace_all)
+        self.setTabOrder(self.btn_replace_all, self.cb_case)
+        self.setTabOrder(self.cb_case, self.cb_words)
+        self.setTabOrder(self.cb_words, self.cb_regex)
+        self.setTabOrder(self.cb_regex, self.btn_toggle_preview)
+        self.setTabOrder(self.btn_toggle_preview, self.preview_table)
+        self.setTabOrder(self.preview_table, self.btn_close)
 
     def _get_current_editor(self) -> Optional["CodeEditor"]:
         if not self.main_window or not hasattr(self.main_window, "tab_widget"):
@@ -266,7 +299,10 @@ class FindReplaceDialog(QDialog):
         if err:
             editor.clearSearchHighlight()
             self.status_label.setText(f"Regex-Fehler: {err}")
-            self.status_label.setStyleSheet("color: #ff6b6b; font-weight: bold;")
+            # Barrierefreie Farbweiche für WCAG AA Kontrast (>= 4.5:1)
+            is_dark = self.palette().color(self.backgroundRole()).lightness() < 128
+            err_color = "#ff7b72" if is_dark else "#b91c1c"
+            self.status_label.setStyleSheet(f"color: {err_color}; font-weight: bold;")
             self.preview_table.setRowCount(0)
             return
 
@@ -397,6 +433,14 @@ class FindReplaceDialog(QDialog):
             self.main_window.status_bar.showMessage(f"{count} Vorkommen ersetzt.", 4000)
         self._update_live_results()
 
+    def eventFilter(self, watched, event):
+        if watched == self.search_input and event.type() == event.Type.KeyPress:
+            if event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
+                if event.modifiers() & Qt.KeyboardModifier.ShiftModifier:
+                    self.find_prev()
+                    return True
+        return super().eventFilter(watched, event)
+
     def keyPressEvent(self, event):
         if event.key() == Qt.Key.Key_Escape:
             self.close()
@@ -413,4 +457,5 @@ class FindReplaceDialog(QDialog):
         editor = self._get_current_editor()
         if editor:
             editor.clearSearchHighlight()
+            editor.setFocus()
         event.accept()
