@@ -1,7 +1,7 @@
 """Tests for MainWindow line navigation and Edit menu delegation."""
 
 import pytest
-from PySide6.QtWidgets import QApplication, QInputDialog
+from PySide6.QtWidgets import QApplication, QInputDialog, QMessageBox
 
 from ui.main_window import MainWindow
 
@@ -34,8 +34,9 @@ def test_goto_line_moves_to_correct_block(qapp, monkeypatch):
     window.close()
 
 
-def test_mainwindow_edit_delegations(qapp):
+def test_mainwindow_edit_delegations(qapp, monkeypatch):
     """Verifies that MainWindow edit actions correctly call CodeEditor methods."""
+    monkeypatch.setattr(QMessageBox, "question", lambda *args, **kwargs: QMessageBox.StandardButton.Yes)
     window = MainWindow()
     tab = window.tab_widget.current_tab()
     assert tab is not None

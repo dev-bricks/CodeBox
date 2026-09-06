@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 """CodeEditor - Erweiterter Editor mit Zeilennummern, Bracket Matching und Auto-Completion"""
 
-from typing import List, Dict
+import re
+from typing import List, Dict, Tuple, Optional
 from PySide6.QtWidgets import (
     QPlainTextEdit, QWidget, QTextEdit, QCompleter
 )
@@ -765,33 +766,253 @@ class CodeEditor(QPlainTextEdit):
             extraSelections.insert(0, selection)
         self.setExtraSelections(extraSelections)
 
-    # ---- Search ----
+    # ---- Search & Replace ----
 
-    def highlightSearchResults(self, pattern: str, case_sensitive: bool = False):
-        from PySide6.QtGui import QTextDocument
+    def compile_search_pattern(
+        self,
+        pattern: str,
+        case_sensitive: bool = False,
+        is_regex: bool = False,
+        whole_word: bool = False,
+    ) -> Tuple[Optional[re.Pattern], Optional[str]]:
+        """Kompiliert das Suchmuster als Regex. Gibt (Pattern, None) oder (None, Fehlermeldung) zurück."""
+        if not pattern:
+            return None, None
+        flags = 0 if case_sensitive else re.IGNORECASE
+        pat_str = pattern
+        if not is_regex:
+            pat_str = re.escape(pattern)
+            if whole_word:
+                pat_str = r"\b" + pat_str + r"\b"
+        elif whole_word:
+            pat_str = r"\b(?:" + pattern + r")\b"
+        try:
+            return re.compile(pat_str, flags), None
+        except re.error as exc:
+            return None, str(exc)
+
+    def find_all_matches(
+        self,
+        pattern: str,
+        case_sensitive: bool = False,
+        is_regex: bool = False,
+        whole_word: bool = False,
+    ) -> Tuple[List[Tuple[int, int]], Optional[str]]:
+        """Findet alle Treffer-Positionen (start, end) im Dokumenttext."""
+        if not pattern:
+            return [], None
+        compiled, err = self.compile_search_pattern(
+            pattern, case_sensitive=case_sensitive, is_regex=is_regex, whole_word=whole_word
+        )
+        if err or not compiled:
+            return [], err
+        text = self.toPlainText()
+        matches = [(m.start(), m.end()) for m in compiled.finditer(text)]
+        return matches, None
+
+    def highlightSearchResults(
+        self,
+        pattern: str,
+        case_sensitive: bool = False,
+        is_regex: bool = False,
+        whole_word: bool = False,
+    ) -> int:
+        """Hebt alle Suchtreffer im Dokument hervor und liefert die Trefferanzahl."""
         self.search_selections = []
         if not pattern:
             self.highlightCurrentLine()
             return 0
-        flags = QTextDocument.FindFlag(0)
-        if case_sensitive:
-            flags |= QTextDocument.FindFlag.FindCaseSensitively
-        cursor = QTextCursor(self.document())
+        matches, err = self.find_all_matches(
+            pattern, case_sensitive=case_sensitive, is_regex=is_regex, whole_word=whole_word
+        )
+        if err or not matches:
+            self.highlightCurrentLine()
+            return 0
         fmt = QTextCharFormat()
         fmt.setBackground(QColor(100, 100, 0))
         fmt.setForeground(QColor(255, 255, 255))
-        count = 0
-        while True:
-            cursor = self.document().find(pattern, cursor, flags)
-            if cursor.isNull():
-                break
+        for start, end in matches:
+            cursor = QTextCursor(self.document())
+            cursor.setPosition(start)
+            cursor.setPosition(end, QTextCursor.MoveMode.KeepAnchor)
             sel = QTextEdit.ExtraSelection()
             sel.format = fmt
             sel.cursor = cursor
             self.search_selections.append(sel)
-            count += 1
         self.highlightCurrentLine()
-        return count
+        return len(matches)
+
+    def find_next(
+        self,
+        pattern: str,
+        case_sensitive: bool = False,
+        is_regex: bool = False,
+        whole_word: bool = False,
+        forward: bool = True,
+    ) -> bool:
+        """Findet den nächsten oder vorherigen Treffer und selektiert ihn im Editor (mit Wrap-Around)."""
+        matches, err = self.find_all_matches(
+            pattern, case_sensitive=case_sensitive, is_regex=is_regex, whole_word=whole_word
+        )
+        if not matches:
+            return False
+        cursor = self.textCursor()
+        cur_start = cursor.selectionStart()
+        has_sel = cursor.hasSelection()
+
+        chosen_match = None
+        if forward:
+            for start, end in matches:
+                if has_sel:
+                    if start > cur_start:
+                        chosen_match = (start, end)
+                        break
+                else:
+                    if end > cur_start:
+                        chosen_match = (start, end)
+                        break
+            if chosen_match is None:
+                chosen_match = matches[0]
+        else:
+            for start, end in reversed(matches):
+                if has_sel:
+                    if start < cur_start:
+                        chosen_match = (start, end)
+                        break
+                else:
+                    if start < cur_start:
+                        chosen_match = (start, end)
+                        break
+            if chosen_match is None:
+                chosen_match = matches[-1]
+
+        if chosen_match:
+            c = QTextCursor(self.document())
+            c.setPosition(chosen_match[0])
+            c.setPosition(chosen_match[1], QTextCursor.MoveMode.KeepAnchor)
+            self.setTextCursor(c)
+            self.centerCursor()
+            return True
+        return False
+
+    def replace_current(
+        self,
+        pattern: str,
+        replacement: str,
+        case_sensitive: bool = False,
+        is_regex: bool = False,
+        whole_word: bool = False,
+    ) -> bool:
+        """Ersetzt die aktuelle Selektion falls sie passt, und springt zum nächsten Treffer."""
+        compiled, err = self.compile_search_pattern(
+            pattern, case_sensitive=case_sensitive, is_regex=is_regex, whole_word=whole_word
+        )
+        if err or not compiled:
+            return False
+        cursor = self.textCursor()
+        if cursor.hasSelection():
+            selected_text = cursor.selectedText().replace("\u2029", "\n")
+            m = compiled.fullmatch(selected_text)
+            if m:
+                if is_regex:
+                    try:
+                        rep_text = m.expand(replacement)
+                    except Exception:
+                        rep_text = replacement
+                else:
+                    rep_text = replacement
+                cursor.insertText(rep_text)
+                self.setTextCursor(cursor)
+                self.find_next(
+                    pattern, case_sensitive=case_sensitive, is_regex=is_regex, whole_word=whole_word, forward=True
+                )
+                return True
+        return self.find_next(
+            pattern, case_sensitive=case_sensitive, is_regex=is_regex, whole_word=whole_word, forward=True
+        )
+
+    def replace_all(
+        self,
+        pattern: str,
+        replacement: str,
+        case_sensitive: bool = False,
+        is_regex: bool = False,
+        whole_word: bool = False,
+    ) -> int:
+        """Ersetzt alle Treffer im Dokument innerhalb eines einzigen Undo-Schritts."""
+        compiled, err = self.compile_search_pattern(
+            pattern, case_sensitive=case_sensitive, is_regex=is_regex, whole_word=whole_word
+        )
+        if err or not compiled:
+            return 0
+        text = self.toPlainText()
+        match_objects = list(compiled.finditer(text))
+        if not match_objects:
+            return 0
+
+        cursor = self.textCursor()
+        cursor.beginEditBlock()
+        for m in reversed(match_objects):
+            c = QTextCursor(self.document())
+            c.setPosition(m.start())
+            c.setPosition(m.end(), QTextCursor.MoveMode.KeepAnchor)
+            if is_regex:
+                try:
+                    rep_text = m.expand(replacement)
+                except Exception:
+                    rep_text = replacement
+            else:
+                rep_text = replacement
+            c.insertText(rep_text)
+        cursor.endEditBlock()
+        self.clearSearchHighlight()
+        return len(match_objects)
+
+    def get_replace_preview(
+        self,
+        pattern: str,
+        replacement: str,
+        case_sensitive: bool = False,
+        is_regex: bool = False,
+        whole_word: bool = False,
+        max_items: int = 50,
+    ) -> Tuple[List[Dict], int, Optional[str]]:
+        """Erzeugt eine strukturierte Voransicht der Ersetzungen mit Zeile, Spalte, Original und Neu."""
+        if not pattern:
+            return [], 0, None
+        compiled, err = self.compile_search_pattern(
+            pattern, case_sensitive=case_sensitive, is_regex=is_regex, whole_word=whole_word
+        )
+        if err or not compiled:
+            return [], 0, err
+        text = self.toPlainText()
+        match_objects = list(compiled.finditer(text))
+        total = len(match_objects)
+        previews = []
+        doc = self.document()
+        for m in match_objects[:max_items]:
+            start, end = m.start(), m.end()
+            block = doc.findBlock(start)
+            line_no = block.blockNumber() + 1
+            col_no = start - block.position() + 1
+            orig = m.group(0)
+            if is_regex:
+                try:
+                    rep = m.expand(replacement)
+                except Exception:
+                    rep = replacement
+            else:
+                rep = replacement
+            previews.append({
+                "line": line_no,
+                "col": col_no,
+                "start": start,
+                "end": end,
+                "original": orig,
+                "replacement": rep,
+                "line_text": block.text(),
+            })
+        return previews, total, None
 
     def clearSearchHighlight(self):
         self.search_selections = []

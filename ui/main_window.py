@@ -55,6 +55,8 @@ class MainWindow(QMainWindow):
         self._plugin_manager.discover_and_load_all()
         add_provider_listener(self._on_providers_updated)
 
+        self._find_dialog = None
+
         self.setup_ui()
         self.setup_shortcuts()
         self._apply_settings()
@@ -81,9 +83,15 @@ class MainWindow(QMainWindow):
         act_redo = edit_menu.addAction("Wiederherstellen", self._redo, "Ctrl+Y")
         act_redo.setStatusTip("Stellt die letzte rückgängig gemachte Änderung wieder her")
         edit_menu.addSeparator()
-        act_find = edit_menu.addAction("Suchen", self._find, "Ctrl+F")
-        act_find.setStatusTip("Sucht nach Text im aktuellen Dokument")
-        act_goto = edit_menu.addAction("Gehe zu Zeile", self._goto_line, "Ctrl+G")
+        act_find = edit_menu.addAction("Suchen...", self._find, "Ctrl+F")
+        act_find.setStatusTip("Öffnet den Suchen- und Ersetzen-Dialog")
+        act_replace = edit_menu.addAction("Ersetzen...", self._replace, "Ctrl+H")
+        act_replace.setStatusTip("Öffnet den Suchen- und Ersetzen-Dialog im Ersetzen-Modus")
+        act_find_next = edit_menu.addAction("Weitersuchen", self._find_next, "F3")
+        act_find_next.setStatusTip("Springt zum nächsten Suchtreffer")
+        act_find_prev = edit_menu.addAction("Rückwärts weitersuchen", self._find_prev, "Shift+F3")
+        act_find_prev.setStatusTip("Springt zum vorherigen Suchtreffer")
+        act_goto = edit_menu.addAction("Gehe zu Zeile...", self._goto_line, "Ctrl+G")
         act_goto.setStatusTip("Springt zu einer bestimmten Zeilennummer")
         edit_menu.addSeparator()
         act_comment = edit_menu.addAction("Zeilenkommentar umschalten", self._toggle_comment, "Ctrl+/")
@@ -560,14 +568,34 @@ class MainWindow(QMainWindow):
         if tab:
             tab.editor.redo()
 
+    def _open_find_replace_dialog(self, mode: str = "find"):
+        from ui.search_dialog import FindReplaceDialog
+        if self._find_dialog is None:
+            self._find_dialog = FindReplaceDialog(self, initial_mode=mode)
+        else:
+            self._find_dialog.set_mode(mode)
+        self._find_dialog.show()
+        self._find_dialog.raise_()
+        self._find_dialog.activateWindow()
+
     def _find(self):
-        from PySide6.QtWidgets import QInputDialog
-        text, ok = QInputDialog.getText(self, "Suchen", "Suchbegriff:")
-        if ok and text:
-            tab = self.tab_widget.current_tab()
-            if tab:
-                count = tab.editor.highlightSearchResults(text)
-                self.status_bar.showMessage(f"{count} Treffer gefunden", 3000)
+        self._open_find_replace_dialog("find")
+
+    def _replace(self):
+        self._open_find_replace_dialog("replace")
+
+    def _find_next(self):
+        if self._find_dialog and self._find_dialog.isVisible():
+            self._find_dialog.find_next()
+        else:
+            self._open_find_replace_dialog("find")
+
+    def _find_prev(self):
+        if self._find_dialog and self._find_dialog.isVisible():
+            self._find_dialog.find_prev()
+        else:
+            self._open_find_replace_dialog("find")
+
 
     def _goto_line(self):
         from PySide6.QtWidgets import QInputDialog
@@ -796,6 +824,9 @@ class MainWindow(QMainWindow):
         # Terminal-Prozess sauber beenden
         if hasattr(self, 'terminal'):
             self.terminal.close()
+        # Suchen-Dialog schließen
+        if getattr(self, "_find_dialog", None):
+            self._find_dialog.close()
         # LSP-Server stoppen
         self._linter_manager.stop_all()
         self._lsp_manager.stop_all()

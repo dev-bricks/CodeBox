@@ -30,7 +30,10 @@ SHORTCUTS_DATA = [
     # Bearbeiten
     ("Bearbeiten", "Rückgängig", "Ctrl+Z", "Macht die letzte Änderung rückgängig"),
     ("Bearbeiten", "Wiederherstellen", "Ctrl+Y", "Stellt die letzte rückgängig gemachte Änderung wieder her"),
-    ("Bearbeiten", "Suchen", "Ctrl+F", "Öffnet den Suchen-Dialog"),
+    ("Bearbeiten", "Suchen", "Ctrl+F", "Öffnet den Suchen- und Ersetzen-Dialog"),
+    ("Bearbeiten", "Ersetzen", "Ctrl+H", "Öffnet den Suchen- und Ersetzen-Dialog im Ersetzen-Modus"),
+    ("Bearbeiten", "Weitersuchen", "F3", "Springt zum nächsten Suchtreffer"),
+    ("Bearbeiten", "Rückwärts suchen", "Shift+F3", "Springt zum vorherigen Suchtreffer"),
     ("Bearbeiten", "Gehe zu Zeile", "Ctrl+G", "Springt zu einer bestimmten Zeilennummer"),
     ("Bearbeiten", "Einstellungen", "Ctrl+,", "Öffnet die Programmeinstellungen"),
     ("Bearbeiten", "Plugins & Sprachen", "Ctrl+Shift+P", "Öffnet die Plugin- und Sprachverwaltung"),

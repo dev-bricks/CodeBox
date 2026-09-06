@@ -33,8 +33,9 @@ def test_minimap_caching_and_invalidation(qapp):
 
     # Modifying text should invalidate the cache
     editor.appendPlainText("line 4 extra very long line that expands max chars")
-    qapp.processEvents()
     assert minimap._cached_lines is None
+    qapp.processEvents()
+
 
     # Fetching lines again recalculates and caches
     lines2 = minimap._document_lines()
