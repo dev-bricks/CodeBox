@@ -48,6 +48,7 @@ SHORTCUTS_DATA = [
     # Ansicht
     ("Ansicht", "Projektbaum umschalten", "Ctrl+B", "Blendet den Datei- und Projektbaum ein/aus"),
     ("Ansicht", "Terminal umschalten", "Ctrl+`", "Blendet das integrierte Terminal ein/aus"),
+    ("Ansicht", "Git-Diff anzeigen", "Ctrl+Alt+D", "Öffnet den Git Diff-Viewer für geänderte Dateien"),
 
     # Editor & Navigation
     ("Editor", "Zeilenkommentar umschalten", "Ctrl+/", "Kommentiert die aktuelle Zeile oder Auswahl aus/ein"),

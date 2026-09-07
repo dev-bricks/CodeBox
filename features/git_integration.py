@@ -100,7 +100,7 @@ class GitRepo:
                 timeout=10,
             )
             if result.returncode == 0:
-                return result.stdout.strip()
+                return result.stdout.rstrip("\r\n")
             return None
         except (FileNotFoundError, subprocess.TimeoutExpired, OSError) as e:
             logger.debug("Git command failed: git %s (%s)", " ".join(args), e)
@@ -162,7 +162,36 @@ class GitRepo:
             args.append("--cached")
         if filepath:
             args.extend(["--", filepath])
-        return self._run_git(*args)
+        diff = self._run_git(*args)
+        if (not diff) and filepath and not staged:
+            full_path = self.repo_path / filepath
+            if full_path.is_file():
+                status = self.get_status().get(filepath.replace("\\", "/"))
+                if status and status.is_untracked:
+                    try:
+                        import difflib
+                        content = full_path.read_text(encoding="utf-8", errors="replace").splitlines(keepends=True)
+                        diff_lines = list(difflib.unified_diff(
+                            [],
+                            content,
+                            fromfile=f"a/{filepath}",
+                            tofile=f"b/{filepath}",
+                        ))
+                        if diff_lines:
+                            return "".join(diff_lines).strip()
+                    except Exception:
+                        pass
+        return diff
+
+    def get_file_content_at_head(self, filepath: str) -> Optional[str]:
+        """Returns the content of a file from HEAD, or None."""
+        clean_path = filepath.replace("\\", "/")
+        return self._run_git("show", f"HEAD:{clean_path}")
+
+    def get_file_content_in_index(self, filepath: str) -> Optional[str]:
+        """Returns the content of a file from the git index (:0:filepath), or None."""
+        clean_path = filepath.replace("\\", "/")
+        return self._run_git("show", f":0:{clean_path}")
 
     def get_log(self, limit: int = 20, oneline: bool = True) -> List[str]:
         """Returns recent commit messages.

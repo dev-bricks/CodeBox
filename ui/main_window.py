@@ -3,6 +3,7 @@
 """CodeBox Hauptfenster"""
 
 from pathlib import Path
+from typing import Optional
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QSplitter,
     QStatusBar, QLabel, QComboBox, QToolBar, QFileDialog,
@@ -167,6 +168,11 @@ class MainWindow(QMainWindow):
         )
         self._toggle_terminal_action.setStatusTip("Blendet das integrierte Terminal ein oder aus")
 
+        self._toggle_diff_action = view_menu.addAction(
+            "Git-Diff anzeigen...", lambda: self.show_diff(), "Ctrl+Alt+D"
+        )
+        self._toggle_diff_action.setStatusTip("Öffnet den Git Diff-Viewer für geänderte Dateien")
+
         # Theme-Submenü
         from features.theme_manager import get_available_themes, apply_theme
         theme_menu = view_menu.addMenu("Theme")
@@ -199,6 +205,7 @@ class MainWindow(QMainWindow):
         # Linke Seite: Project-View (Dateibaum)
         self.project_view = ProjectView()
         self.project_view.fileDoubleClicked.connect(self._open_file_from_project)
+        self.project_view.diffRequested.connect(self.show_diff)
         self.h_splitter.addWidget(self.project_view)
 
         # Rechte Seite: Vertikaler Splitter (Editor oben, Output/Terminal unten)
@@ -784,6 +791,23 @@ class MainWindow(QMainWindow):
             self.bottom_tabs.show()
             self.bottom_tabs.setCurrentWidget(self.terminal)
             self.terminal.input.setFocus()
+
+    def show_diff(self, file_path: Optional[Path] = None, staged: bool = False):
+        """Öffnet den Git Diff-Viewer für das Projekt oder eine bestimmte Datei."""
+        from ui.diff_viewer import DiffViewerDialog
+        repo_root = getattr(self.project_view, "_root_path", None)
+        if not repo_root:
+            tab = self.tab_widget.current_tab()
+            if tab and tab.file_path:
+                repo_root = tab.file_path.parent
+            else:
+                repo_root = Path.cwd()
+
+        dialog = DiffViewerDialog(self, repo_root=Path(repo_root), initial_file=file_path, staged=staged)
+        dialog.show()
+        dialog.raise_()
+        dialog.activateWindow()
+        return dialog
 
     def _on_providers_updated(self):
         """Aktualisiert die Sprachauswahl in der Toolbar bei Registry-Änderungen."""

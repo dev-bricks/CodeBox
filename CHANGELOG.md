@@ -11,6 +11,27 @@
 Alle wesentlichen Änderungen an CodeBox werden hier dokumentiert.
 Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
+## [0.1.3] - 2026-09-07
+
+### Integrierter Git Diff-Viewer & Status-Parser-Härtung (2026-09-07)
+
+- `ui/diff_viewer.py`: Neuer nativer Git Diff-Viewer (`DiffViewerDialog`) für CodeBox:
+  - **Unified Diff-Modus**: Einspaltige Ansicht mit WCAG-konformer Syntaxhervorhebung (`DiffHighlighter`) für Einfügungen (`+`), Löschungen (`-`), Hunk-Header (`@@`) und Git-Metadaten.
+  - **Side-by-Side Diff-Modus**: Zweispaltige Ansicht mit `QSplitter`, synchronisiertem Scrollen (`valueChanged`-Kopplung) und Linienpräfix-Highlighter (`SideBySideHighlighter`) über zeilenbasierte `compute_side_by_side()`-Ausrichtung.
+  - **Dateiauswahl & Status**: Dropdown-Auswahl aller geänderten Dateien oder des Gesamtrepositories mit Git-Status-Badges (`[M]`, `[S]`, `[U]`, `[D]`).
+  - **Staging-Umschaltung**: Sofortiges Umschalten zwischen Arbeitsbaum-Änderungen und gestageten Commits (`--cached`).
+  - **Chunk-Navigation**: Tastaturnavigation von Chunk zu Chunk via `Alt+Up` und `Alt+Down`.
+  - **Editor-Integration**: Direktsprung in den Haupteditor über den Button *Im Editor öffnen* oder Doppelklick.
+  - **Vollständige Barrierefreiheit**: WCAG AA/AAA-Farbkontraste, `accessibleName`, `accessibleDescription` und Tastaturfokus-Verwaltung.
+- `ui/main_window.py`: Menüaktion *Git-Diff anzeigen...* im Menü *Ansicht* mit Shortcut `Ctrl+Alt+D` verankert und `show_diff()` implementiert; Signalanbindung an `ProjectView.diffRequested`.
+- `features/project_view.py`: Kontextmenü um *Git-Diff anzeigen* erweitert; emittiert `diffRequested(Path)`.
+- `ui/shortcuts_dialog.py`: Neuer Shortcut `Ctrl+Alt+D` in der Ansicht-Kategorie registriert.
+- `features/git_integration.py`:
+  - `_run_git()`: Behoben: `result.stdout.strip()` entfernte das führende Leerzeichen von Zeilen im Format ` M <datei>` in `git status --porcelain`, wodurch der erste Buchstabe des Dateinamens abgeschnitten wurde (`rstrip("\r\n")` statt `strip()`).
+  - `get_diff()`: Fallback für ungetrackte Dateien via `difflib.unified_diff` integriert.
+  - `get_file_content_at_head()` und `get_file_content_in_index()` für präzisen Dateiinhalt-Abgleich hinzugefügt.
+- `tests/test_diff_viewer.py`: 13 neue automatisierte Tests für Diff-Highlighting, Side-by-Side-Berechnung, Dialog-Initialisierung, Dateiauswahl, Staging-Toggle, Chunk-Navigation, Barrierefreiheit und Editor-Sprung (161 passed, 1 skipped).
+
 ## [0.1.2] - 2026-08-24
 
 ### High-End Editor-, Highlighter- & Performance-Härtung (2026-08-24)

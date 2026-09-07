@@ -157,6 +157,7 @@ class ProjectView(QWidget):
     """
 
     fileDoubleClicked = Signal(object)  # Path
+    diffRequested = Signal(object)  # Path
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -350,6 +351,8 @@ class ProjectView(QWidget):
         if not is_dir:
             act_open = menu.addAction("Öffnen")
             act_open.triggered.connect(lambda: self.fileDoubleClicked.emit(file_path))
+            act_diff = menu.addAction("Git-Diff anzeigen")
+            act_diff.triggered.connect(lambda: self.diffRequested.emit(file_path))
 
         act_reveal = menu.addAction("Im Explorer zeigen")
         act_reveal.triggered.connect(lambda: self._reveal_in_explorer(file_path))
