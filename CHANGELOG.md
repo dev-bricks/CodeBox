@@ -11,6 +11,27 @@
 Alle wesentlichen Änderungen an CodeBox werden hier dokumentiert.
 Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
+## [0.1.4] - 2026-09-08
+
+### Code-Folding für Funktionen und Klassen (2026-09-08)
+
+- `core/folding.py`: Neues Modul für Faltungserkennung und Block-Sichtbarkeitsverwaltung:
+  - `FoldRegion`: Datenklasse für Start-/Endzeile, Typ (Funktion/Klasse/Block), Name und hierarchische Signatur für persistente Faltungszustände über Zeilenverschiebungen hinweg.
+  - `FoldDetector`: Präzise Erkennung für Python (Funktionen, `async def`, Klassen über Einrückungs- und Scope-Tracking) und geschweifte Klammern (`{ ... }` für JS, TS, C++, Rust, Go, Java, JSON) unter Ausschluss von String-Literalen und Kommentaren.
+  - `FoldingManager`: Verwaltung des aktiven Faltungszustands und native Kopplung an `QTextBlock.setVisible(bool)` mit `QTextDocument.markContentsDirty(0, count)`.
+  - Cursorsicherheit: Verhindert unsichtbare Cursors durch automatische Neupositionierung auf die Kopfzeile beim Einklappen.
+- `core/editor.py`:
+  - `LineNumberArea`: Um Faltungsspalte (`FOLD_AREA_WIDTH = 14`) erweitert; High-DPI Vektor-Rendering für `▼` (ausgeklappt) und `▶` (eingeklappt); Klick zum Umschalten und dynamischer Hover-Cursor (`PointingHandCursor`).
+  - Methoden `toggle_fold`, `toggle_fold_at_cursor`, `fold_all`, `unfold_all`, `is_line_foldable`, `is_line_folded`.
+  - `_schedule_fold_update`: Entprellte (debounced) Hintergrund-Aktualisierung bei Text- und Provideränderungen.
+- `core/tabs.py`: Setzt `file_path` Eigenschaft auf Editor und aktualisiert Faltung beim Laden.
+- `ui/main_window.py`: Untermenü *Code-Faltung* im Menü *Ansicht* verankert:
+  - *Faltung umschalten* (`Ctrl+Shift+[`)
+  - *Alles einklappen* (`Ctrl+Alt+[`)
+  - *Alles ausklappen* (`Ctrl+Alt+]`)
+- `ui/shortcuts_dialog.py`: Shortcuts in der Kategorie *Ansicht* dokumentiert.
+- `tests/test_code_folding.py`: 10 neue automatisierte Tests für Python- und Brace-Erkennung, Gutter-Klick, Visibility, Cursor-Schutz und MainWindow-Aktionen.
+
 ## [0.1.3] - 2026-09-07
 
 ### Integrierter Git Diff-Viewer & Status-Parser-Härtung (2026-09-07)

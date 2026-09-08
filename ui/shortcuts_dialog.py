@@ -49,6 +49,9 @@ SHORTCUTS_DATA = [
     ("Ansicht", "Projektbaum umschalten", "Ctrl+B", "Blendet den Datei- und Projektbaum ein/aus"),
     ("Ansicht", "Terminal umschalten", "Ctrl+`", "Blendet das integrierte Terminal ein/aus"),
     ("Ansicht", "Git-Diff anzeigen", "Ctrl+Alt+D", "Öffnet den Git Diff-Viewer für geänderte Dateien"),
+    ("Ansicht", "Code-Faltung umschalten", "Ctrl+Shift+[", "Klappt die Funktion oder Klasse an der Cursorposition ein oder aus"),
+    ("Ansicht", "Alle Blöcke einklappen", "Ctrl+Alt+[", "Klappt alle Funktionen und Klassen im Dokument ein"),
+    ("Ansicht", "Alle Blöcke ausklappen", "Ctrl+Alt+]", "Klappt alle Funktionen und Klassen im Dokument aus"),
 
     # Editor & Navigation
     ("Editor", "Zeilenkommentar umschalten", "Ctrl+/", "Kommentiert die aktuelle Zeile oder Auswahl aus/ein"),

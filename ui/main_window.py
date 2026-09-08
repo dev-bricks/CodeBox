@@ -183,6 +183,23 @@ class MainWindow(QMainWindow):
             )
             t_act.setStatusTip(f"Farbschema auf '{theme_name.capitalize()}' umstellen")
 
+        # Code-Faltung Submenü
+        folding_menu = view_menu.addMenu("Code-Faltung")
+        self._toggle_fold_action = folding_menu.addAction(
+            "Faltung umschalten", self._toggle_fold_current, "Ctrl+Shift+["
+        )
+        self._toggle_fold_action.setStatusTip("Klappt den aktuellen Block an der Cursorposition ein oder aus")
+
+        self._fold_all_action = folding_menu.addAction(
+            "Alles einklappen", self._fold_all, "Ctrl+Alt+["
+        )
+        self._fold_all_action.setStatusTip("Klappt alle Funktionen und Klassen im Dokument ein")
+
+        self._unfold_all_action = folding_menu.addAction(
+            "Alles ausklappen", self._unfold_all, "Ctrl+Alt+]"
+        )
+        self._unfold_all_action.setStatusTip("Klappt alle Funktionen und Klassen im Dokument aus")
+
         # ---- Hilfe-Menü ----
         help_menu = menubar.addMenu("Hilfe")
         act_shortcuts = help_menu.addAction("Tastenkürzel-Übersicht", self.open_shortcuts_dialog, "F1")
@@ -635,6 +652,24 @@ class MainWindow(QMainWindow):
         tab = self.tab_widget.current_tab()
         if tab and tab.editor:
             tab.editor.unindent_selection()
+
+    def _toggle_fold_current(self):
+        """Schaltet die Faltung an der aktuellen Cursor-Zeile um."""
+        tab = self.tab_widget.current_tab()
+        if tab and tab.editor:
+            tab.editor.toggle_fold_at_cursor()
+
+    def _fold_all(self):
+        """Klappt alle Blöcke im aktuellen Dokument ein."""
+        tab = self.tab_widget.current_tab()
+        if tab and tab.editor:
+            tab.editor.fold_all()
+
+    def _unfold_all(self):
+        """Klappt alle Blöcke im aktuellen Dokument aus."""
+        tab = self.tab_widget.current_tab()
+        if tab and tab.editor:
+            tab.editor.unfold_all()
 
     def open_plugins_dialog(self):
         """Öffnet den Dialog zur Verwaltung von Plugins und Sprachen."""

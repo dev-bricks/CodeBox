@@ -7,23 +7,68 @@ from typing import List, Dict, Tuple, Optional
 from PySide6.QtWidgets import (
     QPlainTextEdit, QWidget, QTextEdit, QCompleter
 )
-from PySide6.QtCore import Qt, QSize, QRect, Signal
+from PySide6.QtCore import Qt, QSize, QRect, Signal, QTimer, QPointF
 from PySide6.QtGui import (
-    QFont, QColor, QPainter, QTextFormat, QTextCharFormat, QTextCursor
+    QFont, QColor, QPainter, QTextFormat, QTextCharFormat, QTextCursor, QPolygonF
 )
+
+from core.folding import FoldingManager
 
 
 class LineNumberArea(QWidget):
-    """Zeichnet Zeilennummern für den CodeEditor"""
+    """Zeichnet Zeilennummern und Faltungs-Indikatoren für den CodeEditor"""
     def __init__(self, editor):
         super().__init__(editor)
         self.codeEditor = editor
+        self.setMouseTracking(True)
 
     def sizeHint(self):
         return QSize(self.codeEditor.lineNumberAreaWidth(), 0)
 
     def paintEvent(self, event):
         self.codeEditor.lineNumberAreaPaintEvent(event)
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            block = self.codeEditor.firstVisibleBlock()
+            top = int(self.codeEditor.blockBoundingGeometry(block).translated(self.codeEditor.contentOffset()).top())
+            y = event.position().y()
+            while block.isValid():
+                if block.isVisible():
+                    h = int(self.codeEditor.blockBoundingRect(block).height())
+                    if top <= y < top + h:
+                        block_num = block.blockNumber()
+                        if self.codeEditor.is_line_foldable(block_num):
+                            self.codeEditor.toggle_fold(block_num)
+                            event.accept()
+                            return
+                        break
+                    top += h
+                block = block.next()
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        block = self.codeEditor.firstVisibleBlock()
+        top = int(self.codeEditor.blockBoundingGeometry(block).translated(self.codeEditor.contentOffset()).top())
+        y = event.position().y()
+        x = event.position().x()
+        fold_x = self.width() - getattr(self.codeEditor, 'FOLD_AREA_WIDTH', 14)
+        is_hovering_fold = False
+        while block.isValid():
+            if block.isVisible():
+                h = int(self.codeEditor.blockBoundingRect(block).height())
+                if top <= y < top + h:
+                    block_num = block.blockNumber()
+                    if self.codeEditor.is_line_foldable(block_num) and x >= fold_x - 4:
+                        is_hovering_fold = True
+                    break
+                top += h
+            block = block.next()
+        if is_hovering_fold:
+            self.setCursor(Qt.CursorShape.PointingHandCursor)
+        else:
+            self.setCursor(Qt.CursorShape.ArrowCursor)
+        super().mouseMoveEvent(event)
 
 
 class Minimap(QWidget):
@@ -211,6 +256,14 @@ class CodeEditor(QPlainTextEdit):
         self._provider = None
         self.tab_size = 4
 
+        self.FOLD_AREA_WIDTH = 14
+        self.folding_manager = FoldingManager(self)
+        self._fold_timer = QTimer(self)
+        self._fold_timer.setSingleShot(True)
+        self._fold_timer.setInterval(100)
+        self._fold_timer.timeout.connect(self.update_folds)
+        self.textChanged.connect(self._schedule_fold_update)
+
         self.blockCountChanged.connect(self.updateLineNumberAreaWidth)
         self.updateRequest.connect(self.updateLineNumberArea)
         self.cursorPositionChanged.connect(self.highlightCurrentLine)
@@ -266,11 +319,12 @@ class CodeEditor(QPlainTextEdit):
         """)
 
     def set_provider(self, provider):
-        """Setzt den Language-Provider für Completion und Indent"""
+        """Setzt den Language-Provider für Completion, Indent und Faltung"""
         self._provider = provider
         if provider:
             words = provider.get_keywords() + provider.get_builtins() + list(provider.get_snippets().keys())
             self.set_completer_words(words)
+        self.update_folds()
 
     def insert_completion(self, completion: str):
         if not completion:
@@ -689,7 +743,8 @@ class CodeEditor(QPlainTextEdit):
             digits += 1
         fm = self.fontMetrics()
         char_width = fm.horizontalAdvance('9') if hasattr(fm, 'horizontalAdvance') else fm.width('9')
-        return 20 + char_width * digits
+        fold_w = getattr(self, 'FOLD_AREA_WIDTH', 14)
+        return 16 + char_width * digits + fold_w
 
     def updateLineNumberAreaWidth(self, _):
         right_margin = self.minimap.width() if self._minimap_visible else 0
@@ -728,6 +783,9 @@ class CodeEditor(QPlainTextEdit):
         blockNumber = block.blockNumber()
         top = int(self.blockBoundingGeometry(block).translated(self.contentOffset()).top())
         bottom = top + int(self.blockBoundingRect(block).height())
+        fold_width = getattr(self, 'FOLD_AREA_WIDTH', 14)
+        area_width = self.lineNumberArea.width()
+        font_h = self.fontMetrics().height()
 
         while block.isValid() and top <= event.rect().bottom():
             if block.isVisible() and bottom >= event.rect().top():
@@ -742,14 +800,95 @@ class CodeEditor(QPlainTextEdit):
                     painter.setPen(QColor(255, 200, 80))
                 else:
                     painter.setPen(QColor(100, 100, 100))
-                painter.drawText(0, top, self.lineNumberArea.width() - 5,
-                                 self.fontMetrics().height(), Qt.AlignmentFlag.AlignRight, str(line_num))
+
+                num_rect_w = max(0, area_width - fold_width - 4)
+                painter.drawText(0, top, num_rect_w,
+                                 font_h, Qt.AlignmentFlag.AlignRight, str(line_num))
+
+                if hasattr(self, 'folding_manager') and self.folding_manager.is_line_foldable(blockNumber):
+                    is_folded = self.folding_manager.is_line_folded(blockNumber)
+                    cx = area_width - (fold_width // 2) - 2
+                    cy = top + (font_h // 2)
+                    painter.save()
+                    painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+                    if is_folded:
+                        painter.setPen(Qt.PenStyle.NoPen)
+                        painter.setBrush(QColor(200, 200, 200))
+                        triangle = QPolygonF([
+                            QPointF(cx - 3, cy - 4),
+                            QPointF(cx + 4, cy),
+                            QPointF(cx - 3, cy + 4)
+                        ])
+                        painter.drawPolygon(triangle)
+                    else:
+                        painter.setPen(Qt.PenStyle.NoPen)
+                        painter.setBrush(QColor(130, 130, 130))
+                        triangle = QPolygonF([
+                            QPointF(cx - 4, cy - 2),
+                            QPointF(cx + 4, cy - 2),
+                            QPointF(cx, cy + 3)
+                        ])
+                        painter.drawPolygon(triangle)
+                    painter.restore()
+
             block = block.next()
             if not block.isValid():
                 break
             top = bottom
             bottom = top + int(self.blockBoundingRect(block).height())
             blockNumber += 1
+
+    # ---- Code Folding ----
+
+    def _schedule_fold_update(self):
+        """Plant eine verzögerte Aktualisierung der Faltungsbereiche (Debounce)."""
+        if hasattr(self, '_fold_timer'):
+            self._fold_timer.start()
+
+    def update_folds(self):
+        """Aktualisiert die Faltungsbereiche für das Dokument sofort."""
+        if hasattr(self, 'folding_manager'):
+            file_path = self.property("file_path") or ""
+            self.folding_manager.update_regions(
+                self.toPlainText(),
+                provider=self._provider,
+                filename=str(file_path),
+            )
+
+    def is_line_foldable(self, line: int) -> bool:
+        """Prüft, ob an dieser Zeile (0-basiert) ein faltbarer Block beginnt."""
+        if hasattr(self, 'folding_manager'):
+            return self.folding_manager.is_line_foldable(line)
+        return False
+
+    def is_line_folded(self, line: int) -> bool:
+        """Prüft, ob der Block an dieser Zeile (0-basiert) eingeklappt ist."""
+        if hasattr(self, 'folding_manager'):
+            return self.folding_manager.is_line_folded(line)
+        return False
+
+    def toggle_fold(self, line: int) -> bool:
+        """Schaltet die Faltung an einer Zeile (0-basiert) um."""
+        if hasattr(self, 'folding_manager'):
+            return self.folding_manager.toggle_fold(line)
+        return False
+
+    def toggle_fold_at_cursor(self) -> bool:
+        """Schaltet die Faltung an der aktuellen Cursor-Zeile um."""
+        if hasattr(self, 'folding_manager'):
+            cur_line = self.textCursor().blockNumber()
+            return self.folding_manager.toggle_fold(cur_line)
+        return False
+
+    def fold_all(self):
+        """Klappt alle erkannten Blöcke im Dokument ein."""
+        if hasattr(self, 'folding_manager'):
+            self.folding_manager.fold_all()
+
+    def unfold_all(self):
+        """Klappt alle Blöcke im Dokument aus."""
+        if hasattr(self, 'folding_manager'):
+            self.folding_manager.unfold_all()
 
     # ---- Highlighting ----
 

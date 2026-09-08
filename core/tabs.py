@@ -28,6 +28,7 @@ class EditorTab:
     def _load_file(self, path: Path):
         """Lädt eine Datei in den Editor"""
         self.file_path = path
+        self.editor.setProperty("file_path", str(path))
         if path.exists():
             text = path.read_text(encoding='utf-8', errors='replace')
             self.editor.setPlainText(text)
@@ -38,6 +39,7 @@ class EditorTab:
             self.provider = provider
             self.highlighter.set_provider(provider)
             self.editor.set_provider(provider)
+        self.editor.update_folds()
 
     def _on_modified(self, modified):
         self.is_modified = modified
