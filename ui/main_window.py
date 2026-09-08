@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt, Signal
 
-from core.tabs import TabWidget
+from core.tabs import TabWidget, EditorTab
 from core.output import OutputPanel
 from features.terminal import TerminalWidget
 from features.project_view import ProjectView
@@ -57,6 +57,7 @@ class MainWindow(QMainWindow):
         add_provider_listener(self._on_providers_updated)
 
         self._find_dialog = None
+        self._active_tab_widget = None
 
         self.setup_ui()
         self.setup_shortcuts()
@@ -200,6 +201,33 @@ class MainWindow(QMainWindow):
         )
         self._unfold_all_action.setStatusTip("Klappt alle Funktionen und Klassen im Dokument aus")
 
+        # Editor teilen Submenü
+        split_menu = view_menu.addMenu("Editor teilen")
+        self._split_right_action = split_menu.addAction(
+            "Nach rechts teilen (vertikal)", self.split_editor_right, "Ctrl+\\"
+        )
+        self._split_right_action.setStatusTip("Teilt den Editor in zwei nebeneinanderliegende Spalten")
+
+        self._split_down_action = split_menu.addAction(
+            "Nach unten teilen (horizontal)", self.split_editor_down, "Ctrl+Shift+\\"
+        )
+        self._split_down_action.setStatusTip("Teilt den Editor in zwei übereinanderliegende Zeilen")
+
+        self._unsplit_action = split_menu.addAction(
+            "Teilung aufheben", self.unsplit_editor, "Ctrl+Alt+W"
+        )
+        self._unsplit_action.setStatusTip("Schließt die geteilte Ansicht und kehrt zum Einzeleditor zurück")
+
+        self._switch_split_action = split_menu.addAction(
+            "Fokus zwischen Ansichten wechseln", self.focus_other_split, "F6"
+        )
+        self._switch_split_action.setStatusTip("Wechselt den Tastaturfokus zwischen den geteilten Editorfenstern")
+
+        self._move_tab_split_action = split_menu.addAction(
+            "Aktiven Tab zur anderen Ansicht verschieben", self.move_tab_to_other_split, "Ctrl+Alt+M"
+        )
+        self._move_tab_split_action.setStatusTip("Verschiebt das aktuelle Dokument in die andere Editorhälfte")
+
         # ---- Hilfe-Menü ----
         help_menu = menubar.addMenu("Hilfe")
         act_shortcuts = help_menu.addAction("Tastenkürzel-Übersicht", self.open_shortcuts_dialog, "F1")
@@ -228,10 +256,29 @@ class MainWindow(QMainWindow):
         # Rechte Seite: Vertikaler Splitter (Editor oben, Output/Terminal unten)
         self.v_splitter = QSplitter(Qt.Orientation.Vertical)
 
-        # Tab-Widget (Editor)
+        # Editor-Splitter (Horizontal / Vertikal teilbar für geteilte Ansichten)
+        self.editor_splitter = QSplitter(Qt.Orientation.Horizontal)
+        self.editor_splitter.setObjectName("editor_splitter")
+
+        # Primäres Tab-Widget (Editor)
         self.tab_widget = TabWidget()
+        self.tab_widget.setObjectName("primary_tab_widget")
         self.tab_widget.currentFileChanged.connect(self._on_file_changed)
-        self.v_splitter.addWidget(self.tab_widget)
+        self.tab_widget.tabFocused.connect(self._on_tab_widget_focused)
+        self.editor_splitter.addWidget(self.tab_widget)
+
+        # Sekundäres Tab-Widget (Split-Editor)
+        self.split_tab_widget = TabWidget()
+        self.split_tab_widget.setObjectName("split_tab_widget")
+        self.split_tab_widget.setAccessibleName("Geteilte Editor-Tabs")
+        self.split_tab_widget.setAccessibleDescription("Reiterleiste für geteilte Code-Ansicht")
+        self.split_tab_widget.currentFileChanged.connect(self._on_file_changed)
+        self.split_tab_widget.tabFocused.connect(self._on_tab_widget_focused)
+        self.split_tab_widget.tabCloseRequested.connect(self._on_split_tab_close_requested)
+        self.split_tab_widget.setVisible(False)
+        self.editor_splitter.addWidget(self.split_tab_widget)
+
+        self.v_splitter.addWidget(self.editor_splitter)
 
         # Unteres Panel: Tabs mit Output und Terminal
         self.bottom_tabs = QTabWidget()
@@ -286,13 +333,11 @@ class MainWindow(QMainWindow):
     def setup_shortcuts(self):
         pass  # Shortcuts sind bereits über die Menüleiste definiert
 
-    # ---- Datei-Aktionen ----
+    # ---- Split-Editor- & Tab-Verwaltung ----
 
-    def new_file(self):
-        tab = self.tab_widget.new_tab()
-        self.output.run_btn.setEnabled(False)
-        self._connect_cursor(tab)
-        if hasattr(self, '_settings') and self._settings and tab and tab.editor:
+    def _apply_tab_settings(self, tab: Optional[EditorTab]):
+        """Wendet Schriftart-, Tab- und Minimap-Einstellungen auf einen Tab an."""
+        if tab and tab.editor and hasattr(self, '_settings') and self._settings:
             font_family = self._settings.get("font_family", "Consolas")
             font_size = int(self._settings.get("font_size", 10))
             tab_size = int(self._settings.get("tab_size", 4))
@@ -300,6 +345,183 @@ class MainWindow(QMainWindow):
             tab.editor.set_minimap_visible(
                 bool(self._settings.get("show_minimap", True))
             )
+
+    def get_active_tab_widget(self) -> TabWidget:
+        """Gibt das aktuell aktive Tab-Widget zurück (primär oder geteilt)."""
+        if (
+            self._active_tab_widget is not None
+            and not self._active_tab_widget.isHidden()
+            and self._active_tab_widget.count() > 0
+        ):
+            return self._active_tab_widget
+        return self.tab_widget
+
+    def get_active_tab(self) -> Optional[EditorTab]:
+        """Gibt den aktiven Tab des aktuell fokussierten Bereichs zurück."""
+        tw = self.get_active_tab_widget()
+        return tw.current_tab()
+
+    def is_editor_split(self) -> bool:
+        """Prüft, ob der geteilte Editor aktuell sichtbar ist."""
+        return not self.split_tab_widget.isHidden()
+
+    def split_editor(self, orientation: Qt.Orientation = Qt.Orientation.Horizontal):
+        """Teilt den Editor horizontal (nebeneinander) oder vertikal (übereinander)."""
+        self.editor_splitter.setOrientation(orientation)
+        if self.split_tab_widget.isHidden():
+            self.split_tab_widget.setVisible(True)
+            if self.split_tab_widget.count() == 0:
+                active_tab = self.tab_widget.current_tab()
+                if active_tab:
+                    split_tab = self.split_tab_widget.clone_tab(active_tab)
+                else:
+                    split_tab = self.split_tab_widget.new_tab()
+                self._apply_tab_settings(split_tab)
+                self._connect_cursor(split_tab)
+
+            total = (
+                self.editor_splitter.width()
+                if orientation == Qt.Orientation.Horizontal
+                else self.editor_splitter.height()
+            )
+            half = max(150, total // 2)
+            self.editor_splitter.setSizes([half, half])
+
+        self._active_tab_widget = self.split_tab_widget
+        cur = self.split_tab_widget.current_tab()
+        if cur and cur.editor:
+            cur.editor.setFocus()
+            self._update_status_bar_for_tab(cur)
+
+    def split_editor_right(self):
+        """Teilt den Editor in zwei vertikale Spalten nebeneinander."""
+        self.split_editor(Qt.Orientation.Horizontal)
+
+    def split_editor_down(self):
+        """Teilt den Editor in zwei horizontale Zeilen übereinander."""
+        self.split_editor(Qt.Orientation.Vertical)
+
+    def unsplit_editor(self):
+        """Hebt die Teilung auf und überführt exklusive Tabs sicher in den Hauptbereich."""
+        if self.split_tab_widget.isHidden():
+            return
+
+        while self.split_tab_widget.count() > 0:
+            split_tab = self.split_tab_widget.tabs.get(0)
+            if not split_tab:
+                self.split_tab_widget.removeTab(0)
+                continue
+            already_in_primary = any(
+                (t.file_path and split_tab.file_path and t.file_path == split_tab.file_path)
+                or (t.editor.document() is split_tab.editor.document())
+                for t in self.tab_widget.tabs.values()
+            )
+            if not already_in_primary:
+                self.tab_widget.move_tab_from(self.split_tab_widget, 0)
+            else:
+                self.split_tab_widget.close_tab(0, prompt=False)
+
+        self.split_tab_widget.setVisible(False)
+        self._active_tab_widget = self.tab_widget
+        cur = self.tab_widget.current_tab()
+        if cur and cur.editor:
+            cur.editor.setFocus()
+            self._update_status_bar_for_tab(cur)
+
+    def focus_other_split(self):
+        """Wechselt den Tastaturfokus zwischen den beiden geteilten Editor-Fenstern."""
+        if self.split_tab_widget.isHidden():
+            self.split_editor_right()
+            return
+        if self.get_active_tab_widget() is self.split_tab_widget:
+            target = self.tab_widget
+        else:
+            target = self.split_tab_widget
+        self._active_tab_widget = target
+        cur = target.current_tab()
+        if cur and cur.editor:
+            cur.editor.setFocus()
+            self._update_status_bar_for_tab(cur)
+
+    def move_tab_to_other_split(self):
+        """Verschiebt das aktuelle Dokument in die andere Editorhälfte."""
+        active_tw = self.get_active_tab_widget()
+        if active_tw is self.tab_widget:
+            if self.split_tab_widget.isHidden():
+                self.split_tab_widget.setVisible(True)
+                total = self.editor_splitter.width()
+                half = max(150, total // 2)
+                self.editor_splitter.setSizes([half, half])
+            source_tw = self.tab_widget
+            target_tw = self.split_tab_widget
+        else:
+            source_tw = self.split_tab_widget
+            target_tw = self.tab_widget
+
+        idx = source_tw.currentIndex()
+        if idx < 0 or source_tw.count() == 0:
+            return
+
+        moved_tab = target_tw.move_tab_from(source_tw, idx)
+        if moved_tab:
+            self._apply_tab_settings(moved_tab)
+            self._connect_cursor(moved_tab)
+            self._active_tab_widget = target_tw
+            moved_tab.editor.setFocus()
+            self._update_status_bar_for_tab(moved_tab)
+
+        if self.split_tab_widget.count() == 0:
+            self.unsplit_editor()
+
+    def _on_split_tab_close_requested(self, index: int):
+        self.split_tab_widget.close_tab(index)
+        if self.split_tab_widget.count() == 0:
+            self.unsplit_editor()
+
+    def _on_tab_widget_focused(self, widget, tab=None):
+        self._active_tab_widget = widget
+        t = tab or widget.current_tab()
+        if t:
+            self._update_status_bar_for_tab(t)
+
+    def _update_status_bar_for_tab(self, tab: Optional[EditorTab]):
+        if not tab:
+            return
+        if tab.provider:
+            self.lang_label.setText(tab.provider.get_name())
+            self.output.run_btn.setEnabled(True)
+            self.lang_combo.blockSignals(True)
+            idx = self.lang_combo.findText(tab.provider.get_name())
+            if idx >= 0:
+                self.lang_combo.setCurrentIndex(idx)
+            self.lang_combo.blockSignals(False)
+        else:
+            self.lang_label.setText("Keine Sprache")
+            self.output.run_btn.setEnabled(False)
+            self.lang_combo.blockSignals(True)
+            self.lang_combo.setCurrentIndex(0)
+            self.lang_combo.blockSignals(False)
+
+        if tab.file_path:
+            self.setWindowTitle(format_window_title(tab.file_path))
+        else:
+            self.setWindowTitle(format_window_title())
+
+        cursor = tab.editor.textCursor()
+        line = cursor.blockNumber() + 1
+        col = cursor.columnNumber() + 1
+        self.pos_label.setText(f"Zeile {line}, Spalte {col}")
+
+    # ---- Datei-Aktionen ----
+
+    def new_file(self, target_widget: Optional[TabWidget] = None):
+        target = target_widget or self.get_active_tab_widget()
+        tab = target.new_tab()
+        self.output.run_btn.setEnabled(False)
+        self._connect_cursor(tab)
+        self._apply_tab_settings(tab)
+        self._update_status_bar_for_tab(tab)
+        return tab
 
     def open_file(self):
         path, _ = QFileDialog.getOpenFileName(
@@ -309,27 +531,36 @@ class MainWindow(QMainWindow):
         if path:
             self.open_path(Path(path))
 
-    def open_path(self, file_path: Path):
+    def open_path(self, file_path: Path, target_widget: Optional[TabWidget] = None):
         """Öffnet einen konkreten Pfad ohne Dateidialog."""
         path = Path(file_path)
         if not path.exists():
             QMessageBox.warning(self, "Datei öffnen", f"Datei nicht gefunden:\n{path}")
             return None
 
-        tab = self.tab_widget.open_file(path)
-        if tab and tab.editor and hasattr(self, '_settings') and self._settings:
-            font_family = self._settings.get("font_family", "Consolas")
-            font_size = int(self._settings.get("font_size", 10))
-            tab_size = int(self._settings.get("tab_size", 4))
-            tab.editor.apply_editor_settings(font_family, font_size, tab_size)
-            tab.editor.set_minimap_visible(
-                bool(self._settings.get("show_minimap", True))
-            )
+        target = target_widget or self.get_active_tab_widget()
+
+        # Prüfen, ob die Datei bereits im anderen Tab-Widget offen ist -> dann Klon erstellen für synchrones Bearbeiten
+        other_tw = self.split_tab_widget if target is self.tab_widget else self.tab_widget
+        other_tab = None
+        for idx in range(other_tw.count()):
+            t = other_tw.tabs.get(idx)
+            if t and t.file_path and t.file_path.resolve() == path.resolve():
+                other_tab = t
+                break
+
+        if other_tab is not None and target is not other_tw:
+            tab = target.clone_tab(other_tab)
+        else:
+            tab = target.open_file(path)
+
+        self._apply_tab_settings(tab)
         if tab and tab.provider:
             self.lang_label.setText(tab.provider.get_name())
             self.output.run_btn.setEnabled(True)
             self._connect_lsp(tab, path)
         self._connect_cursor(tab)
+        self._update_status_bar_for_tab(tab)
         return tab
 
     def _connect_lsp(self, tab, file_path: Path):
@@ -435,22 +666,23 @@ class MainWindow(QMainWindow):
         """Refresh gutter markers and the combined Problems panel."""
         all_problems = []
         live_tabs = []
-        for idx in range(self.tab_widget.count()):
-            tab = self.tab_widget.tabs.get(idx)
-            if not tab:
-                continue
-            live_tabs.append(tab)
-            problems = []
-            file_path = str(getattr(tab, "file_path", "") or "")
-            for item in list(getattr(tab, "_lsp_errors", []) or []) + list(getattr(tab, "_lint_errors", []) or []):
-                normalized = dict(item)
-                normalized.setdefault("path", file_path)
-                normalized.setdefault("source", "LSP")
-                normalized["tab"] = tab
-                problems.append(normalized)
-            tab.editor.set_linter_errors(problems)
-            self._problems_by_tab[tab] = problems
-            all_problems.extend(problems)
+        for tw in (self.tab_widget, self.split_tab_widget):
+            for idx in range(tw.count()):
+                tab = tw.tabs.get(idx)
+                if not tab or tab in live_tabs:
+                    continue
+                live_tabs.append(tab)
+                problems = []
+                file_path = str(getattr(tab, "file_path", "") or "")
+                for item in list(getattr(tab, "_lsp_errors", []) or []) + list(getattr(tab, "_lint_errors", []) or []):
+                    normalized = dict(item)
+                    normalized.setdefault("path", file_path)
+                    normalized.setdefault("source", "LSP")
+                    normalized["tab"] = tab
+                    problems.append(normalized)
+                tab.editor.set_linter_errors(problems)
+                self._problems_by_tab[tab] = problems
+                all_problems.extend(problems)
         for tab in list(self._problems_by_tab):
             if tab not in live_tabs:
                 self._problems_by_tab.pop(tab, None)
@@ -462,18 +694,23 @@ class MainWindow(QMainWindow):
         tab = problem.get("tab") if isinstance(problem, dict) else None
         if not tab or not self._is_live_tab(tab):
             path = problem.get("path") if isinstance(problem, dict) else None
-            tab = next((
-                self.tab_widget.tabs.get(idx)
-                for idx in range(self.tab_widget.count())
-                if self.tab_widget.tabs.get(idx)
-                and str(self.tab_widget.tabs[idx].file_path or "") == str(path or "")
-            ), None)
+            for tw in (self.tab_widget, self.split_tab_widget):
+                tab = next((
+                    tw.tabs.get(idx)
+                    for idx in range(tw.count())
+                    if tw.tabs.get(idx)
+                    and str(tw.tabs[idx].file_path or "") == str(path or "")
+                ), None)
+                if tab:
+                    break
         if not tab:
             return
-        for idx in range(self.tab_widget.count()):
-            if self.tab_widget.tabs.get(idx) is tab:
-                self.tab_widget.setCurrentIndex(idx)
-                break
+        for tw in (self.tab_widget, self.split_tab_widget):
+            for idx in range(tw.count()):
+                if tw.tabs.get(idx) is tab:
+                    tw.setCurrentIndex(idx)
+                    self._active_tab_widget = tw
+                    break
         line = max(1, int(problem.get("line", 1)))
         col = max(1, int(problem.get("col", 1)))
         block = tab.editor.document().findBlockByNumber(line - 1)
@@ -500,14 +737,14 @@ class MainWindow(QMainWindow):
             completer.popup().sizeHintForColumn(0) +
             completer.popup().verticalScrollBar().sizeHint().width()
         )
-        completer.complete(cursor_rect)
+        tab.editor.completer.complete(cursor_rect)
 
-    @staticmethod
-    def _extract_lsp_completion_words(result) -> list:
-        if isinstance(result, dict):
-            items = result.get("items", [])
-        else:
-            items = result or []
+    def _extract_lsp_completion_words(self, result):
+        if not result:
+            return []
+        items = result.get("items", []) if isinstance(result, dict) else result
+        if not isinstance(items, list):
+            return []
         words = []
         for item in items:
             if isinstance(item, dict):
@@ -519,10 +756,12 @@ class MainWindow(QMainWindow):
         return sorted(set(words))
 
     def _is_live_tab(self, tab) -> bool:
-        return any(self.tab_widget.tabs.get(idx) is tab for idx in range(self.tab_widget.count()))
+        in_primary = any(self.tab_widget.tabs.get(idx) is tab for idx in range(self.tab_widget.count()))
+        in_split = any(self.split_tab_widget.tabs.get(idx) is tab for idx in range(self.split_tab_widget.count()))
+        return in_primary or in_split
 
     def save_file(self):
-        tab = self.tab_widget.current_tab()
+        tab = self.get_active_tab()
         if not tab:
             return
         assigned_new_path = False
@@ -543,7 +782,8 @@ class MainWindow(QMainWindow):
                 provider = get_provider_for_extension(ext)
                 if provider:
                     tab.provider = provider
-                    tab.highlighter.set_provider(provider)
+                    if tab.highlighter:
+                        tab.highlighter.set_provider(provider)
                     tab.editor.set_provider(provider)
                     self.lang_label.setText(provider.get_name())
             else:
@@ -552,12 +792,18 @@ class MainWindow(QMainWindow):
             if assigned_new_path:
                 tab.file_path = original_file_path
                 tab.provider = original_provider
-                tab.highlighter.set_provider(original_provider)
+                if tab.highlighter:
+                    tab.highlighter.set_provider(original_provider)
                 tab.editor.set_provider(original_provider)
                 self.lang_label.setText(original_lang_label)
                 self.output.run_btn.setEnabled(original_run_enabled)
             return
-        self.tab_widget._update_tab_title(tab)
+        self.get_active_tab_widget()._update_tab_title(tab)
+        other_tw = self.split_tab_widget if self.get_active_tab_widget() is self.tab_widget else self.tab_widget
+        for idx in range(other_tw.count()):
+            other_t = other_tw.tabs.get(idx)
+            if other_t and (other_t.file_path == tab.file_path or other_t.editor.document() is tab.editor.document()):
+                other_tw._update_tab_title(other_t)
         self.setWindowTitle(format_window_title(tab.file_path))
         self.output.run_btn.setEnabled(bool(tab.provider))
         if tab.file_path and tab.provider and not getattr(tab, "_lsp_client", None):
@@ -583,12 +829,12 @@ class MainWindow(QMainWindow):
     # ---- Bearbeiten-Aktionen ----
 
     def _undo(self):
-        tab = self.tab_widget.current_tab()
+        tab = self.get_active_tab()
         if tab:
             tab.editor.undo()
 
     def _redo(self):
-        tab = self.tab_widget.current_tab()
+        tab = self.get_active_tab()
         if tab:
             tab.editor.redo()
 
@@ -620,10 +866,9 @@ class MainWindow(QMainWindow):
         else:
             self._open_find_replace_dialog("find")
 
-
     def _goto_line(self):
         from PySide6.QtWidgets import QInputDialog
-        tab = self.tab_widget.current_tab()
+        tab = self.get_active_tab()
         if not tab or not tab.editor:
             return
         line, ok = QInputDialog.getInt(
@@ -639,35 +884,35 @@ class MainWindow(QMainWindow):
                 tab.editor.setFocus()
 
     def _toggle_comment(self):
-        tab = self.tab_widget.current_tab()
+        tab = self.get_active_tab()
         if tab and tab.editor:
             tab.editor.toggle_comment()
 
     def _indent(self):
-        tab = self.tab_widget.current_tab()
+        tab = self.get_active_tab()
         if tab and tab.editor:
             tab.editor.indent_selection()
 
     def _dedent(self):
-        tab = self.tab_widget.current_tab()
+        tab = self.get_active_tab()
         if tab and tab.editor:
             tab.editor.unindent_selection()
 
     def _toggle_fold_current(self):
         """Schaltet die Faltung an der aktuellen Cursor-Zeile um."""
-        tab = self.tab_widget.current_tab()
+        tab = self.get_active_tab()
         if tab and tab.editor:
             tab.editor.toggle_fold_at_cursor()
 
     def _fold_all(self):
         """Klappt alle Blöcke im aktuellen Dokument ein."""
-        tab = self.tab_widget.current_tab()
+        tab = self.get_active_tab()
         if tab and tab.editor:
             tab.editor.fold_all()
 
     def _unfold_all(self):
         """Klappt alle Blöcke im aktuellen Dokument aus."""
-        tab = self.tab_widget.current_tab()
+        tab = self.get_active_tab()
         if tab and tab.editor:
             tab.editor.unfold_all()
 
@@ -714,19 +959,20 @@ class MainWindow(QMainWindow):
         from features.theme_manager import apply_theme
         apply_theme(QApplication.instance(), theme)
 
-        # Editor-Einstellungen auf alle offenen Tabs anwenden
-        for idx in range(self.tab_widget.count()):
-            tab = self.tab_widget.tabs.get(idx)
-            if tab and tab.editor:
-                tab.editor.apply_editor_settings(font_family, font_size, tab_size)
-                tab.editor.set_minimap_visible(
-                    bool(self._settings.get("show_minimap", True))
-                )
+        # Editor-Einstellungen auf alle offenen Tabs anwenden (primär & geteilt)
+        for tw in (self.tab_widget, self.split_tab_widget):
+            for idx in range(tw.count()):
+                tab = tw.tabs.get(idx)
+                if tab and tab.editor:
+                    tab.editor.apply_editor_settings(font_family, font_size, tab_size)
+                    tab.editor.set_minimap_visible(
+                        bool(self._settings.get("show_minimap", True))
+                    )
 
     # ---- Ausführen ----
 
     def run_current(self):
-        tab = self.tab_widget.current_tab()
+        tab = self.get_active_tab()
         if not tab or not tab.file_path:
             QMessageBox.warning(self, "Ausführen", "Bitte zuerst eine Datei speichern.")
             return
@@ -747,9 +993,9 @@ class MainWindow(QMainWindow):
     # ---- Events ----
 
     def _on_file_changed(self, file_path):
+        tab = self.get_active_tab()
         if file_path:
             self.setWindowTitle(format_window_title(file_path))
-            tab = self.tab_widget.current_tab()
             if tab and tab.provider:
                 self.lang_label.setText(tab.provider.get_name())
                 self.output.run_btn.setEnabled(True)
@@ -767,19 +1013,19 @@ class MainWindow(QMainWindow):
             self.setWindowTitle(format_window_title())
             self.lang_label.setText("Keine Sprache")
             self.output.run_btn.setEnabled(False)
-            tab = self.tab_widget.current_tab()
             if tab:
                 self._connect_cursor(tab)
 
     def _on_language_changed(self, lang_name):
         if lang_name == "(Auto)":
             return
-        tab = self.tab_widget.current_tab()
+        tab = self.get_active_tab()
         if tab:
             provider = get_provider_by_name(lang_name)
             if provider:
                 tab.provider = provider
-                tab.highlighter.set_provider(provider)
+                if tab.highlighter:
+                    tab.highlighter.set_provider(provider)
                 tab.editor.set_provider(provider)
                 self.lang_label.setText(provider.get_name())
                 self.output.run_btn.setEnabled(True)
@@ -814,7 +1060,7 @@ class MainWindow(QMainWindow):
 
     def _focus_active_editor(self):
         """Setzt den Tastaturfokus auf den aktiven Editor zurück."""
-        tab = self.tab_widget.current_tab()
+        tab = self.get_active_tab()
         if tab and tab.editor:
             tab.editor.setFocus()
 
@@ -832,7 +1078,7 @@ class MainWindow(QMainWindow):
         from ui.diff_viewer import DiffViewerDialog
         repo_root = getattr(self.project_view, "_root_path", None)
         if not repo_root:
-            tab = self.tab_widget.current_tab()
+            tab = self.get_active_tab()
             if tab and tab.file_path:
                 repo_root = tab.file_path.parent
             else:
@@ -864,12 +1110,17 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event):
         # Listener entfernen
         remove_provider_listener(self._on_providers_updated)
-        # Alle Tabs auf ungespeicherte Änderungen prüfen
+        # Alle Tabs auf ungespeicherte Änderungen prüfen (primär & geteilt)
         unsaved = []
-        for idx in range(self.tab_widget.count()):
-            tab = self.tab_widget.tabs.get(idx)
-            if tab and tab.is_modified:
-                unsaved.append(self.tab_widget.tabText(idx))
+        seen_docs = set()
+        for tw in (self.tab_widget, self.split_tab_widget):
+            for idx in range(tw.count()):
+                tab = tw.tabs.get(idx)
+                if tab and tab.is_modified:
+                    doc = tab.editor.document()
+                    if doc not in seen_docs:
+                        seen_docs.add(doc)
+                        unsaved.append(tw.tabText(idx).lstrip('*'))
         if unsaved:
             names = "\n".join(f"  - {n}" for n in unsaved)
             reply = QMessageBox.question(

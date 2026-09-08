@@ -232,6 +232,7 @@ class CodeEditor(QPlainTextEdit):
     cursorPositionInfo = Signal(int, int)  # Zeile, Spalte
     completionRequested = Signal(int, int, str)  # LSP: Zeile, Spalte, Prefix (0-basiert)
     modificationChanged = Signal(bool)
+    focusReceived = Signal()
 
     BRACKETS = {'(': ')', '[': ']', '{': '}', ')': '(', ']': '[', '}': '{'}
     OPEN_BRACKETS = '([{'
@@ -668,6 +669,10 @@ class CodeEditor(QPlainTextEdit):
             cr.setWidth(self.completer.popup().sizeHintForColumn(0) +
                         self.completer.popup().verticalScrollBar().sizeHint().width())
             self.completer.complete(cr)
+
+    def focusInEvent(self, event):
+        super().focusInEvent(event)
+        self.focusReceived.emit()
 
     # ---- Bracket Matching ----
 

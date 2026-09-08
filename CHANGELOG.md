@@ -9,7 +9,23 @@
   surface exists.
 
 Alle wesentlichen Änderungen an CodeBox werden hier dokumentiert.
-Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
+## [0.1.5] - 2026-09-09
+
+### Geteilte Editor-Ansichten (Split Editor Horizontal / Vertikal) (2026-09-09)
+
+- `core/editor.py`:
+  - `focusReceived = Signal()`: Emittiert bei Fokuswechsel (`focusInEvent`) für präzises Tracking des aktiven Editors zwischen Split-Panes.
+- `core/tabs.py`:
+  - `EditorTab`: Unterstützung für geteilte Dokumente (`shared_doc`) und Factory-Methode `create_clone()`.
+  - `TabWidget`: Methoden `clone_tab()` und `move_tab_from()` für nahtlose Tab-Übertragung zwischen Split-Bereichen; Signale `tabFocused` und `tabCountChanged`. Sicheres Schließen von Klonen ohne redundante Speicher-Dialoge.
+- `ui/main_window.py`:
+  - Splitter-Struktur: `editor_splitter` (`QSplitter`) fasst primäres (`tab_widget`) und geteiltes (`split_tab_widget`) TabWidget zusammen.
+  - Dynamische Aufteilung: Horizontale (`split_editor_right`, `Ctrl+\`) und vertikale (`split_editor_down`, `Ctrl+Shift+\`) Teilung mit synchroner Echtzeit-Bearbeitung des gemeinsamen `QTextDocument`.
+  - Fokus & Navigation: `focus_other_split` (`F6`) und `move_tab_to_other_split` (`Ctrl+Alt+M`).
+  - Auto-Unsplit & Safe Unsplit (`unsplit_editor`, `Ctrl+Alt+W`): Automatisches Einklappen beim Schließen des letzten Split-Tabs; sichere Überführung exklusiver Dokumente in den Primärbereich.
+  - Statusleiste, Suche (`FindReplaceDialog`), Aktionen (Undo/Redo, Ausführen, LSP/Linter) und Beenden-Prüfung (`closeEvent`) nahtlos an den aktiven Split-Pane gekoppelt.
+- `ui/shortcuts_dialog.py`: Neue Tastenkürzel in der Kategorie *Ansicht* dokumentiert.
+- `tests/test_split_editor.py`: 9 automatisierte Tests für horizontales/vertikales Teilen, synchrone Dokumentbearbeitung, Fokus-Wechsel, Tab-Verschiebung, Auto-Unsplit und Dialog-Anbindung (180 passed, 1 skipped).
 
 ## [0.1.4] - 2026-09-08
 

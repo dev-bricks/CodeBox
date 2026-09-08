@@ -52,6 +52,11 @@ SHORTCUTS_DATA = [
     ("Ansicht", "Code-Faltung umschalten", "Ctrl+Shift+[", "Klappt die Funktion oder Klasse an der Cursorposition ein oder aus"),
     ("Ansicht", "Alle Blöcke einklappen", "Ctrl+Alt+[", "Klappt alle Funktionen und Klassen im Dokument ein"),
     ("Ansicht", "Alle Blöcke ausklappen", "Ctrl+Alt+]", "Klappt alle Funktionen und Klassen im Dokument aus"),
+    ("Ansicht", "Editor nach rechts teilen", "Ctrl+\\", "Teilt den Editor in zwei nebeneinanderliegende Spalten"),
+    ("Ansicht", "Editor nach unten teilen", "Ctrl+Shift+\\", "Teilt den Editor in zwei übereinanderliegende Zeilen"),
+    ("Ansicht", "Editor-Teilung aufheben", "Ctrl+Alt+W", "Schließt die geteilte Ansicht und kehrt zum Einzeleditor zurück"),
+    ("Ansicht", "Fokus zwischen geteilten Ansichten", "F6", "Wechselt den Tastaturfokus zwischen den geteilten Editorhälften"),
+    ("Ansicht", "Tab zur anderen Ansicht verschieben", "Ctrl+Alt+M", "Verschiebt das aktuelle Dokument in die andere Editorhälfte"),
 
     # Editor & Navigation
     ("Editor", "Zeilenkommentar umschalten", "Ctrl+/", "Kommentiert die aktuelle Zeile oder Auswahl aus/ein"),

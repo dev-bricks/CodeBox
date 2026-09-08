@@ -237,10 +237,16 @@ class FindReplaceDialog(QDialog):
         self.setTabOrder(self.preview_table, self.btn_close)
 
     def _get_current_editor(self) -> Optional["CodeEditor"]:
-        if not self.main_window or not hasattr(self.main_window, "tab_widget"):
+        if not self.main_window:
             return None
-        tab = self.main_window.tab_widget.current_tab()
-        return tab.editor if tab else None
+        if hasattr(self.main_window, "get_active_tab"):
+            tab = self.main_window.get_active_tab()
+            if tab and tab.editor:
+                return tab.editor
+        if hasattr(self.main_window, "tab_widget"):
+            tab = self.main_window.tab_widget.current_tab()
+            return tab.editor if tab else None
+        return None
 
     def set_mode(self, mode: str):
         """Setzt den Modus auf 'find' oder 'replace' und fokussiert das entsprechende Feld."""
