@@ -103,6 +103,18 @@ class MainWindow(QMainWindow):
         act_dedent = edit_menu.addAction("Ausrücken", self._dedent, "Shift+Tab")
         act_dedent.setStatusTip("Rückt die aktuelle Zeile oder Auswahl aus")
         edit_menu.addSeparator()
+        selection_menu = edit_menu.addMenu("Mehrfachauswahl & Multi-Cursor")
+        act_cursor_above = selection_menu.addAction("Cursor oberhalb hinzufügen", self._add_cursor_above, "Ctrl+Alt+Up")
+        act_cursor_above.setStatusTip("Fügt einen weiteren Cursor in der Zeile darüber ein (Spaltenauswahl)")
+        act_cursor_below = selection_menu.addAction("Cursor unterhalb hinzufügen", self._add_cursor_below, "Ctrl+Alt+Down")
+        act_cursor_below.setStatusTip("Fügt einen weiteren Cursor in der Zeile darunter ein (Spaltenauswahl)")
+        act_select_all_occ = selection_menu.addAction("Alle Vorkommen markieren", self._select_all_occurrences, "Ctrl+Shift+L")
+        act_select_all_occ.setStatusTip("Markiert alle Vorkommen des aktuellen Wortes oder der Auswahl mit Multi-Cursorn")
+        act_add_next_occ = selection_menu.addAction("Nächstes Vorkommen hinzufügen", self._add_next_occurrence, "Ctrl+Alt+L")
+        act_add_next_occ.setStatusTip("Fügt das nächste Vorkommen zur Mehrfachauswahl hinzu")
+        act_clear_cursors = selection_menu.addAction("Mehrfachcursor aufheben", self._clear_multi_cursors, "Escape")
+        act_clear_cursors.setStatusTip("Hebt alle zusätzlichen Cursor auf und kehrt zum Einzelcursor zurück")
+        edit_menu.addSeparator()
         act_plugins = edit_menu.addAction("Plugins & Sprachen...", self.open_plugins_dialog, "Ctrl+Shift+P")
         act_plugins.setStatusTip("Öffnet die Verwaltung für Sprach-Erweiterungen und Plugins")
         act_settings = edit_menu.addAction("Einstellungen...", self.open_settings_dialog, "Ctrl+,")
@@ -916,6 +928,42 @@ class MainWindow(QMainWindow):
         if tab and tab.editor:
             tab.editor.unfold_all()
 
+    def _add_cursor_above(self):
+        """Fügt einen weiteren Cursor in der Zeile darüber ein."""
+        tab = self.get_active_tab()
+        if tab and tab.editor and hasattr(tab.editor, "multi_cursor_manager"):
+            tab.editor.multi_cursor_manager.add_cursor_above()
+
+    def _add_cursor_below(self):
+        """Fügt einen weiteren Cursor in der Zeile darunter ein."""
+        tab = self.get_active_tab()
+        if tab and tab.editor and hasattr(tab.editor, "multi_cursor_manager"):
+            tab.editor.multi_cursor_manager.add_cursor_below()
+
+    def _select_all_occurrences(self):
+        """Markiert alle Vorkommen des aktuellen Wortes oder der Auswahl mit Multi-Cursorn."""
+        tab = self.get_active_tab()
+        if tab and tab.editor and hasattr(tab.editor, "multi_cursor_manager"):
+            count = tab.editor.multi_cursor_manager.select_all_occurrences()
+            if count:
+                self.statusBar().showMessage(f"{count} Vorkommen markiert (Multi-Cursor)", 3000)
+
+    def _add_next_occurrence(self):
+        """Fügt das nächste Vorkommen zur Mehrfachauswahl hinzu."""
+        tab = self.get_active_tab()
+        if tab and tab.editor and hasattr(tab.editor, "multi_cursor_manager"):
+            if tab.editor.multi_cursor_manager.add_next_occurrence():
+                self.statusBar().showMessage(
+                    f"{tab.editor.multi_cursor_manager.cursor_count()} Cursor aktiv", 3000
+                )
+
+    def _clear_multi_cursors(self):
+        """Hebt alle zusätzlichen Cursor auf und kehrt zum Einzelcursor zurück."""
+        tab = self.get_active_tab()
+        if tab and tab.editor and hasattr(tab.editor, "multi_cursor_manager"):
+            tab.editor.multi_cursor_manager.clear()
+            self.statusBar().showMessage("Mehrfachcursor aufgehoben", 2000)
+
     def open_plugins_dialog(self):
         """Öffnet den Dialog zur Verwaltung von Plugins und Sprachen."""
         dialog = PluginsDialog(self._plugin_manager, self)
@@ -1042,7 +1090,10 @@ class MainWindow(QMainWindow):
                     pass
 
             def _slot(line, col):
-                self.pos_label.setText(f"Zeile {line}, Spalte {col}")
+                extra = ""
+                if hasattr(tab.editor, "multi_cursor_manager") and tab.editor.multi_cursor_manager.has_extra_cursors():
+                    extra = f" ({tab.editor.multi_cursor_manager.cursor_count()} Cursor)"
+                self.pos_label.setText(f"Zeile {line}, Spalte {col}{extra}")
 
             tab._cursor_slot = _slot
             tab.editor.cursorPositionInfo.connect(_slot)

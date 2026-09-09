@@ -38,6 +38,12 @@ SHORTCUTS_DATA = [
     ("Bearbeiten", "Alle ersetzen (Dialog)", "Alt+A", "Ersetzt alle Vorkommen im gesamten Dokument"),
     ("Bearbeiten", "Vorheriger Treffer (Suchfeld)", "Shift+Enter", "Springt aus dem Suchfeld zum vorherigen Treffer"),
     ("Bearbeiten", "Gehe zu Zeile", "Ctrl+G", "Springt zu einer bestimmten Zeilennummer"),
+    ("Bearbeiten", "Cursor oberhalb hinzufügen", "Ctrl+Alt+Up", "Fügt einen weiteren Cursor in der Zeile darüber ein (Spaltenauswahl)"),
+    ("Bearbeiten", "Cursor unterhalb hinzufügen", "Ctrl+Alt+Down", "Fügt einen weiteren Cursor in der Zeile darunter ein (Spaltenauswahl)"),
+    ("Bearbeiten", "Alle Vorkommen markieren", "Ctrl+Shift+L", "Markiert alle Vorkommen des aktuellen Worts oder der Auswahl mit Multi-Cursorn"),
+    ("Bearbeiten", "Nächstes Vorkommen hinzufügen", "Ctrl+Alt+L", "Fügt das nächste Vorkommen zur Mehrfachauswahl hinzu"),
+    ("Bearbeiten", "Mehrfachcursor aufheben", "Escape", "Hebt alle zusätzlichen Cursor auf und kehrt zum Einzelcursor zurück"),
+    ("Bearbeiten", "Multi-Cursor an Klickposition", "Alt+Klick", "Setzt oder entfernt einen zusätzlichen Cursor an der angeklickten Stelle"),
     ("Bearbeiten", "Einstellungen", "Ctrl+,", "Öffnet die Programmeinstellungen"),
     ("Bearbeiten", "Plugins & Sprachen", "Ctrl+Shift+P", "Öffnet die Plugin- und Sprachverwaltung"),
 

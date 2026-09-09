@@ -6,13 +6,13 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![Platform: Windows | Linux | macOS](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)]()
 [![CI](https://github.com/dev-bricks/CodeBox/actions/workflows/ci.yml/badge.svg)](https://github.com/dev-bricks/CodeBox/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-164%20passed%20%7C%20100%25-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-195%20passed%20%7C%20100%25-brightgreen.svg)]()
 [![Privacy: Zero-Egress](https://img.shields.io/badge/privacy-100%25%20local--first%20%7C%20zero--egress-success.svg)](SECURITY.md)
 [![Security Policy](https://img.shields.io/badge/security-bilingual%20policy-blue.svg)](SECURITY.md)
 [![Ecosystem: dev-bricks](https://img.shields.io/badge/ecosystem-dev--bricks-blue.svg)](https://github.com/dev-bricks)
 [![Part of: open-bricks](https://img.shields.io/badge/part%20of-open--bricks-blue.svg)](https://github.com/open-bricks)
 [![LSP Ready](https://img.shields.io/badge/LSP-ready-purple.svg)]()
-[![Version: 0.1.2](https://img.shields.io/badge/version-0.1.2-green.svg)](CHANGELOG.md)
+[![Version: 0.1.6](https://img.shields.io/badge/version-0.1.6-green.svg)](CHANGELOG.md)
 [![llms.txt](https://img.shields.io/badge/llms.txt-available-green.svg)](llms.txt)
 
 [Deutsch](README_de.md) | English
@@ -180,6 +180,8 @@ sequenceDiagram
 
 ## Features
 
+- **Multi-Cursor & Column Selection**: Edit multiple document locations simultaneously, column selection (`Alt+Shift+Drag`), occurrence tagging (`Ctrl+Shift+L` / `Ctrl+Alt+L`), auto-pair wrapping, and atomic multi-cursor undo/redo.
+- **Code Folding & Split Editor**: Interactive code folding with gutter indicators and side-by-side or stacked split panes with synchronized buffers.
 - **Rich Syntax Highlighting**: Pre-configured highlighting for Python, JavaScript, TypeScript, C++, Rust, Go, and Java with punctuation-safe word boundary matching.
 - **Declarative Plugin Architecture**: Create and extend language definitions in seconds using clean JSON schemas (`plugins/`, `~/.codebox/plugins/`).
 - **Interactive Management Dialogs**: Full GUI dialogs for managing language plugins (`Ctrl+Shift+P`) and reviewing keyboard shortcuts (`F1`).

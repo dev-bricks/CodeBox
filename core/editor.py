@@ -13,6 +13,7 @@ from PySide6.QtGui import (
 )
 
 from core.folding import FoldingManager
+from core.multi_cursor import MultiCursorManager
 
 
 class LineNumberArea(QWidget):
@@ -259,6 +260,8 @@ class CodeEditor(QPlainTextEdit):
 
         self.FOLD_AREA_WIDTH = 14
         self.folding_manager = FoldingManager(self)
+        self.multi_cursor_manager = MultiCursorManager(self)
+        self._column_drag_start = None
         self._fold_timer = QTimer(self)
         self._fold_timer.setSingleShot(True)
         self._fold_timer.setInterval(100)
@@ -564,12 +567,79 @@ class CodeEditor(QPlainTextEdit):
         new_cursor.setPosition(nxt.position() + min(col, len(curr_text)))
         self.setTextCursor(new_cursor)
 
+    def paintEvent(self, event):
+        super().paintEvent(event)
+        if hasattr(self, 'multi_cursor_manager') and self.multi_cursor_manager.has_extra_cursors():
+            self.multi_cursor_manager.paint_extra_carets(self)
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            modifiers = event.modifiers()
+            if modifiers & Qt.KeyboardModifier.AltModifier:
+                if modifiers & Qt.KeyboardModifier.ShiftModifier:
+                    # Spaltenauswahl via Alt+Shift+Mausklick / Drag starten
+                    self._column_drag_start = self.cursorForPosition(event.position().toPoint())
+                    event.accept()
+                    return
+                else:
+                    # Weiteren Cursor an Klickposition setzen oder entfernen
+                    clicked_c = self.cursorForPosition(event.position().toPoint())
+                    self.multi_cursor_manager.toggle_cursor_at(clicked_c.position())
+                    event.accept()
+                    return
+            elif hasattr(self, 'multi_cursor_manager') and self.multi_cursor_manager.has_extra_cursors():
+                self.multi_cursor_manager.clear()
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        if getattr(self, '_column_drag_start', None) is not None:
+            end_cursor = self.cursorForPosition(event.position().toPoint())
+            self.multi_cursor_manager.column_select_between_cursors(self._column_drag_start, end_cursor)
+            event.accept()
+            return
+        super().mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        if getattr(self, '_column_drag_start', None) is not None:
+            self._column_drag_start = None
+            event.accept()
+            return
+        super().mouseReleaseEvent(event)
+
     def keyPressEvent(self, event):
         # Completer aktiv?
         if self.completer and self.completer.popup().isVisible():
             if event.key() in (Qt.Key.Key_Enter, Qt.Key.Key_Return, Qt.Key.Key_Escape,
                                Qt.Key.Key_Tab, Qt.Key.Key_Backtab):
                 event.ignore()
+                return
+
+        # Multi-Cursor Shortcuts
+        modifiers = event.modifiers()
+        if (modifiers & Qt.KeyboardModifier.ControlModifier) and (modifiers & Qt.KeyboardModifier.AltModifier):
+            if event.key() == Qt.Key.Key_Up:
+                self.multi_cursor_manager.add_cursor_above()
+                return
+            if event.key() == Qt.Key.Key_Down:
+                self.multi_cursor_manager.add_cursor_below()
+                return
+            if event.key() == Qt.Key.Key_L:
+                self.multi_cursor_manager.add_next_occurrence()
+                return
+
+        if (modifiers & Qt.KeyboardModifier.ControlModifier) and (modifiers & Qt.KeyboardModifier.ShiftModifier):
+            if event.key() == Qt.Key.Key_L:
+                self.multi_cursor_manager.select_all_occurrences()
+                return
+
+        # Escape hebt Multi-Cursor auf
+        if event.key() == Qt.Key.Key_Escape and self.multi_cursor_manager.has_extra_cursors():
+            self.multi_cursor_manager.clear()
+            return
+
+        # Multi-Cursor Tasten-Handling bei aktiven Sekundär-Cursorn
+        if self.multi_cursor_manager.has_extra_cursors():
+            if self.multi_cursor_manager.handle_key_press(event):
                 return
 
         # Tab & Shift+Tab / Backtab (Einrücken / Ausrücken)
@@ -901,6 +971,8 @@ class CodeEditor(QPlainTextEdit):
         extraSelections = (list(self.search_selections) +
                            list(self.bracket_selections) +
                            list(self.error_selections))
+        if hasattr(self, 'multi_cursor_manager'):
+            extraSelections.extend(self.multi_cursor_manager.get_extra_selections())
         if not self.isReadOnly():
             selection = QTextEdit.ExtraSelection()
             selection.format.setBackground(QColor(45, 45, 45))

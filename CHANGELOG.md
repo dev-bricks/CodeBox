@@ -9,6 +9,33 @@
   surface exists.
 
 Alle wesentlichen Änderungen an CodeBox werden hier dokumentiert.
+
+## [0.1.6] - 2026-09-09
+
+### Multi-Cursor & Column Selection Modus (2026-09-09)
+
+- `core/multi_cursor.py`: Neues Modul für Multi-Cursor- und Spaltenauswahl-Verwaltung:
+  - `MultiCursorManager`: Verwaltet sekundäre Cursoren (`secondary_cursors`), synchrone Eingaben, Cursor-Merging und Selektionen.
+  - Methoden `add_cursor_at`, `toggle_cursor_at`, `add_cursor_above` (`Ctrl+Alt+Up`), `add_cursor_below` (`Ctrl+Alt+Down`).
+  - `select_all_occurrences` (`Ctrl+Shift+L`): Markiert alle Vorkommen des aktuellen Worts oder der Auswahl mit synchronen Cursorn.
+  - `add_next_occurrence` (`Ctrl+Alt+L`): Fügt das nächste Vorkommen sukzessive zur Mehrfachauswahl hinzu.
+  - `column_select_between_cursors`: Rechteckige Spaltenauswahl über mehrere Zeilen via `Alt+Shift+Drag`.
+  - Synchrone Textmanipulation: `insert_text`, `delete_backspace`, `delete_forward`, `unindent_cursors`, Auto-Pairing & Bracket-Wrapping (`insert_pair_or_wrap`).
+  - Multi-Cursor Zwischenablage: `copy_selection`, `cut_selection` und zeilenweises `paste_text`.
+  - Atomares Undo/Redo: Alle Änderungen über mehrere Cursoren hinweg werden in einem einzigen `beginEditBlock()`/`endEditBlock()` gekapselt.
+  - Visuelles Rendering: `get_extra_selections()` mit `#264f78` und 2px scharfe Vektor-Carets in `paint_extra_carets()`.
+- `core/editor.py`:
+  - Integration von `MultiCursorManager`.
+  - `paintEvent`: Rendert sekundäre Carets im Viewport.
+  - `mousePressEvent` / `mouseMoveEvent` / `mouseReleaseEvent`: `Alt+Klick` zum Setzen/Entfernen von Cursorn und `Alt+Shift+Ziehen` für Spaltenauswahl.
+  - `keyPressEvent`: Tastatur-Shortcuts und synchrone Multi-Cursor-Tastendeligation.
+  - `highlightCurrentLine`: Dynamische Einbindung sekundärer Selektionen.
+- `ui/main_window.py`:
+  - Untermenü *Mehrfachauswahl & Multi-Cursor* im Menü *Bearbeiten*.
+  - Statusleistenanzeige: Anzeige von ` (X Cursor)` bei aktiven Mehrfachcursorn.
+- `ui/shortcuts_dialog.py`: 6 neue Tastenkürzel für Multi-Cursor dokumentiert.
+- `tests/test_multi_cursor.py`: 15 automatisierte Tests für Cursor-Erstellung, Spaltenauswahl, parallele Eingabe, Löschen, Navigation, Merging, Copy/Paste, Undo/Redo und UI-Aktionen (195 passed, 1 skipped).
+
 ## [0.1.5] - 2026-09-09
 
 ### Geteilte Editor-Ansichten (Split Editor Horizontal / Vertikal) (2026-09-09)
