@@ -24,6 +24,7 @@ SHORTCUTS_DATA = [
     # Datei
     ("Datei", "Neu", "Ctrl+N", "Erstellt eine neue leere Datei"),
     ("Datei", "Öffnen...", "Ctrl+O", "Öffnet eine bestehende Datei"),
+    ("Datei", "Schnell öffnen (Quick Open)", "Ctrl+P", "Öffnet die Schnellauswahl für Projektdateien"),
     ("Datei", "Speichern", "Ctrl+S", "Speichert die aktuelle Datei"),
     ("Datei", "Beenden", "Ctrl+Q", "Schließt die CodeBox-Anwendung"),
 
@@ -45,7 +46,8 @@ SHORTCUTS_DATA = [
     ("Bearbeiten", "Mehrfachcursor aufheben", "Escape", "Hebt alle zusätzlichen Cursor auf und kehrt zum Einzelcursor zurück"),
     ("Bearbeiten", "Multi-Cursor an Klickposition", "Alt+Klick", "Setzt oder entfernt einen zusätzlichen Cursor an der angeklickten Stelle"),
     ("Bearbeiten", "Einstellungen", "Ctrl+,", "Öffnet die Programmeinstellungen"),
-    ("Bearbeiten", "Plugins & Sprachen", "Ctrl+Shift+P", "Öffnet die Plugin- und Sprachverwaltung"),
+    ("Bearbeiten", "Befehlspalette", "Ctrl+Shift+P", "Öffnet die interaktive Befehlspalette für alle IDE-Aktionen"),
+    ("Bearbeiten", "Plugins & Sprachen", "", "Öffnet die Plugin- und Sprachverwaltung"),
 
     # Ausführen
     ("Ausführen", "Ausführen", "F5", "Führt das aktuelle Skript oder Programm aus"),

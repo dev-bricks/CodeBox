@@ -21,8 +21,21 @@ from features.theme_manager import DEFAULT_THEME, apply_theme
 
 
 def load_app_icon() -> QIcon:
-    icon_path = Path(__file__).with_name("CodeBox.ico")
-    return QIcon(str(icon_path)) if icon_path.exists() else QIcon()
+    root = Path(__file__).resolve().parent
+    candidates = [
+        root / "CodeBox.ico",
+        root / "DesktopIcon.ico",
+        root / "assets" / "codebox.ico",
+        root / "assets" / "icon.ico",
+        root / "icon.ico",
+        root / "assets" / "icon.png",
+        root / "DesktopIcon.png",
+        root / "icon.png",
+    ]
+    for path in candidates:
+        if path.exists():
+            return QIcon(str(path))
+    return QIcon()
 
 
 def parse_launch_args(argv=None):

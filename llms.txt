@@ -1,6 +1,6 @@
 # CodeBox - Local PySide6 Desktop Code Editor
 
-## Last-checked: 2026-08-24
+## Last-checked: 2026-09-10
 
 > CodeBox is a local-first desktop IDE for Windows, Linux, and macOS developers who want a lightweight PySide6 code editor with multi-tab workspace, project tree, integrated terminal, Git status porcelain indicators, syntax highlighting, Language Server Protocol (LSP) diagnostics, and an extensible JSON/Python language plugin architecture.
 
@@ -17,10 +17,13 @@ Part of the dev-bricks family. Python, MIT.
 
 ## Features & Architecture
 
+- **Command Palette & Quick-Open**: Centralized keyboard-driven launcher (`Ctrl+P` for project file finder, `Ctrl+Shift+P` for interactive command palette).
+- **Split Editor Panes**: Horizontal (`Ctrl+\`) and vertical (`Ctrl+Shift+\`) multi-editor splits sharing underlying documents.
+- **Multi-Cursor & Column Selection**: True multi-caret editing (`Alt+Click`, `Ctrl+Shift+L`, `Ctrl+Alt+Up/Down`, `Alt+Shift+Drag`).
+- **Integrated Git Diff-Viewer**: Side-by-side and unified diffs directly in the IDE (`Ctrl+Alt+D`).
 - **Multi-Language Highlighting**: Built-in providers for Python, JavaScript, TypeScript, C++, Rust, Go, and Java via state-machine-driven `UniversalHighlighter` supporting multi-line docstrings and block comments.
 - **Smart Block Editing & Shortcuts**: Multi-line block indentation (`Tab`), dedentation (`Shift+Tab`), line comment toggling (`Ctrl+/`, `Ctrl+#`), line duplication (`Ctrl+D`), and line moving (`Alt+Up`, `Alt+Down`).
 - **Extensible Plugin System**: Declarative JSON language plugins and Python-based plugins with auto-discovery and live reloading (`plugins/`, `~/.codebox/plugins/`).
-- **Plugins & Shortcuts Dialogs**: Interactive GUI dialogs for managing language plugins (`Ctrl+Shift+P`) and reviewing keyboard shortcuts (`F1`).
 - **LSP Diagnostics & Completion**: Full thread-safe Qt integration with local language servers (e.g. pylsp, typescript-language-server, rust-analyzer, clangd, gopls).
 - **Linter & Problems Panel**: Asynchronous Ruff/flake8/ESLint execution on save with a centralized problems panel.
 - **Integrated Terminal**: Native shell integration (`cmd`, `PowerShell`, `bash`) with dynamic encoding detection (cp1252 / utf-8) and directory sync.
@@ -33,7 +36,7 @@ Part of the dev-bricks family. Python, MIT.
 - `python main.py`: Launches the CodeBox desktop interface.
 - `python main.py --open <file>`: Launches and directly opens a target file path.
 - `build_exe.bat`: Uses PyInstaller to bundle the application into a standalone executable (`dist/CodeBox.exe`).
-- `pytest`: Runs the automated test suite (164 passed).
+- `pytest`: Runs the automated test suite (209 passed, 1 skipped).
 - `ruff check .`: Runs the codebase linting suite.
 
 ## Related Projects (dev-bricks & ellmos family)

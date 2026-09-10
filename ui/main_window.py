@@ -28,6 +28,7 @@ from features.plugin_manager import PluginManager
 from ui.problems_panel import ProblemsPanel
 from ui.plugins_dialog import PluginsDialog
 from ui.shortcuts_dialog import ShortcutsDialog
+from ui.command_palette import CommandPaletteDialog
 from version import format_window_title, APP_VERSION
 from config import load_settings
 
@@ -73,6 +74,8 @@ class MainWindow(QMainWindow):
         act_new.setStatusTip("Erstellt eine neue leere Datei")
         act_open = file_menu.addAction("Öffnen...", self.open_file, "Ctrl+O")
         act_open.setStatusTip("Öffnet eine bestehende Datei von der Festplatte")
+        act_quick_open = file_menu.addAction("Schnell öffnen...", self.show_quick_open, "Ctrl+P")
+        act_quick_open.setStatusTip("Öffnet die Schnellauswahl für Projektdateien (Quick Open)")
         act_save = file_menu.addAction("Speichern", self.save_file, "Ctrl+S")
         act_save.setStatusTip("Speichert die aktuelle Datei")
         file_menu.addSeparator()
@@ -115,7 +118,9 @@ class MainWindow(QMainWindow):
         act_clear_cursors = selection_menu.addAction("Mehrfachcursor aufheben", self._clear_multi_cursors, "Escape")
         act_clear_cursors.setStatusTip("Hebt alle zusätzlichen Cursor auf und kehrt zum Einzelcursor zurück")
         edit_menu.addSeparator()
-        act_plugins = edit_menu.addAction("Plugins & Sprachen...", self.open_plugins_dialog, "Ctrl+Shift+P")
+        act_palette = edit_menu.addAction("Befehlspalette...", self.show_command_palette, "Ctrl+Shift+P")
+        act_palette.setStatusTip("Öffnet die Befehlspalette für alle Aktionen")
+        act_plugins = edit_menu.addAction("Plugins & Sprachen...", self.open_plugins_dialog)
         act_plugins.setStatusTip("Öffnet die Verwaltung für Sprach-Erweiterungen und Plugins")
         act_settings = edit_menu.addAction("Einstellungen...", self.open_settings_dialog, "Ctrl+,")
         act_settings.setStatusTip("Öffnet die Programmeinstellungen")
@@ -1140,6 +1145,18 @@ class MainWindow(QMainWindow):
         dialog.raise_()
         dialog.activateWindow()
         return dialog
+
+    def show_quick_open(self):
+        """Öffnet die Schnellauswahl für Projektdateien (Quick Open, Ctrl+P)."""
+        dlg = CommandPaletteDialog(self, mode="files")
+        dlg.exec()
+        return dlg
+
+    def show_command_palette(self):
+        """Öffnet die Befehlspalette für alle Aktionen (Ctrl+Shift+P)."""
+        dlg = CommandPaletteDialog(self, mode="commands")
+        dlg.exec()
+        return dlg
 
     def _on_providers_updated(self):
         """Aktualisiert die Sprachauswahl in der Toolbar bei Registry-Änderungen."""

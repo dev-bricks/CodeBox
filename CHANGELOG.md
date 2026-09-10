@@ -10,6 +10,28 @@
 
 Alle wesentlichen Änderungen an CodeBox werden hier dokumentiert.
 
+## [0.1.7] - 2026-09-10
+
+### Quick-Open Datei-Finder & Befehlspalette (`Ctrl+P` / `Ctrl+Shift+P`)
+
+- `ui/command_palette.py`: Neues Modul für eine zentrierte, tastaturgesteuerte Befehlspalette und Schnellauswahl:
+  - **Quick-Open Modus (`Ctrl+P`)**: Schnelles Suchen und Öffnen von Dateien im aktuellen Projekt mit intelligenter Pfad- und Dateinamengewichtung (Scoring), Ignorieren von VCS- und Build-Ordnern (`.git`, `node_modules`, `__pycache__` etc.), Dateityp-Badges und Vorschau.
+  - **Befehlspalette (`Ctrl+Shift+P` / führendes `>`)**: Vollständige Übersicht aller registrierten Menü- und Schnellaktionen der IDE mit Kategorie, Shortcuts und Tastaturnavigation.
+  - Nahtloser Moduswechsel bei Eingabe oder Löschen des Präfix `>`.
+  - Tastaturnavigation (`Pfeil Runter`, `Pfeil Rauf`, `Enter` zur Ausführung/Öffnen, `Esc` zum Abbrechen).
+  - Volle Barrierefreiheit mit `AccessibleName` und `AccessibleDescription`.
+- `ui/main_window.py`:
+  - Integration von `act_quick_open` (`Ctrl+P`) im Menü *Datei*.
+  - Integration von `act_palette` (`Ctrl+Shift+P`) im Menü *Bearbeiten*.
+  - Methoden `show_quick_open()` und `show_command_palette()`.
+- `ui/shortcuts_dialog.py`:
+  - Tastaturkürzel-Tabelle um `Ctrl+P` und `Ctrl+Shift+P` ergänzt.
+- `tests/test_command_palette.py`:
+  - 9 automatisierte Tests für Dateisuche, Befehlsindexierung, Moduswechsel, Tastaturnavigation und Ausführung.
+- `tests/test_assets_and_icons.py`:
+  - 5 automatisierte Vertragstests für das Windows- und Multiplattform-Icon-Asset-Set (`CodeBox.ico`, `DesktopIcon.ico`, `assets/`, `mobile_icons/`, `store_assets/`).
+- Versionsangleichung auf 0.1.7 in `pyproject.toml`, `version.py`, `README.md`, `README_de.md` und `CHANGELOG.md`.
+
 ## [0.1.6] - 2026-09-09
 
 ### Multi-Cursor & Column Selection Modus (2026-09-09)

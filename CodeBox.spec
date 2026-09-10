@@ -7,6 +7,11 @@ a = Analysis(
     binaries=[],
     datas=[
         ('CodeBox.ico', '.'),
+        ('DesktopIcon.ico', '.'),
+        ('icon.ico', '.'),
+        ('icon.png', '.'),
+        ('DesktopIcon.png', '.'),
+        ('assets', 'assets'),
         ('themes/*.qss', 'themes'),
     ],
     hiddenimports=[],
