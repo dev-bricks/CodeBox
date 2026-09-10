@@ -63,7 +63,7 @@ class TerminalEncodingTests(unittest.TestCase):
     def test_set_working_dir_uses_same_encoding_as_execute_command(self):
         """Regression (B-002): set_working_dir() muss dieselbe Encoding-Logik
         wie _execute_command() nutzen — zuvor wurde utf-8 hart codiert,
-        _execute_command() aber cp1252 fuer cmd."""
+        _execute_command() aber cp1252 für cmd."""
         widget = self._make_widget("cmd")
 
         # Prozess-Mock im Running-Zustand

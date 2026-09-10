@@ -223,7 +223,7 @@ def test_close_event_blocks_when_user_clicks_no(tmp_path):
         window.closeEvent(event)
 
     assert not event.isAccepted(), (
-        "closeEvent() muss das Schliessen blockieren, wenn der User 'No' wählt (B-008)"
+        "closeEvent() muss das Schließen blockieren, wenn der User 'No' wählt (B-008)"
     )
 
     tab.is_modified = False
@@ -231,7 +231,7 @@ def test_close_event_blocks_when_user_clicks_no(tmp_path):
 
 
 def test_close_event_allows_when_user_clicks_yes(tmp_path):
-    """Regression B-008b: closeEvent muss Schliessen erlauben wenn User 'Yes' wählt."""
+    """Regression B-008b: closeEvent muss Schließen erlauben wenn User 'Yes' wählt."""
     from PySide6.QtCore import QEvent
     _ensure_app()
 
@@ -250,7 +250,7 @@ def test_close_event_allows_when_user_clicks_yes(tmp_path):
         window.closeEvent(event)
 
     assert event.isAccepted(), (
-        "closeEvent() muss Schliessen erlauben, wenn der User 'Yes' wählt (B-008b)"
+        "closeEvent() muss Schließen erlauben, wenn der User 'Yes' wählt (B-008b)"
     )
 
     tab.is_modified = False
