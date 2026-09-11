@@ -83,6 +83,14 @@ class SettingsDialog(QDialog):
         self.minimap_cb.setChecked(bool(self._settings.get("show_minimap", True)))
         form_layout.addRow(self.minimap_cb)
 
+        # Vim Mode
+        self.vim_mode_cb = QCheckBox("Vim-Modus aktivieren (Modal Editing: Normal, Insert, Visual)")
+        self.vim_mode_cb.setToolTip("Aktiviert modales Editieren mit Vim-Tastenkürzeln (h/j/k/l, w/b/e, dd, yy, p etc.)")
+        self.vim_mode_cb.setAccessibleName("Vim-Modus aktivieren")
+        self.vim_mode_cb.setAccessibleDescription("Schaltet die Tastaturbedienung im Editor auf die modale Vim-Navigation um")
+        self.vim_mode_cb.setChecked(bool(self._settings.get("vim_mode", False)))
+        form_layout.addRow(self.vim_mode_cb)
+
         layout.addLayout(form_layout)
 
         # Dialog Buttons
@@ -102,6 +110,7 @@ class SettingsDialog(QDialog):
         settings["theme"] = self.theme_combo.currentData() or "dark"
         settings["auto_save"] = self.auto_save_cb.isChecked()
         settings["show_minimap"] = self.minimap_cb.isChecked()
+        settings["vim_mode"] = self.vim_mode_cb.isChecked()
         return settings
 
     def accept(self):

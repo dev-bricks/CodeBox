@@ -10,6 +10,37 @@
 
 Alle wesentlichen Änderungen an CodeBox werden hier dokumentiert.
 
+## [0.1.9] - 2026-09-11
+
+### Zuschaltbarer Vim-Keybindings Modus
+
+- `core/vim_mode.py`: Neues Kernmodul mit vollständiger Vim-Zustandsmaschine (`VimEngine`, `VimMode`):
+  - 4 Betriebsmodi: `NORMAL`, `INSERT`, `VISUAL` (zeichenweise Markierung) und `VISUAL_LINE` (zeilenweise Markierung).
+  - Terminal-authentischer Blockcursor im Normal- und Visual-Modus via adaptiver Fontmetrik (`QFontMetrics.horizontalAdvance`).
+  - Bewegungstasten: `h`, `j`, `k`, `l`, Wortsprünge `w`, `b`, `e`, Zeilenbegrenzungen `0`, `^`, `$`, Dokumentensprünge `gg`, `G`, `<N>G` sowie Halbseiten-Scrollen `Ctrl+D`, `Ctrl+U`.
+  - Ziffernpuffer & Zähler-Multiplikation (`3w`, `5j`, `2dd`).
+  - Umfassende Lösch- und Änderungsbefehle: `x`, `X`, `dd`, `dw`, `de`, `d$`/`D`, `d0`, `cw`, `cc`/`S`, `C`, `s`, `r<char>`.
+  - Kopieren & Einfügen (Yank/Put): `yy`, `Y`, `yw`, `y$`, `p`, `P` mit nativer Unterscheidung zwischen zeilen- und zeichenbasiertem Einfügen sowie Synchronisation mit dem System-Clipboard.
+  - Weitere Aktionen: Fallwechsel (`~`), Zeilen verbinden (`J`), Ein-/Ausrücken (`>>`, `<<`), Undo (`u`), Redo (`Ctrl+R`).
+  - Bereichsoperationen im Visual- und Visual-Line-Modus (`d`, `x`, `y`, `c`, `>`, `<`, `~`, `u`, `U`).
+- `core/editor.py`:
+  - `vim_engine` Instanz in `CodeEditor`.
+  - Methoden `set_vim_mode_enabled(bool)` und `is_vim_mode_enabled() -> bool`.
+  - Key-Event Routing im Editor fängt Tastenanschläge bei aktivem Vim-Modus modal ab.
+- `ui/main_window.py`:
+  - Menü *Bearbeiten* -> *Vim-Modus* (`Ctrl+Alt+V`) mit checkbarem Zustand.
+  - Statusleisten-Widget (`vim_label`) mit Anzeige von `-- NORMAL --`, `-- INSERT --`, `-- VISUAL --`, `-- VISUAL_LINE --` und aktuellem Befehlspuffer (z. B. `  [3d]`).
+  - Propagierung des Vim-Zustands auf alle geöffneten Tabs beider Split-Ansichten.
+  - Automatische Registrierung in der Schnellauswahl / Befehlspalette (`Ctrl+Shift+P`).
+- `config/__init__.py`:
+  - `"vim_mode": False` in `DEFAULT_SETTINGS` aufgenommen.
+- `ui/settings_dialog.py`:
+  - Checkbox zur globalen Aktivierung/Deaktivierung des Vim-Modus.
+- `ui/shortcuts_dialog.py`:
+  - Neue Dokumentations-Kategorie *Vim-Modus* mit vollständiger Tabelle aller Tastenbelegungen sowie Ergänzung unter *Bearbeiten*.
+- `tests/test_vim_mode.py`:
+  - 27 automatisierte Unit Tests für Zustände, Navigation, Operatoren, Visual Mode, Zwischenablage, Editor- und UI-Integration (Gesamt: 239 passed, 1 skipped).
+
 ## [0.1.8] - 2026-09-11
 
 ### Git-Staging & Commit-Dialog

@@ -14,6 +14,7 @@ from PySide6.QtGui import (
 
 from core.folding import FoldingManager
 from core.multi_cursor import MultiCursorManager
+from core.vim_mode import VimEngine
 
 
 class LineNumberArea(QWidget):
@@ -261,6 +262,7 @@ class CodeEditor(QPlainTextEdit):
         self.FOLD_AREA_WIDTH = 14
         self.folding_manager = FoldingManager(self)
         self.multi_cursor_manager = MultiCursorManager(self)
+        self.vim_engine = VimEngine(self)
         self._column_drag_start = None
         self._fold_timer = QTimer(self)
         self._fold_timer.setSingleShot(True)
@@ -305,6 +307,15 @@ class CodeEditor(QPlainTextEdit):
     def is_minimap_visible(self) -> bool:
         """Gibt zurück, ob die Minimap für diesen Editor sichtbar sein soll."""
         return self._minimap_visible
+
+    def set_vim_mode_enabled(self, enabled: bool):
+        """Aktiviert oder deaktiviert den Vim-Modus für diesen Editor."""
+        if hasattr(self, 'vim_engine'):
+            self.vim_engine.set_enabled(enabled)
+
+    def is_vim_mode_enabled(self) -> bool:
+        """Prüft, ob der Vim-Modus in diesem Editor aktiv ist."""
+        return hasattr(self, 'vim_engine') and self.vim_engine.is_enabled()
 
     def set_completer_words(self, words: List[str]):
         """Setzt die Completion-Wörter"""
@@ -612,6 +623,11 @@ class CodeEditor(QPlainTextEdit):
             if event.key() in (Qt.Key.Key_Enter, Qt.Key.Key_Return, Qt.Key.Key_Escape,
                                Qt.Key.Key_Tab, Qt.Key.Key_Backtab):
                 event.ignore()
+                return
+
+        # Vim-Modus Tasten-Handling
+        if hasattr(self, 'vim_engine') and self.vim_engine.is_enabled():
+            if self.vim_engine.handle_key_event(event):
                 return
 
         # Multi-Cursor Shortcuts

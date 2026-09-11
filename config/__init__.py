@@ -10,7 +10,8 @@ DEFAULT_SETTINGS = {
     "theme": "dark",
     "auto_save": False,
     "show_minimap": True,
-    "recent_files": []
+    "recent_files": [],
+    "vim_mode": False
 }
 
 _SETTINGS_FILE = Path(__file__).parent / "settings.json"

@@ -46,6 +46,7 @@ SHORTCUTS_DATA = [
     ("Bearbeiten", "Mehrfachcursor aufheben", "Escape", "Hebt alle zusätzlichen Cursor auf und kehrt zum Einzelcursor zurück"),
     ("Bearbeiten", "Multi-Cursor an Klickposition", "Alt+Klick", "Setzt oder entfernt einen zusätzlichen Cursor an der angeklickten Stelle"),
     ("Bearbeiten", "Einstellungen", "Ctrl+,", "Öffnet die Programmeinstellungen"),
+    ("Bearbeiten", "Vim-Modus umschalten", "Ctrl+Alt+V", "Schaltet modales Editieren (Normal, Insert, Visual) ein/aus"),
     ("Bearbeiten", "Befehlspalette", "Ctrl+Shift+P", "Öffnet die interaktive Befehlspalette für alle IDE-Aktionen"),
     ("Bearbeiten", "Plugins & Sprachen", "", "Öffnet die Plugin- und Sprachverwaltung"),
 
@@ -78,6 +79,18 @@ SHORTCUTS_DATA = [
     ("Editor", "Ausrücken", "Shift+Tab", "Rückt die aktuelle Zeile oder Auswahl aus"),
     ("Editor", "Schrift vergrößern", "Ctrl+Mausrad hoch", "Erhöht die Schriftgröße im Editor"),
     ("Editor", "Schrift verkleinern", "Ctrl+Mausrad runter", "Verringert die Schriftgröße im Editor"),
+
+    # Vim-Modus
+    ("Vim-Modus", "Normal-Navigation", "h / j / k / l", "Bewegt Cursor links / runter / rauf / rechts"),
+    ("Vim-Modus", "Wort-Navigation", "w / b / e", "Springt zum nächsten Wortanfang, vorherigen Wortanfang oder Wortende"),
+    ("Vim-Modus", "Zeilenanfang / -ende", "0 / ^ / $", "Springt zu Spalte 0, erstem Zeichen oder Zeilenende"),
+    ("Vim-Modus", "Dokumentsprung", "gg / G / <N>G", "Springt zu Zeile 1, letzter Zeile oder Zeile N"),
+    ("Vim-Modus", "Einfügemodus", "i / I / a / A / o / O", "Einfügen vor/nach Cursor, Zeilenanfang/-ende, neue Zeile unten/oben"),
+    ("Vim-Modus", "Zeichen / Zeile löschen", "x / dd / D", "Löscht Zeichen, ganze Zeile oder bis Zeilenende"),
+    ("Vim-Modus", "Wort / Zeile ändern", "cw / cc / C", "Ändert Wort, ganze Zeile oder bis Zeilenende und wechselt in Insert"),
+    ("Vim-Modus", "Kopieren & Einfügen", "yy / yw / p / P", "Kopiert Zeile/Wort und fügt nach bzw. vor dem Cursor ein"),
+    ("Vim-Modus", "Visuelle Markierung", "v / V", "Zeichenweise bzw. zeilenweise visuelle Textauswahl"),
+    ("Vim-Modus", "Rückgängig / Wiederholen", "u / Ctrl+R", "Macht letzte Änderung rückgängig oder wiederholt sie"),
 
     # Hilfe
     ("Hilfe", "Tastenkürzel-Übersicht", "F1", "Öffnet diese Tastenkürzel-Referenz"),

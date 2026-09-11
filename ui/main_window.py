@@ -122,6 +122,10 @@ class MainWindow(QMainWindow):
         act_palette.setStatusTip("Öffnet die Befehlspalette für alle Aktionen")
         act_plugins = edit_menu.addAction("Plugins & Sprachen...", self.open_plugins_dialog)
         act_plugins.setStatusTip("Öffnet die Verwaltung für Sprach-Erweiterungen und Plugins")
+        self.act_vim_mode = edit_menu.addAction("Vim-Modus", self.toggle_vim_mode, "Ctrl+Alt+V")
+        self.act_vim_mode.setCheckable(True)
+        self.act_vim_mode.setChecked(bool(self._settings.get("vim_mode", False)))
+        self.act_vim_mode.setStatusTip("Schaltet modales Editieren (Normal, Insert, Visual) ein oder aus")
         act_settings = edit_menu.addAction("Einstellungen...", self.open_settings_dialog, "Ctrl+,")
         act_settings.setStatusTip("Öffnet die Programmeinstellungen")
 
@@ -334,6 +338,15 @@ class MainWindow(QMainWindow):
         # ---- Statusbar ----
         self.status_bar = QStatusBar()
         self.setStatusBar(self.status_bar)
+
+        self.vim_label = QLabel("")
+        self.vim_label.setObjectName("vim_label")
+        self.vim_label.setToolTip("Aktueller Vim-Modus und Befehlspuffer")
+        self.vim_label.setAccessibleName("Vim-Modus Status")
+        self.vim_label.setStyleSheet("font-weight: bold; padding-right: 8px; color: #569cd6;")
+        self.vim_label.setVisible(False)
+        self.status_bar.addWidget(self.vim_label)
+
         self.pos_label = QLabel("Zeile 1, Spalte 1")
         self.pos_label.setToolTip("Aktuelle Cursor-Position (Zeile, Spalte)")
         self.pos_label.setAccessibleName("Cursorposition")
@@ -359,7 +372,7 @@ class MainWindow(QMainWindow):
     # ---- Split-Editor- & Tab-Verwaltung ----
 
     def _apply_tab_settings(self, tab: Optional[EditorTab]):
-        """Wendet Schriftart-, Tab- und Minimap-Einstellungen auf einen Tab an."""
+        """Wendet Schriftart-, Tab-, Minimap- und Vim-Einstellungen auf einen Tab an."""
         if tab and tab.editor and hasattr(self, '_settings') and self._settings:
             font_family = self._settings.get("font_family", "Consolas")
             font_size = int(self._settings.get("font_size", 10))
@@ -367,6 +380,9 @@ class MainWindow(QMainWindow):
             tab.editor.apply_editor_settings(font_family, font_size, tab_size)
             tab.editor.set_minimap_visible(
                 bool(self._settings.get("show_minimap", True))
+            )
+            tab.editor.set_vim_mode_enabled(
+                bool(self._settings.get("vim_mode", False))
             )
 
     def get_active_tab_widget(self) -> TabWidget:
@@ -534,6 +550,28 @@ class MainWindow(QMainWindow):
         line = cursor.blockNumber() + 1
         col = cursor.columnNumber() + 1
         self.pos_label.setText(f"Zeile {line}, Spalte {col}")
+        self._update_vim_status_label(tab)
+
+    def _update_vim_status_label(self, tab: Optional[EditorTab]):
+        """Aktualisiert die Vim-Modus Anzeige in der Statusleiste."""
+        if not hasattr(self, "vim_label"):
+            return
+        if not tab or not tab.editor or not hasattr(tab.editor, "vim_engine"):
+            self.vim_label.setText("")
+            self.vim_label.setVisible(False)
+            return
+
+        engine = tab.editor.vim_engine
+        if not engine.is_enabled():
+            self.vim_label.setText("")
+            self.vim_label.setVisible(False)
+            return
+
+        mode = engine.get_mode().value
+        cmd_buf = engine.get_command_buffer()
+        suffix = f"  [{cmd_buf}]" if cmd_buf else ""
+        self.vim_label.setText(f"-- {mode} --{suffix}")
+        self.vim_label.setVisible(True)
 
     # ---- Datei-Aktionen ----
 
@@ -1013,6 +1051,10 @@ class MainWindow(QMainWindow):
         font_size = int(self._settings.get("font_size", 10))
         tab_size = int(self._settings.get("tab_size", 4))
         theme = self._settings.get("theme", "dark")
+        vim_mode = bool(self._settings.get("vim_mode", False))
+
+        if hasattr(self, "act_vim_mode"):
+            self.act_vim_mode.setChecked(vim_mode)
 
         # Theme anwenden
         from features.theme_manager import apply_theme
@@ -1027,6 +1069,33 @@ class MainWindow(QMainWindow):
                     tab.editor.set_minimap_visible(
                         bool(self._settings.get("show_minimap", True))
                     )
+                    tab.editor.set_vim_mode_enabled(vim_mode)
+
+        self._update_vim_status_label(self.get_active_tab())
+
+    def toggle_vim_mode(self, checked: Optional[bool] = None):
+        """Schaltet den modalen Vim-Modus an allen offenen Editoren ein oder aus."""
+        if checked is None:
+            new_state = not bool(self._settings.get("vim_mode", False))
+        else:
+            new_state = bool(checked)
+        self._settings["vim_mode"] = new_state
+        from config import save_settings
+        save_settings(self._settings)
+
+        if hasattr(self, "act_vim_mode"):
+            self.act_vim_mode.setChecked(new_state)
+
+        for tw in (self.tab_widget, self.split_tab_widget):
+            for idx in range(tw.count()):
+                tab = tw.tabs.get(idx)
+                if tab and tab.editor and hasattr(tab.editor, "set_vim_mode_enabled"):
+                    tab.editor.set_vim_mode_enabled(new_state)
+
+        active_tab = self.get_active_tab()
+        self._update_vim_status_label(active_tab)
+        msg = "Vim-Modus aktiviert" if new_state else "Vim-Modus deaktiviert"
+        self.status_bar.showMessage(msg, 3000)
 
     # ---- Ausführen ----
 
@@ -1108,6 +1177,29 @@ class MainWindow(QMainWindow):
 
             tab._cursor_slot = _slot
             tab.editor.cursorPositionInfo.connect(_slot)
+
+            if hasattr(tab.editor, "vim_engine"):
+                old_vmode = getattr(tab, "_vim_mode_slot", None)
+                if old_vmode is not None:
+                    try:
+                        tab.editor.vim_engine.modeChanged.disconnect(old_vmode)
+                    except (TypeError, RuntimeError):
+                        pass
+                old_vcmd = getattr(tab, "_vim_cmd_slot", None)
+                if old_vcmd is not None:
+                    try:
+                        tab.editor.vim_engine.commandBufferChanged.disconnect(old_vcmd)
+                    except (TypeError, RuntimeError):
+                        pass
+
+                def _vim_slot(*_args):
+                    if self.get_active_tab() is tab:
+                        self._update_vim_status_label(tab)
+
+                tab._vim_mode_slot = _vim_slot
+                tab._vim_cmd_slot = _vim_slot
+                tab.editor.vim_engine.modeChanged.connect(_vim_slot)
+                tab.editor.vim_engine.commandBufferChanged.connect(_vim_slot)
 
     def _open_file_from_project(self, file_path):
         """Öffnet eine Datei aus dem Projektbaum."""
