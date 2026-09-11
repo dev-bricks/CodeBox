@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 APP_NAME = "CodeBox"
-APP_VERSION = "0.1.7"
+APP_VERSION = "0.1.8"
 DEFAULT_WINDOW_TEMPLATE = f"{APP_NAME} v{APP_VERSION}"
 __version__ = APP_VERSION
 

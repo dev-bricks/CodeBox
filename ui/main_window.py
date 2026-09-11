@@ -191,6 +191,11 @@ class MainWindow(QMainWindow):
         )
         self._toggle_diff_action.setStatusTip("Öffnet den Git Diff-Viewer für geänderte Dateien")
 
+        self._toggle_commit_action = view_menu.addAction(
+            "Git-Commit Dialog...", lambda: self.show_git_commit(), "Ctrl+Alt+C"
+        )
+        self._toggle_commit_action.setStatusTip("Öffnet den Dialog zum Stagen und Committen von Git-Änderungen")
+
         # Theme-Submenü
         from features.theme_manager import get_available_themes, apply_theme
         theme_menu = view_menu.addMenu("Theme")
@@ -268,6 +273,7 @@ class MainWindow(QMainWindow):
         self.project_view = ProjectView()
         self.project_view.fileDoubleClicked.connect(self._open_file_from_project)
         self.project_view.diffRequested.connect(self.show_diff)
+        self.project_view.commitRequested.connect(self.show_git_commit)
         self.h_splitter.addWidget(self.project_view)
 
         # Rechte Seite: Vertikaler Splitter (Editor oben, Output/Terminal unten)
@@ -1141,6 +1147,30 @@ class MainWindow(QMainWindow):
                 repo_root = Path.cwd()
 
         dialog = DiffViewerDialog(self, repo_root=Path(repo_root), initial_file=file_path, staged=staged)
+        dialog.show()
+        dialog.raise_()
+        dialog.activateWindow()
+        return dialog
+
+    def show_git_commit(self, file_path: Optional[Path] = None):
+        """Öffnet den Git-Commit-Dialog für das Projekt oder eine bestimmte Datei."""
+        from ui.git_commit_dialog import GitCommitDialog
+        repo_root = getattr(self.project_view, "_root_path", None)
+        if not repo_root:
+            tab = self.get_active_tab()
+            if tab and tab.file_path:
+                repo_root = tab.file_path.parent
+            else:
+                repo_root = Path.cwd()
+
+        dialog = GitCommitDialog(
+            repo_root=Path(repo_root),
+            initial_file=file_path,
+            parent=self,
+            main_window=self,
+        )
+        dialog.status_changed.connect(self.project_view._refresh)
+        dialog.committed.connect(lambda msg: self.project_view._refresh())
         dialog.show()
         dialog.raise_()
         dialog.activateWindow()

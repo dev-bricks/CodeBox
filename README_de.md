@@ -6,13 +6,13 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![Plattform: Windows | Linux | macOS](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)]()
 [![CI](https://github.com/dev-bricks/CodeBox/actions/workflows/ci.yml/badge.svg)](https://github.com/dev-bricks/CodeBox/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-164%20passed%20%7C%20100%25-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-212%20passed%20%7C%20100%25-brightgreen.svg)]()
 [![Datenschutz: Zero-Egress](https://img.shields.io/badge/datenschutz-100%25%20local--first%20%7C%20zero--egress-success.svg)](SECURITY.md)
 [![Sicherheitsrichtlinie](https://img.shields.io/badge/sicherheit-zweisprachige%20policy-blue.svg)](SECURITY.md)
 [![Ökosystem: dev-bricks](https://img.shields.io/badge/ecosystem-dev--bricks-blue.svg)](https://github.com/dev-bricks)
 [![Dachverband: open-bricks](https://img.shields.io/badge/part%20of-open--bricks-blue.svg)](https://github.com/open-bricks)
 [![LSP Ready](https://img.shields.io/badge/LSP-ready-purple.svg)]()
-[![Version: 0.1.7](https://img.shields.io/badge/version-0.1.7-green.svg)](CHANGELOG.md)
+[![Version: 0.1.8](https://img.shields.io/badge/version-0.1.8-green.svg)](CHANGELOG.md)
 [![llms.txt](https://img.shields.io/badge/llms.txt-verf%C3%BCgbar-green.svg)](llms.txt)
 
 [English](README.md) | Deutsch
@@ -180,9 +180,14 @@ sequenceDiagram
 
 ## Funktionen
 
+- **Schnellauswahl & Befehlspalette**: Schneller Datei-Finder (`Ctrl+P`) mit intelligentem Treffer-Scoring und interaktive Befehlspalette (`Ctrl+Shift+P`) zur tastaturgesteuerten IDE-Bedienung.
+- **Git-Staging & Commit-Dialog**: Integriertes Git-Staging (`git add`, `git restore --staged`), Verwerfen von Änderungen, Diff-Inspektion und nativer Commit-Dialog (`Ctrl+Alt+C`) direkt aus der Seitenleiste und dem Ansicht-Menü.
+- **Integrierter Git Diff-Viewer**: Side-by-Side- und Unified-Diffs direkt in der IDE (`Ctrl+Alt+D`).
+- **Multi-Cursor & Column Selection**: Synchrone Bearbeitung an beliebig vielen Cursor-Positionen, Spaltenauswahl (`Alt+Shift+Ziehen`), Vorkommen-Markierung (`Ctrl+Shift+L` / `Ctrl+Alt+L`) und atomares Undo/Redo.
+- **Code-Faltung & Split-Editor**: Interaktives Ein-/Ausklappen von Funktionsblöcken und horizontale/vertikale Editor-Teilung mit synchronisierten Dokument-Buffern.
 - **Präzises Syntax-Highlighting**: Vorkonfigurierte Highlightings für Python, JavaScript, TypeScript, C++, Rust, Go und Java mit satzzeichensicherem Wortgrenzen-Matching.
 - **Deklarative Plugin-Architektur**: Neue Sprachen in wenigen Minuten per JSON-Schema definieren (`plugins/`, `~/.codebox/plugins/`).
-- **Interaktive Verwaltungsdialoge**: Vollständige GUI-Dialoge zur Verwaltung von Sprach-Plugins (`Ctrl+Shift+P`) und Tastaturkürzeln (`F1`).
+- **Interaktive Verwaltungsdialoge**: Vollständige GUI-Dialoge zur Verwaltung von Sprach-Plugins und Tastaturkürzeln (`F1`).
 - **Integriertes Terminal**: Native Terminalemulation mit Befehlshistorie, Streaming und automatischer Pfadsynchronisation.
 - **Projekt-Dateibaum**: Baumansicht mit Proxy-Suchfilter, Kontextaktionen und Git-Porcelain-Statusmarkern.
 - **Multi-Tab-Arbeitsbereich**: Drag-and-Drop-Reiter, Schutz vor Speicherverlust und absolute Pfad-Tooltips.

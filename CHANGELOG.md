@@ -10,6 +10,36 @@
 
 Alle wesentlichen Änderungen an CodeBox werden hier dokumentiert.
 
+## [0.1.8] - 2026-09-11
+
+### Git-Staging & Commit-Dialog
+
+- `features/git_integration.py`: Erweiterung der `GitRepo`-Klasse um vollständige Git-Staging-, Reset-, Verwerfen- und Commit-Funktionen:
+  - `_run_git_result()` für detaillierte Subprocess-Ergebnisse mit Rückgabewert, stdout und stderr.
+  - `stage_file(filepath)` und `stage_all()` (`git add`).
+  - `unstage_file(filepath)` und `unstage_all()` (`git restore --staged` / `git reset HEAD`).
+  - `discard_file_changes(filepath)` zum sicheren Verwerfen von Änderungen im Arbeitsbaum oder Löschen ungetrackter Dateien.
+  - `commit(message)` zum Erstellen von Commits mit Validierung leerer Nachrichten und Rückgabe von Ausgaben.
+- `ui/git_commit_dialog.py`: Neuer nativer Dialog `GitCommitDialog`:
+  - Zweispaltige Ansicht für bereitgestellte Änderungen (Staged) und ungestagte Arbeitsbaum-Änderungen.
+  - Status-Badges (`[M]`, `[A]`, `[?]`, `[D]`) mit WCAG-konformer Farbcodierung.
+  - Direktaktionen: "Stagen", "Alle stagen", "Aus Staging entfernen", "Alle unstagen", "Verwerfen...", "Diff anzeigen".
+  - Doppelklick-Unterstützung: Doppelklick auf ein Staged-Element hebt das Staging auf; Doppelklick auf ein Unstaged-Element stellt es bereit.
+  - Großzügiges Eingabefeld für Commit-Nachrichten mit Zeichen- und Zeilenzähler sowie Shortcut `Ctrl+Enter` zur sofortigen Ausführung.
+  - Vollständig barrierefrei mit `AccessibleName`, `AccessibleDescription` und Tastaturnavigation.
+- `features/project_view.py`:
+  - Neuer Header-Button "Commit..." (aktiviert, wenn das geöffnete Projekt ein Git-Repository ist).
+  - Kontextmenü-Erweiterung um "Datei stagen", "Staging aufheben", "Änderungen verwerfen..." und "Git-Commit Dialog...".
+  - Signal `commitRequested(Path)` zur Entkopplung und Status-Synchronisation nach Git-Aktionen.
+- `ui/main_window.py`:
+  - Menüeintrag *Ansicht* -> *Git-Commit Dialog...* mit Tastenkürzel `Ctrl+Alt+C`.
+  - Signalverbindung `project_view.commitRequested.connect(self.show_git_commit)`.
+  - Methode `show_git_commit()` zur dialoggestützten Ausführung.
+- `ui/shortcuts_dialog.py`:
+  - Aufnahme von `Git-Commit Dialog` (`Ctrl+Alt+C`) in die Tastaturkürzel-Referenz.
+- `tests/test_git_staging_and_commit.py`:
+  - 3 automatisierte Integrations- und GUI-Tests mit vollständiger Testabdeckung auf Basis temporärer Git-Repositories.
+
 ## [0.1.7] - 2026-09-10
 
 ### Quick-Open Datei-Finder & Befehlspalette (`Ctrl+P` / `Ctrl+Shift+P`)

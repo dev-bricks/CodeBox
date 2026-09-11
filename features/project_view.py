@@ -158,6 +158,7 @@ class ProjectView(QWidget):
 
     fileDoubleClicked = Signal(object)  # Path
     diffRequested = Signal(object)  # Path
+    commitRequested = Signal(object)  # Optional[Path]
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -202,6 +203,19 @@ class ProjectView(QWidget):
         )
         self.btn_refresh.clicked.connect(self._refresh)
         header.addWidget(self.btn_refresh)
+
+        self.btn_commit = QPushButton("Commit...")
+        self.btn_commit.setObjectName("project_view_commit_button")
+        self.btn_commit.setFixedWidth(65)
+        self.btn_commit.setStyleSheet("font-size: 10px;")
+        self.btn_commit.setToolTip("Git-Staging und Commit-Dialog öffnen")
+        self.btn_commit.setAccessibleName("Git-Commit Dialog")
+        self.btn_commit.setAccessibleDescription(
+            "Öffnet den Dialog zum Bereitstellen und Committen von Git-Änderungen."
+        )
+        self.btn_commit.setEnabled(False)
+        self.btn_commit.clicked.connect(lambda: self.open_commit_dialog())
+        header.addWidget(self.btn_commit)
 
         layout.addLayout(header)
 
@@ -308,13 +322,16 @@ class ProjectView(QWidget):
         """
         if not self._root_path:
             self.git_delegate.set_status("", {})
+            self.btn_commit.setEnabled(False)
             return
         from features.git_integration import GitRepo
         repo = GitRepo(str(self._root_path))
         if repo.is_git_repo():
             self.git_delegate.set_status(str(self._root_path), repo.get_status())
+            self.btn_commit.setEnabled(True)
         else:
             self.git_delegate.set_status("", {})
+            self.btn_commit.setEnabled(False)
 
     def _open_folder_dialog(self):
         path = QFileDialog.getExistingDirectory(self, "Projektordner wählen")
@@ -368,6 +385,27 @@ class ProjectView(QWidget):
             act_new_file = menu.addAction("Neue Datei...")
             act_new_file.triggered.connect(lambda: self._new_file_in(file_path))
 
+        # Git Actions
+        if self._root_path:
+            from features.git_integration import GitRepo
+            repo = GitRepo(str(self._root_path))
+            if repo.is_git_repo():
+                menu.addSeparator()
+                rel_status = status_for_path(str(file_path), str(self._root_path), repo.get_status())
+                if not is_dir and rel_status:
+                    if rel_status.is_staged:
+                        act_unstage = menu.addAction("Staging aufheben (git reset)")
+                        act_unstage.triggered.connect(lambda f=file_path: self._unstage_file(f))
+                    if rel_status.is_modified or rel_status.is_untracked or rel_status.is_deleted:
+                        act_stage = menu.addAction("Datei stagen (git add)")
+                        act_stage.triggered.connect(lambda f=file_path: self._stage_file(f))
+
+                    act_discard = menu.addAction("Änderungen verwerfen...")
+                    act_discard.triggered.connect(lambda f=file_path: self._discard_file_changes(f))
+
+                act_commit = menu.addAction("Git-Commit Dialog...")
+                act_commit.triggered.connect(lambda f=file_path: self.open_commit_dialog(initial_file=f))
+
         menu.exec(self.tree.viewport().mapToGlobal(position))
 
     def _reveal_in_explorer(self, path: Path):
@@ -404,3 +442,67 @@ class ProjectView(QWidget):
                                      f"Datei konnte nicht erstellt werden:\n{e}")
                 return
             self.fileDoubleClicked.emit(new_path)
+
+    def _stage_file(self, file_path: Path):
+        """Stages a file and updates git status."""
+        if not self._root_path:
+            return
+        from features.git_integration import GitRepo
+        repo = GitRepo(str(self._root_path))
+        try:
+            rel = file_path.relative_to(self._root_path).as_posix()
+            if repo.stage_file(rel):
+                self._refresh()
+        except ValueError:
+            pass
+
+    def _unstage_file(self, file_path: Path):
+        """Unstages a file and updates git status."""
+        if not self._root_path:
+            return
+        from features.git_integration import GitRepo
+        repo = GitRepo(str(self._root_path))
+        try:
+            rel = file_path.relative_to(self._root_path).as_posix()
+            if repo.unstage_file(rel):
+                self._refresh()
+        except ValueError:
+            pass
+
+    def _discard_file_changes(self, file_path: Path):
+        """Prompts to discard changes and refreshes git status."""
+        if not self._root_path:
+            return
+        reply = QMessageBox.question(
+            self,
+            "Änderungen verwerfen",
+            f"Möchten Sie alle lokalen Änderungen an '{file_path.name}' wirklich unwiderruflich verwerfen?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if reply == QMessageBox.StandardButton.Yes:
+            from features.git_integration import GitRepo
+            repo = GitRepo(str(self._root_path))
+            try:
+                rel = file_path.relative_to(self._root_path).as_posix()
+                if repo.discard_file_changes(rel):
+                    self._refresh()
+            except ValueError:
+                pass
+
+    def open_commit_dialog(self, initial_file: Optional[Path] = None):
+        """Öffnet den Git-Commit-Dialog für das aktuelle Projekt."""
+        if not self._root_path:
+            QMessageBox.information(self, "Kein Projekt geöffnet", "Bitte öffnen Sie zuerst ein Projekt.")
+            return
+        self.commitRequested.emit(initial_file)
+        from ui.git_commit_dialog import GitCommitDialog
+        dialog = GitCommitDialog(
+            repo_root=self._root_path,
+            initial_file=initial_file,
+            parent=self.window() if self.window() else self,
+        )
+        dialog.status_changed.connect(self._refresh)
+        dialog.committed.connect(lambda msg: self._refresh())
+        dialog.exec()
+        self._refresh()

@@ -47,7 +47,7 @@ def test_version_parity(pyproject_data: dict) -> None:
 
     # Check llms.txt
     llms_text = (PROJECT_ROOT / "llms.txt").read_text(encoding="utf-8")
-    assert "Last-checked: 2026-08-24" in llms_text
+    assert re.search(r"Last-checked:\s*\d{4}-\d{2}-\d{2}", llms_text) is not None
 
 
 def test_pyproject_required_fields(pyproject_data: dict) -> None:

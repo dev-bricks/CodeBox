@@ -11,7 +11,7 @@ Uses subprocess to call git CLI (no additional dependencies).
 import subprocess
 import logging
 from pathlib import Path
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Tuple
 from dataclasses import dataclass
 
 logger = logging.getLogger("CodeBox.Git")
@@ -208,3 +208,79 @@ class GitRepo:
         if result:
             return result.splitlines()
         return []
+
+    def _run_git_result(self, *args) -> Tuple[int, str, str]:
+        """Executes a git command and returns (returncode, stdout, stderr)."""
+        try:
+            result = subprocess.run(
+                ["git"] + list(args),
+                cwd=str(self.repo_path),
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=15,
+            )
+            return result.returncode, result.stdout.strip(), result.stderr.strip()
+        except (FileNotFoundError, subprocess.TimeoutExpired, OSError) as e:
+            logger.debug("Git command failed: git %s (%s)", " ".join(args), e)
+            return -1, "", str(e)
+
+    def stage_file(self, filepath: str) -> bool:
+        """Stages a specific file (git add -- <filepath>)."""
+        clean_path = filepath.replace("\\", "/")
+        code, _, _ = self._run_git_result("add", "--", clean_path)
+        return code == 0
+
+    def unstage_file(self, filepath: str) -> bool:
+        """Unstages a specific file (git restore --staged -- <filepath>)."""
+        clean_path = filepath.replace("\\", "/")
+        code, _, _ = self._run_git_result("restore", "--staged", "--", clean_path)
+        if code != 0:
+            code, _, _ = self._run_git_result("reset", "HEAD", "--", clean_path)
+        return code == 0
+
+    def stage_all(self) -> bool:
+        """Stages all changes in the repository (git add -A)."""
+        code, _, _ = self._run_git_result("add", "-A")
+        return code == 0
+
+    def unstage_all(self) -> bool:
+        """Unstages all staged changes in the repository (git restore --staged .)."""
+        code, _, _ = self._run_git_result("restore", "--staged", ".")
+        if code != 0:
+            code, _, _ = self._run_git_result("reset", "HEAD")
+        return code == 0
+
+    def discard_file_changes(self, filepath: str) -> bool:
+        """Discards worktree changes for a file (restore or clean)."""
+        clean_path = filepath.replace("\\", "/")
+        status_dict = self.get_status()
+        status = status_dict.get(clean_path)
+        if status and status.is_untracked:
+            target = self.repo_path / filepath
+            try:
+                if target.is_file():
+                    target.unlink()
+                    return True
+            except OSError:
+                code, _, _ = self._run_git_result("clean", "-f", "--", clean_path)
+                return code == 0
+        code, _, _ = self._run_git_result("restore", "--", clean_path)
+        if code != 0:
+            code, _, _ = self._run_git_result("checkout", "--", clean_path)
+        return code == 0
+
+    def commit(self, message: str) -> Tuple[bool, str]:
+        """Creates a git commit with the given message.
+
+        Returns:
+            (True, output_text) on success, (False, error_message) on failure.
+        """
+        msg = message.strip()
+        if not msg:
+            return False, "Commit-Nachricht darf nicht leer sein."
+        code, stdout, stderr = self._run_git_result("commit", "-m", msg)
+        if code == 0:
+            return True, stdout or "Commit erfolgreich erstellt."
+        return False, stderr or stdout or "Fehler beim Erstellen des Commits."
