@@ -10,6 +10,41 @@
 
 Alle wesentlichen Änderungen an CodeBox werden hier dokumentiert.
 
+## [0.2.0] - 2026-09-12
+
+### Multi-Root-Workspace Support
+
+- `core/workspace.py`: Neues Kernmodul für Multi-Root-Arbeitsbereiche:
+  - Datenklasse `WorkspaceFolder` (`path`, `name`, `to_dict`, `from_dict`) mit portabler relativer Pfadberechnung.
+  - `WorkspaceManager` (`QObject`) mit Signalen `foldersChanged`, `activeFolderChanged(object)`, `workspaceLoaded(str)`.
+  - Methoden `add_folder`, `remove_folder`, `set_active_folder`, `set_single_folder`, `clear`, `find_folder_for_file`.
+  - Datei-Format `.codebox-workspace` (JSON) mit Metadaten, Schema-Version und relativer Pfadauflösung für geräteübergreifende Portabilität (OneDrive/Multi-Device).
+  - Methode `collect_all_files` zum schnellen Ordner-übergreifenden Durchsuchen mit Filterregeln.
+- `features/project_view.py`:
+  - Dynamischer Arbeitsbereich-Umschalter (`workspace_widget` mit `workspace_combo`, `btn_add_root`, `btn_remove_root`), der sich bei mehreren geöffneten Ordnern automatisch einblendet und bei Einzelordnern für ein aufgeräumtes Design unsichtbar bleibt.
+  - Nahtloser Wechsel des aktiven Ordners und Aktualisierung von Git-Branch und Dateibaum.
+  - Kontextmenü-Aktionen im Dateibaum für Verzeichnisse: "Ordner zum Arbeitsbereich hinzufügen" und "Ordner aus Arbeitsbereich entfernen".
+- `ui/main_window.py`:
+  - Menü *Datei* erweitert um:
+    - *Ordner öffnen...* (`Ctrl+Shift+O`): Öffnet einen Ordner als einzelnen Arbeitsbereich.
+    - *Ordner zum Arbeitsbereich hinzufügen...*: Fügt einen weiteren Ordner hinzu.
+    - *Arbeitsbereich öffnen...*: Lädt eine `.codebox-workspace` Konfiguration.
+    - *Arbeitsbereich speichern unter...*: Speichert den aktuellen Arbeitsbereich inklusive aller Ordner.
+    - *Arbeitsbereich schließen*: Schließt alle Ordner des aktuellen Arbeitsbereichs.
+  - Intelligente Dateizuordnung (`_on_file_changed`): Erkennt automatisch, welchem Arbeitsbereichs-Ordner eine geöffnete Datei angehört, und wechselt den aktiven Ordner, ohne andere Arbeitsbereichs-Ordner zu verwerfen.
+  - Automatische Synchronisation des integrierten Terminals auf den jeweils aktiven Arbeitsbereichs-Ordner.
+- `ui/command_palette.py`:
+  - Quick-Open (`Ctrl+P`) durchsucht im Multi-Root-Modus alle Projektordner des Arbeitsbereichs gleichzeitig mit prägnanten Ordner-Badges (z. B. `[backend] api/routes.py`).
+  - Neue Arbeitsbereichs-Aktionen stehen direkt über die Befehlspalette (`Ctrl+Shift+P`) zur Verfügung.
+- `config/__init__.py`:
+  - Standardeinstellung `"recent_workspaces": []` hinzugefügt.
+- `ui/shortcuts_dialog.py`:
+  - Shortcuts-Übersicht um die neuen Arbeitsbereichs-Aktionen und `Ctrl+Shift+O` ergänzt.
+- Testsuite:
+  - `tests/test_workspace.py`: 5 Unit-Tests für `WorkspaceManager` und `WorkspaceFolder`.
+  - `tests/test_multi_root_workspace.py`: 4 Integrations-Tests für UI, Lifecycle, Dateizuordnung und Quick-Open Suche.
+  - 248 Tests bestanden, 1 übersprungen, 100% grün.
+
 ## [0.1.9] - 2026-09-11
 
 ### Zuschaltbarer Vim-Keybindings Modus

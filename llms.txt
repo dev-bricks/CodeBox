@@ -1,6 +1,6 @@
 # CodeBox - Local PySide6 Desktop Code Editor
 
-## Last-checked: 2026-09-11
+## Last-checked: 2026-09-12
 
 > CodeBox is a local-first desktop IDE for Windows, Linux, and macOS developers who want a lightweight PySide6 code editor with multi-tab workspace, project tree, integrated terminal, Git status porcelain indicators, syntax highlighting, Language Server Protocol (LSP) diagnostics, and an extensible JSON/Python language plugin architecture.
 
@@ -17,6 +17,7 @@ Part of the dev-bricks family. Python, MIT.
 
 ## Features & Architecture
 
+- **Multi-Root Workspaces**: Load and manage multiple project folders simultaneously with portable `.codebox-workspace` files, dynamic tree switcher, cross-folder Quick Open, and per-root Git status.
 - **Quick-Open & Command Palette**: Centralized keyboard-driven launcher (`Ctrl+P` for project file finder, `Ctrl+Shift+P` for interactive command palette).
 - **Git Staging & Commit Dialog**: Dedicated staging (`git add`, `git restore --staged`), change discard, diff inspections, and commit workflow dialog (`Ctrl+Alt+C`, sidebar button, and context menu).
 - **Split Editor Panes**: Horizontal (`Ctrl+\`) and vertical (`Ctrl+Shift+\`) multi-editor splits sharing underlying documents.
@@ -37,7 +38,7 @@ Part of the dev-bricks family. Python, MIT.
 - `python main.py`: Launches the CodeBox desktop interface.
 - `python main.py --open <file>`: Launches and directly opens a target file path.
 - `build_exe.bat`: Uses PyInstaller to bundle the application into a standalone executable (`dist/CodeBox.exe`).
-- `pytest`: Runs the automated test suite (209 passed, 1 skipped).
+- `pytest`: Runs the automated test suite (248 passed, 1 skipped).
 - `ruff check .`: Runs the codebase linting suite.
 
 ## Related Projects (dev-bricks & ellmos family)

@@ -8,18 +8,21 @@ Unterstützt Doppelklick zum Öffnen, Kontextmenü und Filter.
 Git-Status-Indikatoren (M/S/U/D) werden rechts neben dem Dateinamen eingeblendet.
 """
 
+from __future__ import annotations
+
 from pathlib import Path
 from typing import Optional, Dict, TYPE_CHECKING
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QTreeView, QFileSystemModel,
     QPushButton, QLabel, QLineEdit, QMenu, QFileDialog,
-    QMessageBox, QStyledItemDelegate
+    QMessageBox, QStyledItemDelegate, QComboBox
 )
 from PySide6.QtCore import Qt, QDir, Signal, QSortFilterProxyModel, QModelIndex
 from PySide6.QtGui import QFont, QColor
 
 if TYPE_CHECKING:
     from features.git_integration import GitFileStatus
+    from core.workspace import WorkspaceManager
 
 
 # Dateien/Ordner, die standardmäßig ausgeblendet werden
@@ -163,6 +166,7 @@ class ProjectView(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self._root_path = None
+        self._workspace = None
         self._setup_ui()
 
     def _setup_ui(self):
@@ -218,6 +222,44 @@ class ProjectView(QWidget):
         header.addWidget(self.btn_commit)
 
         layout.addLayout(header)
+
+        # Multi-Root Workspace Selector Bar
+        self.workspace_widget = QWidget()
+        self.workspace_widget.setObjectName("project_view_workspace_widget")
+        ws_layout = QHBoxLayout(self.workspace_widget)
+        ws_layout.setContentsMargins(4, 2, 4, 2)
+        ws_layout.setSpacing(4)
+
+        self.workspace_combo = QComboBox()
+        self.workspace_combo.setObjectName("project_view_workspace_combo")
+        self.workspace_combo.setToolTip("Aktiven Ordner im Arbeitsbereich auswählen")
+        self.workspace_combo.setAccessibleName("Arbeitsbereich-Ordnerauswahl")
+        self.workspace_combo.setAccessibleDescription("Wechselt zwischen den geöffneten Ordnern im Arbeitsbereich.")
+        self.workspace_combo.currentIndexChanged.connect(self._on_workspace_combo_changed)
+        ws_layout.addWidget(self.workspace_combo, 1)
+
+        self.btn_add_root = QPushButton("+")
+        self.btn_add_root.setObjectName("project_view_add_root_button")
+        self.btn_add_root.setFixedWidth(24)
+        self.btn_add_root.setStyleSheet("font-size: 11px; font-weight: bold;")
+        self.btn_add_root.setToolTip("Ordner zum Arbeitsbereich hinzufügen...")
+        self.btn_add_root.setAccessibleName("Ordner zum Arbeitsbereich hinzufügen")
+        self.btn_add_root.setAccessibleDescription("Fügt einen weiteren Projektordner zum Arbeitsbereich hinzu.")
+        self.btn_add_root.clicked.connect(self._add_folder_dialog)
+        ws_layout.addWidget(self.btn_add_root)
+
+        self.btn_remove_root = QPushButton("✕")
+        self.btn_remove_root.setObjectName("project_view_remove_root_button")
+        self.btn_remove_root.setFixedWidth(24)
+        self.btn_remove_root.setStyleSheet("font-size: 10px;")
+        self.btn_remove_root.setToolTip("Aktiven Ordner aus dem Arbeitsbereich entfernen")
+        self.btn_remove_root.setAccessibleName("Ordner aus Arbeitsbereich entfernen")
+        self.btn_remove_root.setAccessibleDescription("Entfernt den aktuellen Ordner aus dem Arbeitsbereich.")
+        self.btn_remove_root.clicked.connect(self._remove_current_root_folder)
+        ws_layout.addWidget(self.btn_remove_root)
+
+        layout.addWidget(self.workspace_widget)
+        self.workspace_widget.setVisible(False)
 
         # Filter
         self.filter_input = QLineEdit()
@@ -292,10 +334,131 @@ class ProjectView(QWidget):
 
         layout.addWidget(self.tree)
 
+    def set_workspace(self, workspace: Optional[WorkspaceManager]):
+        """Verbindet die ProjectView mit dem WorkspaceManager."""
+        if self._workspace is not None:
+            try:
+                self._workspace.foldersChanged.disconnect(self._on_workspace_folders_changed)
+                self._workspace.activeFolderChanged.disconnect(self._on_workspace_active_folder_changed)
+            except (TypeError, RuntimeError):
+                pass
+
+        self._workspace = workspace
+        if self._workspace is not None:
+            self._workspace.foldersChanged.connect(self._on_workspace_folders_changed)
+            self._workspace.activeFolderChanged.connect(self._on_workspace_active_folder_changed)
+            self._on_workspace_folders_changed()
+            if self._workspace.active_folder:
+                self._apply_root(self._workspace.active_folder)
+
+    def _on_workspace_folders_changed(self):
+        """Aktualisiert die Arbeitsbereichs-Auswahlleiste."""
+        if not self._workspace or len(self._workspace.folders) <= 1:
+            self.workspace_widget.setVisible(False)
+            if self._workspace and self._workspace.folders:
+                folder = self._workspace.folders[0].path
+                if self._root_path != folder:
+                    self._apply_root(folder)
+                else:
+                    self._update_git_info()
+            return
+
+        self.workspace_widget.setVisible(True)
+        self.workspace_combo.blockSignals(True)
+        self.workspace_combo.clear()
+
+        from features.git_integration import GitRepo
+        for wf in self._workspace.folders:
+            repo = GitRepo(str(wf.path))
+            branch = repo.get_branch() if repo.is_git_repo() else ""
+            label = f"{wf.name}  [{branch}]" if branch else wf.name
+            self.workspace_combo.addItem(f"📁 {label}", str(wf.path))
+            idx = self.workspace_combo.count() - 1
+            self.workspace_combo.setItemData(idx, str(wf.path), Qt.ItemDataRole.ToolTipRole)
+
+        active = self._workspace.active_folder
+        if active:
+            for i in range(self.workspace_combo.count()):
+                if self.workspace_combo.itemData(i) == str(active):
+                    self.workspace_combo.setCurrentIndex(i)
+                    break
+        self.workspace_combo.blockSignals(False)
+        self.title_label.setText(f"Arbeitsbereich ({len(self._workspace.folders)} Ordner)")
+
+    def _on_workspace_active_folder_changed(self, active_path: Optional[Path]):
+        if active_path is None:
+            self._root_path = None
+            self.tree.setRootIndex(QModelIndex())
+            self._update_git_info()
+            self._load_git_status()
+            return
+
+        if self._root_path != active_path:
+            self._apply_root(active_path)
+
+        if self.workspace_widget.isVisible():
+            self.workspace_combo.blockSignals(True)
+            for i in range(self.workspace_combo.count()):
+                if self.workspace_combo.itemData(i) == str(active_path):
+                    self.workspace_combo.setCurrentIndex(i)
+                    break
+            self.workspace_combo.blockSignals(False)
+
+    def _on_workspace_combo_changed(self, index: int):
+        if index < 0 or not self._workspace:
+            return
+        path_str = self.workspace_combo.itemData(index)
+        if path_str:
+            p = Path(path_str)
+            self._workspace.set_active_folder(p)
+
+    def add_workspace_folder(self, path: Path | str, name: Optional[str] = None):
+        """Fügt einen Ordner zum Arbeitsbereich hinzu."""
+        p = Path(path).resolve()
+        if self._workspace is not None:
+            self._workspace.add_folder(p, name=name, make_active=True)
+        else:
+            self.set_root(str(p))
+
+    def remove_workspace_folder(self, path: Path | str):
+        """Entfernt einen Ordner aus dem Arbeitsbereich."""
+        p = Path(path).resolve()
+        if self._workspace is not None:
+            self._workspace.remove_folder(p)
+        elif self._root_path == p:
+            self._root_path = None
+            self.tree.setRootIndex(QModelIndex())
+            self._update_git_info()
+            self._load_git_status()
+
+    def _add_folder_dialog(self):
+        path = QFileDialog.getExistingDirectory(self, "Ordner zum Arbeitsbereich hinzufügen")
+        if path:
+            self.add_workspace_folder(path)
+
+    def _remove_current_root_folder(self):
+        if self._root_path and self._workspace:
+            self.remove_workspace_folder(self._root_path)
+
     def set_root(self, path: str):
         """Setzt den Wurzelordner des Dateibaums."""
-        self._root_path = Path(path)
-        root_index = self.fs_model.setRootPath(path)
+        if not path:
+            self._root_path = None
+            self.tree.setRootIndex(QModelIndex())
+            self._update_git_info()
+            self._load_git_status()
+            return
+        p = Path(path).resolve()
+        if self._workspace is not None:
+            if not self._workspace.has_folder(p):
+                self._workspace.add_folder(p, make_active=True)
+            else:
+                self._workspace.set_active_folder(p)
+        self._apply_root(p)
+
+    def _apply_root(self, path: Path):
+        self._root_path = path
+        root_index = self.fs_model.setRootPath(str(path))
         proxy_root = self.proxy.mapFromSource(root_index)
         self.tree.setRootIndex(proxy_root)
         self._update_git_info()
@@ -303,8 +466,12 @@ class ProjectView(QWidget):
 
     def _update_git_info(self):
         """Aktualisiert die Git-Branch-Anzeige im Titel."""
+        if self._workspace and self._workspace.is_multi_root:
+            self.title_label.setText(f"Arbeitsbereich ({len(self._workspace.folders)} Ordner)")
+            return
+
         if not self._root_path:
-            self.title_label.setText("")
+            self.title_label.setText("Projekt")
             return
         from features.git_integration import GitRepo
         repo = GitRepo(str(self._root_path))
@@ -384,6 +551,14 @@ class ProjectView(QWidget):
         if is_dir:
             act_new_file = menu.addAction("Neue Datei...")
             act_new_file.triggered.connect(lambda: self._new_file_in(file_path))
+
+            menu.addSeparator()
+            act_add_ws = menu.addAction("Ordner zum Arbeitsbereich hinzufügen")
+            act_add_ws.triggered.connect(lambda f=file_path: self.add_workspace_folder(f))
+
+            if self._workspace and self._workspace.has_folder(file_path):
+                act_rm_ws = menu.addAction("Ordner aus Arbeitsbereich entfernen")
+                act_rm_ws.triggered.connect(lambda f=file_path: self.remove_workspace_folder(f))
 
         # Git Actions
         if self._root_path:

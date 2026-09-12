@@ -24,6 +24,11 @@ SHORTCUTS_DATA = [
     # Datei
     ("Datei", "Neu", "Ctrl+N", "Erstellt eine neue leere Datei"),
     ("Datei", "Öffnen...", "Ctrl+O", "Öffnet eine bestehende Datei"),
+    ("Datei", "Ordner öffnen...", "Ctrl+Shift+O", "Öffnet einen Projektordner als einzelnen Arbeitsbereich"),
+    ("Datei", "Ordner zum Arbeitsbereich hinzufügen...", "", "Fügt einen weiteren Projektordner zum Arbeitsbereich hinzu"),
+    ("Datei", "Arbeitsbereich öffnen...", "", "Lädt einen .codebox-workspace Arbeitsbereich"),
+    ("Datei", "Arbeitsbereich speichern unter...", "", "Speichert den aktuellen Arbeitsbereich in eine Datei"),
+    ("Datei", "Arbeitsbereich schließen", "", "Schließt alle Ordner des aktuellen Arbeitsbereichs"),
     ("Datei", "Schnell öffnen (Quick Open)", "Ctrl+P", "Öffnet die Schnellauswahl für Projektdateien"),
     ("Datei", "Speichern", "Ctrl+S", "Speichert die aktuelle Datei"),
     ("Datei", "Beenden", "Ctrl+Q", "Schließt die CodeBox-Anwendung"),

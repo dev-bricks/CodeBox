@@ -16,7 +16,7 @@ Bietet die kanonische Vim-Zustandsmaschine für CodeEditor:
 from __future__ import annotations
 
 from enum import Enum
-from typing import Optional, Tuple, TYPE_CHECKING
+from typing import Tuple, TYPE_CHECKING
 from PySide6.QtCore import QObject, Signal, Qt
 from PySide6.QtGui import (
     QTextCursor, QKeyEvent, QGuiApplication, QFontMetrics
@@ -146,7 +146,6 @@ class VimEngine(QObject):
             self._mode = mode
             return
 
-        old_mode = self._mode
         self._mode = mode
         self.reset_buffers()
 

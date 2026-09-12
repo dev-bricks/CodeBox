@@ -11,6 +11,7 @@ DEFAULT_SETTINGS = {
     "auto_save": False,
     "show_minimap": True,
     "recent_files": [],
+    "recent_workspaces": [],
     "vim_mode": False
 }
 

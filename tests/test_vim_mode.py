@@ -5,19 +5,18 @@
 import pytest
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QKeyEvent, QTextCursor
+from PySide6.QtGui import QKeyEvent
 
 from core.editor import CodeEditor
 from core.vim_mode import (
     VimMode,
-    VimEngine,
     find_next_word_start,
     find_prev_word_start,
     find_next_word_end,
 )
 from ui.main_window import MainWindow
 from ui.settings_dialog import SettingsDialog
-from ui.shortcuts_dialog import ShortcutsDialog, SHORTCUTS_DATA
+from ui.shortcuts_dialog import SHORTCUTS_DATA
 
 
 @pytest.fixture(scope="session", autouse=True)

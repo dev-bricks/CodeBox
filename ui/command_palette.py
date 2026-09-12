@@ -245,10 +245,25 @@ class CommandPaletteDialog(QDialog):
         self._update_results()
 
     def _collect_files(self):
-        """Indexiert die Dateien des aktuellen Projektordners."""
+        """Indexiert die Dateien des aktuellen Projektordners oder Arbeitsbereichs."""
         self._all_files.clear()
-        root_dir = None
 
+        # Multi-Root Workspace Support
+        if (
+            hasattr(self.main_window, "workspace")
+            and self.main_window.workspace
+            and not self.main_window.workspace.is_empty
+        ):
+            ws = self.main_window.workspace
+            is_multi = ws.is_multi_root
+            self.root_dir = ws.active_folder or (ws.folders[0].path if ws.folders else Path.cwd())
+            results = ws.collect_all_files(max_files=3000, skip_dirs=SKIP_DIRS)
+            for rel_str, abs_p, folder_name in results:
+                display_str = f"[{folder_name}] {rel_str}" if is_multi else rel_str
+                self._all_files.append((display_str, abs_p))
+            return
+
+        root_dir = None
         if hasattr(self.main_window, "project_view") and self.main_window.project_view:
             pv_root = getattr(self.main_window.project_view, "_root_path", None)
             if pv_root and Path(pv_root).is_dir():

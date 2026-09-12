@@ -33,6 +33,7 @@ Thumbs.db
 *.sqlite
 *.sqlite3
 *.log
+config/settings.json
 *.exe
 *.msi
 *.msix

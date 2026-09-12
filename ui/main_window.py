@@ -13,6 +13,7 @@ from PySide6.QtCore import Qt, Signal
 
 from core.tabs import TabWidget, EditorTab
 from core.output import OutputPanel
+from core.workspace import WorkspaceManager
 from features.terminal import TerminalWidget
 from features.project_view import ProjectView
 from languages import (
@@ -60,6 +61,11 @@ class MainWindow(QMainWindow):
         self._find_dialog = None
         self._active_tab_widget = None
 
+        # Workspace-Manager für Multi-Root-Support
+        self.workspace = WorkspaceManager(self)
+        self.workspace.activeFolderChanged.connect(self._on_workspace_active_folder_changed)
+        self.workspace.workspaceLoaded.connect(self._on_workspace_loaded)
+
         self.setup_ui()
         self.setup_shortcuts()
         self._apply_settings()
@@ -74,6 +80,18 @@ class MainWindow(QMainWindow):
         act_new.setStatusTip("Erstellt eine neue leere Datei")
         act_open = file_menu.addAction("Öffnen...", self.open_file, "Ctrl+O")
         act_open.setStatusTip("Öffnet eine bestehende Datei von der Festplatte")
+        act_open_folder = file_menu.addAction("Ordner öffnen...", self.open_folder_dialog, "Ctrl+Shift+O")
+        act_open_folder.setStatusTip("Öffnet einen Projektordner als einzelnen Arbeitsbereich")
+        act_add_folder = file_menu.addAction("Ordner zum Arbeitsbereich hinzufügen...", self.add_workspace_folder_dialog)
+        act_add_folder.setStatusTip("Fügt einen weiteren Projektordner zum aktuellen Arbeitsbereich hinzu")
+        file_menu.addSeparator()
+        act_open_ws = file_menu.addAction("Arbeitsbereich öffnen...", self.open_workspace_dialog)
+        act_open_ws.setStatusTip("Öffnet eine .codebox-workspace Datei")
+        act_save_ws = file_menu.addAction("Arbeitsbereich speichern unter...", self.save_workspace_dialog)
+        act_save_ws.setStatusTip("Speichert den aktuellen Arbeitsbereich in eine Datei")
+        act_close_ws = file_menu.addAction("Arbeitsbereich schließen", self.close_workspace)
+        act_close_ws.setStatusTip("Schließt alle Ordner des aktuellen Arbeitsbereichs")
+        file_menu.addSeparator()
         act_quick_open = file_menu.addAction("Schnell öffnen...", self.show_quick_open, "Ctrl+P")
         act_quick_open.setStatusTip("Öffnet die Schnellauswahl für Projektdateien (Quick Open)")
         act_save = file_menu.addAction("Speichern", self.save_file, "Ctrl+S")
@@ -275,6 +293,7 @@ class MainWindow(QMainWindow):
 
         # Linke Seite: Project-View (Dateibaum)
         self.project_view = ProjectView()
+        self.project_view.set_workspace(self.workspace)
         self.project_view.fileDoubleClicked.connect(self._open_file_from_project)
         self.project_view.diffRequested.connect(self.show_diff)
         self.project_view.commitRequested.connect(self.show_git_commit)
@@ -591,6 +610,111 @@ class MainWindow(QMainWindow):
         )
         if path:
             self.open_path(Path(path))
+
+    def open_folder_dialog(self):
+        """Öffnet einen Dialog zur Auswahl eines einzelnen Projektordners."""
+        path = QFileDialog.getExistingDirectory(self, "Projektordner öffnen")
+        if path:
+            self.open_folder(Path(path))
+
+    def open_folder(self, path: Path | str):
+        """Öffnet einen Ordner als einzelnen Workspace-Ordner."""
+        folder = Path(path).resolve()
+        if not folder.exists() or not folder.is_dir():
+            QMessageBox.warning(self, "Ordner öffnen", f"Ordner nicht gefunden:\n{folder}")
+            return
+        self.workspace.set_single_folder(folder)
+        self.status_bar.showMessage(f"Projektordner geöffnet: {folder.name}", 3000)
+
+    def add_workspace_folder_dialog(self):
+        """Öffnet einen Dialog zum Hinzufügen eines weiteren Ordners zum Arbeitsbereich."""
+        path = QFileDialog.getExistingDirectory(self, "Ordner zum Arbeitsbereich hinzufügen")
+        if path:
+            self.add_workspace_folder(Path(path))
+
+    def add_workspace_folder(self, path: Path | str, name: Optional[str] = None):
+        """Fügt einen Ordner zum aktuellen Arbeitsbereich hinzu."""
+        folder = Path(path).resolve()
+        if not folder.exists() or not folder.is_dir():
+            QMessageBox.warning(self, "Ordner hinzufügen", f"Ordner nicht gefunden:\n{folder}")
+            return
+        self.workspace.add_folder(folder, name=name, make_active=True)
+        self.status_bar.showMessage(f"Ordner zum Arbeitsbereich hinzugefügt: {folder.name}", 3000)
+
+    def open_workspace_dialog(self):
+        """Öffnet einen Dialog zum Laden einer .codebox-workspace Datei."""
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Arbeitsbereich öffnen", "",
+            "CodeBox Workspace (*.codebox-workspace);;JSON (*.json);;Alle Dateien (*)"
+        )
+        if path:
+            self.open_workspace_file(Path(path))
+
+    def open_workspace_file(self, path: Path | str) -> bool:
+        """Lädt eine Arbeitsbereichs-Konfigurationsdatei."""
+        ws_path = Path(path).resolve()
+        if not ws_path.exists():
+            QMessageBox.warning(self, "Arbeitsbereich öffnen", f"Datei nicht gefunden:\n{ws_path}")
+            return False
+        ok = self.workspace.load_workspace(ws_path)
+        if ok:
+            recent = self._settings.setdefault("recent_workspaces", [])
+            p_str = str(ws_path)
+            if p_str in recent:
+                recent.remove(p_str)
+            recent.insert(0, p_str)
+            self._settings["recent_workspaces"] = recent[:10]
+            from config import save_settings
+            save_settings(self._settings)
+            self.status_bar.showMessage(f"Arbeitsbereich '{self.workspace.name}' geladen.", 4000)
+            return True
+        else:
+            QMessageBox.warning(self, "Arbeitsbereich öffnen", f"Fehler beim Laden des Arbeitsbereichs:\n{ws_path}")
+            return False
+
+    def save_workspace_dialog(self):
+        """Öffnet einen Dialog zum Speichern des aktuellen Arbeitsbereichs."""
+        default_name = f"{self.workspace.name or 'workspace'}.codebox-workspace"
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Arbeitsbereich speichern unter", default_name,
+            "CodeBox Workspace (*.codebox-workspace);;JSON (*.json);;Alle Dateien (*)"
+        )
+        if path:
+            self.save_workspace_file(Path(path))
+
+    def save_workspace_file(self, path: Path | str) -> bool:
+        """Speichert den aktuellen Arbeitsbereich in eine Datei."""
+        ws_path = Path(path).resolve()
+        ok = self.workspace.save_workspace(ws_path)
+        if ok:
+            recent = self._settings.setdefault("recent_workspaces", [])
+            p_str = str(ws_path)
+            if p_str in recent:
+                recent.remove(p_str)
+            recent.insert(0, p_str)
+            self._settings["recent_workspaces"] = recent[:10]
+            from config import save_settings
+            save_settings(self._settings)
+            self.status_bar.showMessage(f"Arbeitsbereich gespeichert: {ws_path.name}", 3000)
+            return True
+        else:
+            QMessageBox.warning(self, "Arbeitsbereich speichern", f"Fehler beim Speichern:\n{ws_path}")
+            return False
+
+    def close_workspace(self):
+        """Schließt alle Ordner im aktuellen Arbeitsbereich."""
+        self.workspace.clear()
+        self.status_bar.showMessage("Arbeitsbereich geschlossen.", 3000)
+
+    def _on_workspace_active_folder_changed(self, active_folder: Optional[Path]):
+        """Reagiert auf Änderungen des aktiven Ordners im Workspace."""
+        if active_folder:
+            self.terminal.set_working_dir(str(active_folder))
+
+    def _on_workspace_loaded(self, path: str):
+        """Wird ausgelöst, wenn ein Workspace geladen wurde."""
+        if self.workspace.active_folder:
+            self.terminal.set_working_dir(str(self.workspace.active_folder))
 
     def open_path(self, file_path: Path, target_widget: Optional[TabWidget] = None):
         """Öffnet einen konkreten Pfad ohne Dateidialog."""
@@ -1132,11 +1256,20 @@ class MainWindow(QMainWindow):
                 self.lang_label.setText("Keine Sprache")
                 self.output.run_btn.setEnabled(False)
             self._connect_cursor(tab)
-            # ProjectView und Terminal auf Projektordner setzen
-            project_dir = file_path.parent
-            if self.project_view._root_path != project_dir:
-                self.project_view.set_root(str(project_dir))
-            self.terminal.set_working_dir(str(project_dir))
+            # Ermitteln, ob die Datei zu einem bestehenden Workspace-Ordner gehört
+            owning_folder = self.workspace.find_folder_for_file(file_path)
+            if owning_folder:
+                if self.workspace.active_folder != owning_folder:
+                    self.workspace.set_active_folder(owning_folder)
+                target_dir = owning_folder
+            else:
+                project_dir = file_path.parent
+                if self.workspace.is_empty:
+                    self.workspace.add_folder(project_dir, make_active=True)
+                elif self.project_view._root_path != project_dir:
+                    self.project_view.set_root(str(project_dir))
+                target_dir = project_dir
+            self.terminal.set_working_dir(str(target_dir))
         else:
             self.setWindowTitle(format_window_title())
             self.lang_label.setText("Keine Sprache")
