@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     QMessageBox, QTabWidget
 )
 from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QTextCursor
 
 from core.tabs import TabWidget, EditorTab
 from core.output import OutputPanel
@@ -23,10 +24,12 @@ from languages import (
     add_provider_listener,
     remove_provider_listener,
 )
-from features.lsp_client import LSPManager
+from features.lsp_client import LSPManager, parse_lsp_locations
 from features.linter import LinterManager
 from features.plugin_manager import PluginManager
+from core.symbol_search import find_definition_fallback, find_references_fallback
 from ui.problems_panel import ProblemsPanel
+from ui.references_panel import ReferencesPanel
 from ui.plugins_dialog import PluginsDialog
 from ui.shortcuts_dialog import ShortcutsDialog
 from ui.command_palette import CommandPaletteDialog
@@ -39,6 +42,8 @@ class MainWindow(QMainWindow):
 
     lspDiagnosticsReceived = Signal(object, list)
     lspCompletionsReceived = Signal(object, list)
+    lspDefinitionReceived = Signal(object, object, str)
+    lspReferencesReceived = Signal(object, object, str)
 
     def __init__(self):
         super().__init__()
@@ -51,6 +56,8 @@ class MainWindow(QMainWindow):
         self._problems_by_tab = {}
         self.lspDiagnosticsReceived.connect(self._apply_lsp_diagnostics)
         self.lspCompletionsReceived.connect(self._apply_lsp_completions)
+        self.lspDefinitionReceived.connect(self._apply_lsp_definition)
+        self.lspReferencesReceived.connect(self._apply_lsp_references)
         self._linter_manager.lintFinished.connect(self._apply_linter_results)
 
         # Plugin-Manager & Auto-Discovery
@@ -119,6 +126,10 @@ class MainWindow(QMainWindow):
         act_find_prev.setStatusTip("Springt zum vorherigen Suchtreffer")
         act_goto = edit_menu.addAction("Gehe zu Zeile...", self._goto_line, "Ctrl+G")
         act_goto.setStatusTip("Springt zu einer bestimmten Zeilennummer")
+        self.act_goto_def = edit_menu.addAction("Zur Definition springen", self.goto_definition, "F12")
+        self.act_goto_def.setStatusTip("Springt zur Definition des aktuellen Symbols (F12)")
+        self.act_find_refs = edit_menu.addAction("Alle Referenzen suchen", self.find_references, "Shift+F12")
+        self.act_find_refs.setStatusTip("Sucht alle Vorkommen und Referenzen des aktuellen Symbols (Shift+F12)")
         edit_menu.addSeparator()
         act_comment = edit_menu.addAction("Zeilenkommentar umschalten", self._toggle_comment, "Ctrl+/")
         act_comment.setStatusTip("Kommentiert die aktuelle Zeile oder Auswahl aus/ein")
@@ -349,6 +360,11 @@ class MainWindow(QMainWindow):
         self.problems.problemActivated.connect(self._activate_problem)
         self.bottom_tabs.addTab(self.problems, "Probleme")
         self.bottom_tabs.setTabToolTip(2, "LSP- und Linter-Diagnosen und Fehlermeldungen")
+
+        self.references = ReferencesPanel()
+        self.references.referenceActivated.connect(self._activate_reference)
+        self.bottom_tabs.addTab(self.references, "Referenzen")
+        self.bottom_tabs.setTabToolTip(3, "LSP- und Symbol-Referenzen")
 
         self.v_splitter.addWidget(self.bottom_tabs)
         self.v_splitter.setSizes([600, 200])
@@ -949,6 +965,220 @@ class MainWindow(QMainWindow):
         in_split = any(self.split_tab_widget.tabs.get(idx) is tab for idx in range(self.split_tab_widget.count()))
         return in_primary or in_split
 
+    def goto_definition(
+        self,
+        line: Optional[int] = None,
+        col: Optional[int] = None,
+        symbol: Optional[str] = None,
+    ):
+        """Springt zur Definition des Symbols an der aktuellen Position (F12)."""
+        tab = self.get_active_tab()
+        if not tab or not tab.editor:
+            return
+
+        cursor = tab.editor.textCursor()
+        if line is None:
+            line = cursor.blockNumber()
+        if col is None:
+            col = cursor.positionInBlock()
+        if symbol is None:
+            symbol = tab.editor.get_symbol_at_cursor()
+
+        if not symbol:
+            self.statusBar().showMessage("Kein Symbol für Definition ausgewählt.", 3000)
+            return
+
+        client = getattr(tab, "_lsp_client", None)
+        uri = getattr(tab, "_lsp_uri", None)
+
+        if client and uri and client.is_available():
+            def on_def(result):
+                self.lspDefinitionReceived.emit(tab, result, symbol)
+
+            client.request_definition(uri, line, col, callback=on_def)
+        else:
+            self._execute_definition_fallback(tab, symbol)
+
+    def find_references(
+        self,
+        line: Optional[int] = None,
+        col: Optional[int] = None,
+        symbol: Optional[str] = None,
+    ):
+        """Sucht alle Referenzen für das Symbol an der aktuellen Position (Shift+F12)."""
+        tab = self.get_active_tab()
+        if not tab or not tab.editor:
+            return
+
+        cursor = tab.editor.textCursor()
+        if line is None:
+            line = cursor.blockNumber()
+        if col is None:
+            col = cursor.positionInBlock()
+        if symbol is None:
+            symbol = tab.editor.get_symbol_at_cursor()
+
+        if not symbol:
+            self.statusBar().showMessage("Kein Symbol für Referenzsuche ausgewählt.", 3000)
+            return
+
+        client = getattr(tab, "_lsp_client", None)
+        uri = getattr(tab, "_lsp_uri", None)
+
+        if client and uri and client.is_available():
+            def on_ref(result):
+                self.lspReferencesReceived.emit(tab, result, symbol)
+
+            client.request_references(uri, line, col, include_declaration=True, callback=on_ref)
+        else:
+            self._execute_references_fallback(tab, symbol)
+
+    def _jump_to_position_in_tab(self, tab, line: int, col: int, length: int = 0):
+        """Springt innerhalb des gegebenen Tabs präzise zur Zeile und Spalte (1-basiert)."""
+        if not tab or not tab.editor:
+            return
+        cursor = tab.editor.textCursor()
+        cursor.movePosition(QTextCursor.MoveOperation.Start)
+        for _ in range(max(0, line - 1)):
+            cursor.movePosition(QTextCursor.MoveOperation.Down)
+        cursor.movePosition(QTextCursor.MoveOperation.StartOfLine)
+        if col > 1:
+            cursor.movePosition(QTextCursor.MoveOperation.Right, QTextCursor.MoveMode.MoveAnchor, col - 1)
+        if length > 0:
+            cursor.movePosition(QTextCursor.MoveOperation.Right, QTextCursor.MoveMode.KeepAnchor, length)
+        tab.editor.setTextCursor(cursor)
+        tab.editor.centerCursor()
+        tab.editor.setFocus()
+
+    def _apply_lsp_definition(self, tab, result, symbol: str):
+        if not self._is_live_tab(tab):
+            return
+        locations = parse_lsp_locations(result)
+        if not locations:
+            self._execute_definition_fallback(tab, symbol)
+            return
+
+        if len(locations) == 1:
+            loc = locations[0]
+            p = loc.get("path")
+            target_line = int(loc.get("line") or 1)
+            target_col = int(loc.get("col") or 1)
+            if p and (tab.file_path is None or Path(p).resolve() != tab.file_path.resolve()):
+                self.open_path_at(p, target_line, target_col, len(symbol))
+            else:
+                self._jump_to_position_in_tab(tab, target_line, target_col, len(symbol))
+            name_str = p.name if p else "aktuellem Dokument"
+            self.statusBar().showMessage(
+                f"Zur Definition von '{symbol}' gesprungen ({name_str}:{target_line})", 4000
+            )
+        else:
+            self._show_references_panel(
+                symbol,
+                locations,
+                title=f"Definitionen für '{symbol}' ({len(locations)} Treffer)",
+            )
+
+
+    def _apply_lsp_references(self, tab, result, symbol: str):
+        if not self._is_live_tab(tab):
+            return
+        locations = parse_lsp_locations(result)
+        if not locations:
+            self._execute_references_fallback(tab, symbol)
+            return
+
+        for loc in locations:
+            p = loc.get("path")
+            target_line = int(loc.get("line") or 1)
+            loc["length"] = len(symbol)
+            if "preview" not in loc and p and p.exists():
+                try:
+                    lines = p.read_text(encoding="utf-8", errors="replace").splitlines()
+                    if 0 < target_line <= len(lines):
+                        loc["preview"] = lines[target_line - 1].strip()
+                except Exception:
+                    pass
+
+        self._show_references_panel(symbol, locations)
+
+    def _execute_definition_fallback(self, tab, symbol: str):
+        workspace_folders = getattr(self.workspace, "folders", None) or (
+            [self.workspace.root_path] if getattr(self.workspace, "root_path", None) else []
+        )
+        current_text = tab.editor.toPlainText() if tab and tab.editor else ""
+        current_path = getattr(tab, "file_path", None)
+
+        matches = find_definition_fallback(
+            symbol,
+            current_path=current_path,
+            current_text=current_text,
+            workspace_folders=workspace_folders,
+        )
+
+        if not matches:
+            self.statusBar().showMessage(f"Keine Definition für '{symbol}' gefunden.", 4000)
+            return
+
+        if len(matches) == 1:
+            m = matches[0]
+            p = m.get("path")
+            target_line = int(m.get("line") or 1)
+            target_col = int(m.get("col") or 1)
+            if p and (tab.file_path is None or Path(p).resolve() != tab.file_path.resolve()):
+                self.open_path_at(p, target_line, target_col, len(symbol))
+            else:
+                self._jump_to_position_in_tab(tab, target_line, target_col, len(symbol))
+            name_str = p.name if p else "aktuellem Dokument"
+            self.statusBar().showMessage(
+                f"Definition für '{symbol}' gefunden ({name_str}:{target_line})", 4000
+            )
+        else:
+            self._show_references_panel(
+                symbol,
+                matches,
+                title=f"Definitionen für '{symbol}' ({len(matches)} Treffer)",
+            )
+
+    def _execute_references_fallback(self, tab, symbol: str):
+        workspace_folders = getattr(self.workspace, "folders", None) or (
+            [self.workspace.root_path] if getattr(self.workspace, "root_path", None) else []
+        )
+        current_text = tab.editor.toPlainText() if tab and tab.editor else ""
+        current_path = getattr(tab, "file_path", None)
+
+        matches = find_references_fallback(
+            symbol,
+            current_path=current_path,
+            current_text=current_text,
+            workspace_folders=workspace_folders,
+        )
+        if not matches:
+            self.statusBar().showMessage(f"Keine Referenzen für '{symbol}' gefunden.", 4000)
+            return
+
+        self._show_references_panel(symbol, matches)
+
+    def _show_references_panel(self, symbol: str, references: list, title: Optional[str] = None):
+        ws_root = getattr(self.workspace, "root_path", None)
+        self.references.set_references(symbol, references, title=title, workspace_root=ws_root)
+        self.bottom_tabs.show()
+        self.bottom_tabs.setCurrentWidget(self.references)
+        self.statusBar().showMessage(
+            f"{len(references)} Treffer für '{symbol}' gefunden.", 4000
+        )
+
+    def _activate_reference(self, ref: dict):
+        path = ref.get("path")
+        line = int(ref.get("line") or 1)
+        col = int(ref.get("col") or 1)
+        length = int(ref.get("length") or 0)
+        active_tab = self.get_active_tab()
+        if path and (not active_tab or not active_tab.file_path or Path(path).resolve() != active_tab.file_path.resolve()):
+            self.open_path_at(path, line, col, length)
+        elif active_tab:
+            self._jump_to_position_in_tab(active_tab, line, col, length)
+
+
     def save_file(self):
         tab = self.get_active_tab()
         if not tab:
@@ -1384,6 +1614,33 @@ class MainWindow(QMainWindow):
                 tab._vim_cmd_slot = _vim_slot
                 tab.editor.vim_engine.modeChanged.connect(_vim_slot)
                 tab.editor.vim_engine.commandBufferChanged.connect(_vim_slot)
+
+            old_def_slot = getattr(tab, "_lsp_def_slot", None)
+            if old_def_slot is not None:
+                try:
+                    tab.editor.definitionRequested.disconnect(old_def_slot)
+                except (TypeError, RuntimeError):
+                    pass
+
+            def _def_slot(line, col, sym):
+                self.goto_definition(line=line, col=col, symbol=sym)
+
+            tab._lsp_def_slot = _def_slot
+            tab.editor.definitionRequested.connect(_def_slot)
+
+            old_ref_slot = getattr(tab, "_lsp_ref_slot", None)
+            if old_ref_slot is not None:
+                try:
+                    tab.editor.referencesRequested.disconnect(old_ref_slot)
+                except (TypeError, RuntimeError):
+                    pass
+
+            def _ref_slot(line, col, sym):
+                self.find_references(line=line, col=col, symbol=sym)
+
+            tab._lsp_ref_slot = _ref_slot
+            tab.editor.referencesRequested.connect(_ref_slot)
+
 
     def _open_file_from_project(self, file_path):
         """Öffnet eine Datei aus dem Projektbaum."""

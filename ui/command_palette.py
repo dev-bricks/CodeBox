@@ -318,6 +318,8 @@ class CommandPaletteDialog(QDialog):
             ("Ansicht", "Terminal ein-/ausblenden", "Ctrl+`", self.main_window._toggle_terminal),
             ("Datei", "Datei schnell öffnen (Quick Open)", "Ctrl+P", self.main_window.show_quick_open),
             ("Bearbeiten", "In Dateien suchen (Projektweite Textsuche)", "Ctrl+Shift+F", self.main_window.show_find_in_files),
+            ("Bearbeiten", "Zur Definition springen (Go to Definition)", "F12", self.main_window.goto_definition),
+            ("Bearbeiten", "Alle Referenzen suchen (Find References)", "Shift+F12", self.main_window.find_references),
             ("Bearbeiten", "Befehlspalette öffnen", "Ctrl+Shift+P", self.main_window.show_command_palette),
             ("Bearbeiten", "Plugins & Sprachen verwalten", "", self.main_window.open_plugins_dialog),
             ("Bearbeiten", "Einstellungen", "Ctrl+,", self.main_window.open_settings_dialog),

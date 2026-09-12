@@ -233,6 +233,8 @@ class CodeEditor(QPlainTextEdit):
 
     cursorPositionInfo = Signal(int, int)  # Zeile, Spalte
     completionRequested = Signal(int, int, str)  # LSP: Zeile, Spalte, Prefix (0-basiert)
+    definitionRequested = Signal(int, int, str)  # LSP/Fallback: Zeile, Spalte, Symbol (0-basiert)
+    referencesRequested = Signal(int, int, str)  # LSP/Fallback: Zeile, Spalte, Symbol (0-basiert)
     modificationChanged = Signal(bool)
     focusReceived = Signal()
 
@@ -359,6 +361,63 @@ class CodeEditor(QPlainTextEdit):
         tc = self.textCursor()
         tc.select(QTextCursor.SelectionType.WordUnderCursor)
         return tc.selectedText()
+
+    def get_symbol_at_cursor(self) -> str:
+        """Gibt das Symbol unter dem Cursor oder den markierten Text zurück."""
+        cursor = self.textCursor()
+        if cursor.hasSelection():
+            sel = cursor.selectedText().strip()
+            if sel:
+                return sel
+        return self.text_under_cursor().strip()
+
+    def request_goto_definition(self):
+        """Löst den Sprung zur Definition für das aktuelle Symbol aus."""
+        cursor = self.textCursor()
+        line = cursor.blockNumber()
+        col = cursor.positionInBlock()
+        symbol = self.get_symbol_at_cursor()
+        self.definitionRequested.emit(line, col, symbol)
+
+    def request_find_references(self):
+        """Löst die Referenzsuche für das aktuelle Symbol aus."""
+        cursor = self.textCursor()
+        line = cursor.blockNumber()
+        col = cursor.positionInBlock()
+        symbol = self.get_symbol_at_cursor()
+        self.referencesRequested.emit(line, col, symbol)
+
+    def contextMenuEvent(self, event):
+        """Erweitertes Kontextmenü mit Definitionen, Referenzen und CodeBox-Aktionen."""
+        cursor = self.cursorForPosition(event.pos())
+        if not self.textCursor().hasSelection():
+            self.setTextCursor(cursor)
+
+        menu = self.createStandardContextMenu()
+        menu.addSeparator()
+
+        symbol = self.get_symbol_at_cursor()
+        if symbol:
+            act_def = menu.addAction(f"Zur Definition von '{symbol}' springen\tF12")
+            act_ref = menu.addAction(f"Referenzen für '{symbol}' suchen\tShift+F12")
+        else:
+            act_def = menu.addAction("Zur Definition springen\tF12")
+            act_ref = menu.addAction("Alle Referenzen suchen\tShift+F12")
+
+        act_def.triggered.connect(self.request_goto_definition)
+        act_ref.triggered.connect(self.request_find_references)
+
+        menu.addSeparator()
+        window = self.window()
+        if hasattr(window, "show_find_in_files"):
+            act_find_files = menu.addAction("In Dateien suchen...\tCtrl+Shift+F")
+            act_find_files.triggered.connect(lambda: window.show_find_in_files(initial_query=symbol))
+
+        act_comment = menu.addAction("Zeilenkommentar umschalten\tCtrl+/")
+        act_comment.triggered.connect(self.toggle_comment)
+
+        menu.exec(event.globalPos())
+
 
     def indent_selection(self, spaces: int = None):
         """Rückt die aktuelle Zeile oder alle markierten Zeilen ein."""

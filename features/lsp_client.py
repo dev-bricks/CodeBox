@@ -19,6 +19,8 @@ import threading
 import shutil
 from typing import Optional, Dict, List, Callable
 from pathlib import Path
+from urllib.parse import unquote, urlparse
+
 
 
 # Bekannte LSP-Server pro Sprache
@@ -60,6 +62,85 @@ class LSPMessage:
         }
 
 
+def lsp_uri_to_path(uri: str) -> Optional[Path]:
+    """Konvertiert eine file://-URI in einen Path.
+
+    Unterstützt POSIX- und Windows-Pfade (z.B. file:///C:/path -> C:/path).
+    """
+    if not uri:
+        return None
+    try:
+        parsed = urlparse(uri)
+        if parsed.scheme != "file":
+            return None
+        raw_path = unquote(parsed.path)
+        # Auf Windows: /C:/foo/bar -> C:/foo/bar
+        if raw_path.startswith("/") and len(raw_path) > 2 and raw_path[2] == ":":
+            raw_path = raw_path[1:]
+        return Path(raw_path)
+    except Exception:
+        return None
+
+
+def parse_lsp_locations(result) -> List[dict]:
+    """Normalisiert LSP-Locations in ein einheitliches Format.
+
+    Unterstützt:
+    - Location: {"uri": "...", "range": {"start": {"line": ..., "character": ...}, ...}}
+    - Location[]: Liste von Location-Objekten
+    - LocationLink[]: [{"targetUri": "...", "targetSelectionRange": {...}, ...}]
+
+    Rückgabe:
+    Liste von Dicts:
+    [
+        {
+            "uri": str,
+            "path": Path,
+            "line": int,      # 1-basiert
+            "col": int,       # 1-basiert
+            "end_line": int,  # 1-basiert
+            "end_col": int,   # 1-basiert
+        },
+        ...
+    ]
+    """
+    if not result:
+        return []
+
+    items = result if isinstance(result, list) else [result]
+    locations = []
+
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+
+        uri = item.get("targetUri") or item.get("uri")
+        if not uri:
+            continue
+
+        range_data = item.get("targetSelectionRange") or item.get("targetRange") or item.get("range") or {}
+        start = range_data.get("start", {})
+        end = range_data.get("end", {})
+
+        start_line = int(start.get("line", 0)) + 1
+        start_col = int(start.get("character", 0)) + 1
+        end_line = int(end.get("line", start.get("line", 0))) + 1
+        end_col = int(end.get("character", start.get("character", 0))) + 1
+
+        path = lsp_uri_to_path(uri)
+
+        locations.append({
+            "uri": uri,
+            "path": path,
+            "line": start_line,
+            "col": start_col,
+            "end_line": end_line,
+            "end_col": end_col,
+        })
+
+    return locations
+
+
 class LSPClient:
     """LSP-Client für eine einzelne Sprache/Server-Instanz.
 
@@ -80,6 +161,8 @@ class LSPClient:
         self.on_diagnostics: Optional[Callable] = None
         self.on_completion: Optional[Callable] = None
         self.on_hover: Optional[Callable] = None
+        self.on_definition: Optional[Callable] = None
+        self.on_references: Optional[Callable] = None
 
     @property
     def server_config(self) -> Optional[dict]:
@@ -138,6 +221,8 @@ class LSPClient:
                         "completionItem": {"snippetSupport": False}
                     },
                     "hover": {},
+                    "definition": {},
+                    "references": {},
                     "publishDiagnostics": {"relatedInformation": True}
                 }
             }
@@ -218,6 +303,29 @@ class LSPClient:
             "textDocument": {"uri": uri},
             "position": {"line": line, "character": character}
         }, callback=callback or self.on_hover)
+
+    def request_definition(self, uri: str, line: int, character: int, callback: Callable = None):
+        """Fordert Definition(en) für die gegebene Position an (textDocument/definition)."""
+        self._send_request("textDocument/definition", {
+            "textDocument": {"uri": uri},
+            "position": {"line": line, "character": character}
+        }, callback=callback or self.on_definition)
+
+    def request_references(
+        self,
+        uri: str,
+        line: int,
+        character: int,
+        include_declaration: bool = True,
+        callback: Callable = None,
+    ):
+        """Fordert alle Referenzen für die gegebene Position an (textDocument/references)."""
+        self._send_request("textDocument/references", {
+            "textDocument": {"uri": uri},
+            "position": {"line": line, "character": character},
+            "context": {"includeDeclaration": include_declaration}
+        }, callback=callback or self.on_references)
+
 
     # --- Interne Methoden ---
 

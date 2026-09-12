@@ -10,6 +10,39 @@
 
 Alle wesentlichen Änderungen an CodeBox werden hier dokumentiert.
 
+## [0.3.0] - 2026-09-12
+
+### LSP Definitionen- & Referenzen-Sprung ("Go to Definition" F12 & "Find References" Shift+F12)
+
+- `features/lsp_client.py`:
+  - LSP-Funktionen erweitert um `request_definition(uri, line, col, callback)` (`textDocument/definition`) und `request_references(uri, line, col, include_declaration, callback)` (`textDocument/references`).
+  - Client-Capabilities um `definition: {}` und `references: {}` erweitert.
+  - Sicheres URL- und Pfadparsing mit `lsp_uri_to_path` (robuste Behandlung von Windows-Laufwerksbuchstaben `file:///C:/...` und Sonderzeichen/Leerzeichen via `unquote`).
+  - Robuste Normalisierung mit `parse_lsp_locations(result)` für alle LSP-Formate (`Location`, `Location[]` und `LocationLink[]`) mit 1-basierter Koordinatenumrechnung.
+- `core/symbol_search.py`:
+  - Neues Kernmodul für semantische und textuelle Definition- & Referenz-Erkennung mit Heuristik-Fallback.
+  - Sprachspezifische Regex-Muster für Python (`def`, `class`, `async def`), JS/TS (`function`, `class`, `const/let/var =`), Rust (`fn`, `struct`, `enum`, `impl`), Go (`func`, `type`), C/C++ (`struct`, `class`, Funktionssignaturen).
+  - Deterministischer Wortgrenzen-Scanner `find_references_fallback` ohne versehentliche Teilworttreffer.
+  - Respektiert Dateigrößen-Limits (2 MB) und `IGNORED_DIRS` (`.git`, `__pycache__`, `.venv`, `node_modules` etc.).
+- `ui/references_panel.py`:
+  - Neues Panel `ReferencesPanel` als permanenter Tab im unteren Bereich (`bottom_tabs`, Tab-Index 3).
+  - Gruppierte Baumansicht nach Datei mit Badge-Anzahl pro Datei und Zeilennummern.
+  - Interaktives Navigieren per Doppelklick oder Return/Enter-Taste mit Signal `referenceActivated`.
+  - Schaltfläche "Leeren" und barrierefreie Accessible-Descriptions.
+- `core/editor.py`:
+  - Editor-Signale `definitionRequested(int, int, str)` und `referencesRequested(int, int, str)`.
+  - Methoden `get_symbol_at_cursor()`, `request_goto_definition()`, `request_find_references()`.
+  - Dynamisches Kontextmenü: "Zur Definition von '<symbol>' springen\tF12", "Referenzen für '<symbol>' suchen\tShift+F12", "In Dateien suchen...\tCtrl+Shift+F" und "Zeilenkommentar umschalten\tCtrl+/".
+- `ui/main_window.py`:
+  - Aktionen *Zur Definition springen* (`F12`) und *Alle Referenzen suchen* (`Shift+F12`) im Menü *Bearbeiten*.
+  - Zentrale Signalweiterleitung in `_connect_cursor(tab)` für alle bestehenden, neuen und geteilten Tabs.
+  - Automatischer Wechsel zwischen aktiver LSP-Anfrage und schnellem Regex-Fallback bei inaktivem Server oder leeren Ergebnissen.
+  - Präzise In-Tab-Navigation `_jump_to_position_in_tab` für dasselbe Dokument und `open_path_at` für externe Projektdateien.
+- `ui/command_palette.py` & `ui/shortcuts_dialog.py`:
+  - Schnellaktionen und Tastenkürzel für F12 und Shift+F12 registriert und dokumentiert.
+- `tests/test_lsp_definition_references.py`:
+  - 16 neue automatisierte Unittests für URI-Parsing, Location-Normalisierung, LSP-Request-Formate, Regex-Fallbacks, Referenzen-Panel und MainWindow-Integration.
+
 ## [0.2.0] - 2026-09-12
 
 ### Integrierte globale Textsuche (Workspace Find in Files / Grep-Tool)
