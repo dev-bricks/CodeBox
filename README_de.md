@@ -168,6 +168,8 @@ sequenceDiagram
 | **Hintergrund-Linting** | Asynchrone Ausführung lokaler Linter (Ruff, flake8, ESLint) beim Speichern. | Dynamische Bündelung von Warnungen und Fehlern im Problems-Panel. |
 | **Schutz vor Speicherverlust** | Abgesicherte Dateisystemoperationen mit Puffererhaltung. | Tabs bleiben geöffnet und Daten geschützt, falls ein Schreibfehler auftritt. |
 | **Integriertes Terminal** | Eingebetteter `QProcess`-Terminalbereich für `cmd`, `PowerShell` und `bash`. | Dynamische Kodierungsanpassung (cp1252 / utf-8) und Verzeichnissynchronisation. |
+| **Multi-Root-Arbeitsbereiche** | Natives `.codebox-workspace`-Format mit relativen, portablen Pfaden. | Nahtlose Verwaltung mehrerer Projektordner in einer Instanz (`Ctrl+Shift+O`). |
+| **Projektweite Dateisuche** | Multithreaded Hintergrund-Grep (`core/file_search.py`) mit `Ctrl+Shift+F`. | Schnelle, nicht-blockierende Suche mit Regex-, Wort- und Glob-Filtern. |
 
 ---
 
@@ -180,6 +182,8 @@ sequenceDiagram
 
 ## Funktionen
 
+- **Projektweite Dateisuche (Find in Files / Grep-Tool)**: Schnelle Textsuche über alle Projektordner und Dateien (`Ctrl+Shift+F`) mit regulären Ausdrücken, Groß-/Kleinschreibung, Ganzwort-Suche, Glob-Filtern (Einschließen/Ausschließen), asynchronem Hintergrund-Worker und Direktsprung in den Editor.
+- **Multi-Root-Arbeitsbereiche**: Verwaltung mehrerer Projektordner in einer gemeinsamen Instanz mit dem `.codebox-workspace`-Format und portablen relativen Pfaden (`Ctrl+Shift+O`).
 - **Schnellauswahl & Befehlspalette**: Schneller Datei-Finder (`Ctrl+P`) mit intelligentem Treffer-Scoring und interaktive Befehlspalette (`Ctrl+Shift+P`) zur tastaturgesteuerten IDE-Bedienung.
 - **Git-Staging & Commit-Dialog**: Integriertes Git-Staging (`git add`, `git restore --staged`), Verwerfen von Änderungen, Diff-Inspektion und nativer Commit-Dialog (`Ctrl+Alt+C`) direkt aus der Seitenleiste und dem Ansicht-Menü.
 - **Integrierter Git Diff-Viewer**: Side-by-Side- und Unified-Diffs direkt in der IDE (`Ctrl+Alt+D`).

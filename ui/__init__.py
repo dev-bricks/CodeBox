@@ -4,6 +4,7 @@ from .problems_panel import ProblemsPanel
 from .plugins_dialog import PluginsDialog
 from .shortcuts_dialog import ShortcutsDialog
 from .search_dialog import FindReplaceDialog
+from .find_in_files_dialog import FindInFilesDialog
 from .diff_viewer import DiffViewerDialog
 
 __all__ = [
@@ -12,5 +13,6 @@ __all__ = [
     "PluginsDialog",
     "ShortcutsDialog",
     "FindReplaceDialog",
+    "FindInFilesDialog",
     "DiffViewerDialog",
 ]

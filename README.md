@@ -168,6 +168,8 @@ sequenceDiagram
 | **Background Linting** | Asynchronous execution of local linters (Ruff, flake8, ESLint) on save. | Errors and warnings aggregated dynamically in unified Problems Panel. |
 | **Save-Failure Resilience** | Guarded filesystem write operations with buffer preservation. | Tabs remain open and unsaved state is protected if filesystem write fails. |
 | **Integrated Terminal** | Embedded `QProcess` terminal supporting `cmd`, `PowerShell`, and `bash`. | Dynamic encoding adaptation (cp1252 / utf-8) and working directory synchronisation. |
+| **Multi-Root Workspaces** | Native `.codebox-workspace` format with portable relative paths. | Seamless project switching across multiple repository roots (`Ctrl+Shift+O`). |
+| **Global Find in Files** | Multi-threaded background grep (`core/file_search.py`) with `Ctrl+Shift+F`. | Fast non-blocking search with Regex/Word/Case options and direct jump. |
 
 ---
 

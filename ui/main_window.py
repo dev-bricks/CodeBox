@@ -59,6 +59,7 @@ class MainWindow(QMainWindow):
         add_provider_listener(self._on_providers_updated)
 
         self._find_dialog = None
+        self._find_in_files_dialog = None
         self._active_tab_widget = None
 
         # Workspace-Manager für Multi-Root-Support
@@ -110,6 +111,8 @@ class MainWindow(QMainWindow):
         act_find.setStatusTip("Öffnet den Suchen- und Ersetzen-Dialog")
         act_replace = edit_menu.addAction("Ersetzen...", self._replace, "Ctrl+H")
         act_replace.setStatusTip("Öffnet den Suchen- und Ersetzen-Dialog im Ersetzen-Modus")
+        act_find_in_files = edit_menu.addAction("In Dateien suchen...", self.show_find_in_files, "Ctrl+Shift+F")
+        act_find_in_files.setStatusTip("Durchsucht alle Projektdateien im Arbeitsbereich nach Text")
         act_find_next = edit_menu.addAction("Weitersuchen", self._find_next, "F3")
         act_find_next.setStatusTip("Springt zum nächsten Suchtreffer")
         act_find_prev = edit_menu.addAction("Rückwärts weitersuchen", self._find_prev, "Shift+F3")
@@ -297,6 +300,7 @@ class MainWindow(QMainWindow):
         self.project_view.fileDoubleClicked.connect(self._open_file_from_project)
         self.project_view.diffRequested.connect(self.show_diff)
         self.project_view.commitRequested.connect(self.show_git_commit)
+        self.project_view.findInFilesRequested.connect(lambda p: self.show_find_in_files(target_path=p))
         self.h_splitter.addWidget(self.project_view)
 
         # Rechte Seite: Vertikaler Splitter (Editor oben, Output/Terminal unten)
@@ -1064,6 +1068,53 @@ class MainWindow(QMainWindow):
             if block.isValid():
                 cursor = tab.editor.textCursor()
                 cursor.setPosition(block.position())
+                tab.editor.setTextCursor(cursor)
+                tab.editor.centerCursor()
+                tab.editor.setFocus()
+
+    def show_find_in_files(
+        self,
+        initial_query: Optional[str] = None,
+        target_path: Optional[Path] = None,
+    ):
+        """Öffnet den Dialog für die datei- und projektweite Textsuche (Find in Files)."""
+        from ui.find_in_files_dialog import FindInFilesDialog
+
+        if initial_query is None:
+            tab = self.get_active_tab()
+            if tab and tab.editor:
+                selected = tab.editor.textCursor().selectedText()
+                if selected:
+                    initial_query = selected
+
+        if self._find_in_files_dialog is None:
+            self._find_in_files_dialog = FindInFilesDialog(self)
+
+        self._find_in_files_dialog.open_for_search(
+            initial_query=initial_query,
+            target_path=target_path,
+        )
+
+    def open_path_at(
+        self,
+        file_path: Path | str,
+        line: int = 1,
+        column: int = 1,
+        length: int = 0,
+    ):
+        """Öffnet eine Datei und setzt Cursor und Markierung auf Zeile, Spalte und Länge."""
+        from PySide6.QtGui import QTextCursor
+
+        tab = self.open_path(Path(file_path))
+        if tab and tab.editor:
+            doc = tab.editor.document()
+            block = doc.findBlockByNumber(max(0, line - 1))
+            if block.isValid():
+                cursor = tab.editor.textCursor()
+                start_pos = block.position() + max(0, column - 1)
+                cursor.setPosition(start_pos)
+                if length > 0:
+                    cursor.setPosition(start_pos + length, QTextCursor.MoveMode.KeepAnchor)
                 tab.editor.setTextCursor(cursor)
                 tab.editor.centerCursor()
                 tab.editor.setFocus()

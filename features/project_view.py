@@ -162,6 +162,7 @@ class ProjectView(QWidget):
     fileDoubleClicked = Signal(object)  # Path
     diffRequested = Signal(object)  # Path
     commitRequested = Signal(object)  # Optional[Path]
+    findInFilesRequested = Signal(object)  # Optional[Path]
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -551,6 +552,9 @@ class ProjectView(QWidget):
         if is_dir:
             act_new_file = menu.addAction("Neue Datei...")
             act_new_file.triggered.connect(lambda: self._new_file_in(file_path))
+
+            act_find_folder = menu.addAction("In diesem Ordner suchen...")
+            act_find_folder.triggered.connect(lambda f=file_path: self.findInFilesRequested.emit(f))
 
             menu.addSeparator()
             act_add_ws = menu.addAction("Ordner zum Arbeitsbereich hinzufügen")

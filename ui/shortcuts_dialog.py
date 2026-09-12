@@ -38,6 +38,7 @@ SHORTCUTS_DATA = [
     ("Bearbeiten", "Wiederherstellen", "Ctrl+Y", "Stellt die letzte rückgängig gemachte Änderung wieder her"),
     ("Bearbeiten", "Suchen", "Ctrl+F", "Öffnet den Suchen- und Ersetzen-Dialog"),
     ("Bearbeiten", "Ersetzen", "Ctrl+H", "Öffnet den Suchen- und Ersetzen-Dialog im Ersetzen-Modus"),
+    ("Bearbeiten", "In Dateien suchen", "Ctrl+Shift+F", "Projektweite Textsuche über alle Workspace-Ordner"),
     ("Bearbeiten", "Weitersuchen", "F3", "Springt zum nächsten Suchtreffer"),
     ("Bearbeiten", "Rückwärts suchen", "Shift+F3", "Springt zum vorherigen Suchtreffer"),
     ("Bearbeiten", "Treffer ersetzen (Dialog)", "Alt+R", "Ersetzt das aktuell ausgewählte Vorkommen"),

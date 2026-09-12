@@ -12,6 +12,30 @@ Alle wesentlichen Änderungen an CodeBox werden hier dokumentiert.
 
 ## [0.2.0] - 2026-09-12
 
+### Integrierte globale Textsuche (Workspace Find in Files / Grep-Tool)
+
+- `core/file_search.py`: Neues Kernmodul für schnelle datei- und projektübergreifende Textsuche:
+  - Datenklassen `SearchMatch` (mit exakten 1-basierten Zeilen- und Spaltenangaben, Trefferlänge und Zeilenvorschau), `FileSearchResult` und `SearchOptions`.
+  - Robuster Regex-Compiler `compile_search_regex` mit Unterstützung für Groß-/Kleinschreibung, Wortgrenzen (`\b`) und benutzerdefinierte Regex-Muster inklusive detaillierter Syntaxfehler-Rückmeldungen.
+  - Leistungsfähiges Glob-Filtersystem `matches_glob_patterns` für Include- und Exclude-Filter (z. B. `*.py`, `*.ts`, `dist/*`).
+  - Asynchroner Multi-Root `SearchWorker` (`QThread`) mit blockierungsfreier Verarbeitung, Abbruch-Unterstützung (`cancel()`), Fortschrittsmeldung (`searchProgress`), inkrementeller Trefferübermittlung (`fileCompleted`) und präziser Zeitmessung.
+  - Automatische Null-Byte-Erkennung (`is_binary_file`) zum sicheren Überspringen von Binärdateien und robuste Kodierungs-Fallbacks (UTF-8 -> CP1252 -> Latin-1).
+- `ui/find_in_files_dialog.py`: Moderner, nicht-modaler Suchdialog (`FindInFilesDialog`):
+  - Tastenkürzel `Ctrl+Shift+F` (sowie Alt-Mnemonics für Schalter: `Alt+K` Groß-/Kleinschreibung, `Alt+G` Ganzes Wort, `Alt+R` Regulärer Ausdruck, `Alt+S` Suchfeld).
+  - Flexible Suchbereichsauswahl über alle Arbeitsbereichs-Ordner oder gezielt für einzelne Unterordner.
+  - Glob-Filter für Dateitypen (Einschließen / Ausschließen).
+  - Interaktiver Trefferbaum (`QTreeWidget`) mit Dateigruppierung, Trefferanzahl-Badges, farblich hervorgehobenen Zeilennummern und Kontextzeilenvorschau.
+  - Direktsprung in den Editor per Enter oder Doppelklick mit Cursorfokussierung, Zentrierung und Hervorhebung des exakten Treffers.
+  - Vollständige Barrierefreiheit (Accessible Names, Accessible Descriptions und Statusleiste mit Fortschrittsanzeige).
+- `ui/main_window.py`:
+  - Menü *Bearbeiten* um *In Dateien suchen...* (`Ctrl+Shift+F`) erweitert.
+  - Methoden `show_find_in_files` (übernimmt automatisch aktuellen markierten Text aus dem Editor) und `open_path_at` für punktgenaues Öffnen und Hervorheben.
+- `features/project_view.py`:
+  - Ordner-Kontextmenü erweitert um *In diesem Ordner suchen...* zur direkten Fokussierung der Suche auf ein Verzeichnis.
+  - Signal `findInFilesRequested` angebunden.
+- `ui/command_palette.py` & `ui/shortcuts_dialog.py`:
+  - *In Dateien suchen (Projektweite Textsuche)* (`Ctrl+Shift+F`) in die Befehlspalette (`Ctrl+Shift+P`) und die Tastenkürzelübersicht aufgenommen.
+
 ### Multi-Root-Workspace Support
 
 - `core/workspace.py`: Neues Kernmodul für Multi-Root-Arbeitsbereiche:
