@@ -28,8 +28,10 @@ from features.lsp_client import LSPManager, parse_lsp_locations
 from features.linter import LinterManager
 from features.plugin_manager import PluginManager
 from core.symbol_search import find_definition_fallback, find_references_fallback
+from core.todo_scanner import TodoItem, TodoScannerManager
 from ui.problems_panel import ProblemsPanel
 from ui.references_panel import ReferencesPanel
+from ui.todo_panel import TodoPanel
 from ui.plugins_dialog import PluginsDialog
 from ui.shortcuts_dialog import ShortcutsDialog
 from ui.command_palette import CommandPaletteDialog
@@ -75,6 +77,8 @@ class MainWindow(QMainWindow):
         self.workspace.workspaceLoaded.connect(self._on_workspace_loaded)
 
         self.setup_ui()
+        self.workspace.foldersChanged.connect(self._rescan_workspace_todos)
+        self.workspace.activeFolderChanged.connect(self._rescan_workspace_todos)
         self.setup_shortcuts()
         self._apply_settings()
         self.new_file()
@@ -217,6 +221,11 @@ class MainWindow(QMainWindow):
         )
         self._toggle_project_action.setStatusTip("Blendet den Datei- und Projektbaum ein oder aus")
 
+        self._toggle_todos_action = view_menu.addAction(
+            "Aufgaben & TODOs", self._toggle_todo_panel, "Ctrl+Alt+T"
+        )
+        self._toggle_todos_action.setStatusTip("Blendet die Aufgaben- und TODO-Seitenleiste ein oder aus")
+
         self._toggle_terminal_action = view_menu.addAction(
             "Terminal", self._toggle_terminal, "Ctrl+`"
         )
@@ -305,14 +314,31 @@ class MainWindow(QMainWindow):
         # Horizontaler Splitter: ProjectView | Editor+Output
         self.h_splitter = QSplitter(Qt.Orientation.Horizontal)
 
-        # Linke Seite: Project-View (Dateibaum)
+        # Linke Seite: Seitenleiste mit Reitern (Projektbaum, Aufgaben)
+        self.sidebar_tabs = QTabWidget()
+        self.sidebar_tabs.setObjectName("sidebar_tabs")
+        self.sidebar_tabs.setAccessibleName("Linke Seitenleiste")
+        self.sidebar_tabs.setAccessibleDescription("Seitenleiste mit Projekt-Dateibaum und Aufgaben/TODOs")
+
         self.project_view = ProjectView()
         self.project_view.set_workspace(self.workspace)
         self.project_view.fileDoubleClicked.connect(self._open_file_from_project)
         self.project_view.diffRequested.connect(self.show_diff)
         self.project_view.commitRequested.connect(self.show_git_commit)
         self.project_view.findInFilesRequested.connect(lambda p: self.show_find_in_files(target_path=p))
-        self.h_splitter.addWidget(self.project_view)
+        self.sidebar_tabs.addTab(self.project_view, "Projekt")
+        self.sidebar_tabs.setTabToolTip(0, "Datei- und Projektbaum anzeigen")
+
+        self.todo_scanner = TodoScannerManager(self)
+        self.todo_panel = TodoPanel()
+        self.todo_panel.set_scanner_manager(self.todo_scanner)
+        self.todo_panel.todoActivated.connect(self._on_todo_activated)
+        self.todo_panel.rescanRequested.connect(self._rescan_workspace_todos)
+        self.todo_panel.countsChanged.connect(self._on_todo_counts_changed)
+        self.sidebar_tabs.addTab(self.todo_panel, "Aufgaben")
+        self.sidebar_tabs.setTabToolTip(1, "TODO- und Aufgaben-Seitenleiste anzeigen")
+
+        self.h_splitter.addWidget(self.sidebar_tabs)
 
         # Rechte Seite: Vertikaler Splitter (Editor oben, Output/Terminal unten)
         self.v_splitter = QSplitter(Qt.Orientation.Vertical)
@@ -1244,6 +1270,8 @@ class MainWindow(QMainWindow):
         else:
             tab._lint_errors = []
             self._refresh_problems(tab)
+        if hasattr(self, "todo_scanner") and tab.file_path:
+            self.todo_scanner.rescan_file(tab.file_path)
 
     # ---- Bearbeiten-Aktionen ----
 
@@ -1647,11 +1675,73 @@ class MainWindow(QMainWindow):
         self.open_path(file_path)
 
     def _toggle_project_view(self):
-        """Blendet den Projektbaum ein/aus."""
-        was_visible = self.project_view.isVisible()
-        self.project_view.setVisible(not was_visible)
-        if was_visible:
-            self._focus_active_editor()
+        """Blendet die Seitenleiste ein/aus und wechselt zum Projektbaum."""
+        if hasattr(self, "sidebar_tabs"):
+            if self.sidebar_tabs.isVisible() and self.sidebar_tabs.currentWidget() == self.project_view:
+                self.sidebar_tabs.hide()
+                self.project_view.hide()
+                self._focus_active_editor()
+            else:
+                self.sidebar_tabs.show()
+                self.project_view.show()
+                self.sidebar_tabs.setCurrentWidget(self.project_view)
+                self.project_view.tree.setFocus()
+        else:
+            was_visible = self.project_view.isVisible()
+            self.project_view.setVisible(not was_visible)
+            if was_visible:
+                self._focus_active_editor()
+
+    def _toggle_todo_panel(self):
+        """Blendet die Seitenleiste ein/aus und wechselt zum Aufgaben-Tab."""
+        if hasattr(self, "sidebar_tabs") and hasattr(self, "todo_panel"):
+            if self.sidebar_tabs.isVisible() and self.sidebar_tabs.currentWidget() == self.todo_panel:
+                self.sidebar_tabs.hide()
+                self.todo_panel.hide()
+                self._focus_active_editor()
+            else:
+                self.sidebar_tabs.show()
+                self.todo_panel.show()
+                self.sidebar_tabs.setCurrentWidget(self.todo_panel)
+                self.todo_panel.search_edit.setFocus()
+
+    def show_todo_panel(self):
+        """Öffnet gezielt die Aufgaben-Seitenleiste."""
+        if hasattr(self, "sidebar_tabs") and hasattr(self, "todo_panel"):
+            self.sidebar_tabs.show()
+            self.todo_panel.show()
+            self.sidebar_tabs.setCurrentWidget(self.todo_panel)
+            self.todo_panel.search_edit.setFocus()
+
+    def _on_todo_activated(self, item: TodoItem):
+        """Springt zur Position einer ausgewählten Aufgabe im Editor."""
+        if not item or not item.file_path:
+            return
+        self.open_path_at(
+            file_path=item.file_path,
+            line=item.line_number,
+            column=item.column,
+            length=len(item.tag),
+        )
+
+    def _on_todo_counts_changed(self, total_items: int, total_files: int):
+        """Aktualisiert die Reiterbeschriftung mit der aktuellen Aufgabenanzahl."""
+        if hasattr(self, "sidebar_tabs"):
+            if total_items > 0:
+                self.sidebar_tabs.setTabText(1, f"Aufgaben ({total_items})")
+            else:
+                self.sidebar_tabs.setTabText(1, "Aufgaben")
+
+    def _rescan_workspace_todos(self):
+        """Startet einen asynchronen Scan aller Workspace-Ordner nach Aufgaben."""
+        if not hasattr(self, "todo_scanner"):
+            return
+        folders = [f.path for f in self.workspace.folders]
+        if not folders and getattr(self.project_view, "_root_path", None):
+            p = Path(self.project_view._root_path)
+            if p.is_dir():
+                folders = [p]
+        self.todo_scanner.start_scan(folders)
 
     def _focus_active_editor(self):
         """Setzt den Tastaturfokus auf den aktiven Editor zurück."""

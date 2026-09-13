@@ -171,6 +171,7 @@ sequenceDiagram
 | **Multi-Root-Arbeitsbereiche** | Natives `.codebox-workspace`-Format mit relativen, portablen Pfaden. | Nahtlose Verwaltung mehrerer Projektordner in einer Instanz (`Ctrl+Shift+O`). |
 | **Projektweite Dateisuche** | Multithreaded Hintergrund-Grep (`core/file_search.py`) mit `Ctrl+Shift+F`. | Schnelle, nicht-blockierende Suche mit Regex-, Wort- und Glob-Filtern. |
 | **Definitionen- & Referenzen-Sprung** | LSP `textDocument/definition` & `references` (`F12`, `Shift+F12`) mit AST/Regex-Fallback. | Sofortige Symbolnavigation über geöffnete Tabs und Projektgrenzen hinweg. |
+| **Aufgaben- & TODO-Seitenleiste** | Automatische Hintergrund-Erkennung (`core/todo_scanner.py`) für TODO, FIXME, BUG, HACK (`Ctrl+Alt+T`). | Schneller Direkt-Sprung, Gruppierung nach Datei/Tag und Echtzeit-Filterung. |
 
 
 ---

@@ -171,6 +171,7 @@ sequenceDiagram
 | **Multi-Root Workspaces** | Native `.codebox-workspace` format with portable relative paths. | Seamless project switching across multiple repository roots (`Ctrl+Shift+O`). |
 | **Global Find in Files** | Multi-threaded background grep (`core/file_search.py`) with `Ctrl+Shift+F`. | Fast non-blocking search with Regex/Word/Case options and direct jump. |
 | **Go to Definition & References** | LSP `textDocument/definition` & `references` (`F12`, `Shift+F12`) with AST/regex fallback. | Instant symbol navigation across open files and workspace projects. |
+| **Tasks & TODO Sidebar** | Automatic background scan (`core/todo_scanner.py`) for TODO, FIXME, BUG, HACK (`Ctrl+Alt+T`). | Instant jump, grouping by file/tag, and real-time query filtering. |
 
 
 ---

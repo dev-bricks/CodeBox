@@ -64,6 +64,7 @@ SHORTCUTS_DATA = [
 
     # Ansicht
     ("Ansicht", "Projektbaum umschalten", "Ctrl+B", "Blendet den Datei- und Projektbaum ein/aus"),
+    ("Ansicht", "Aufgaben & TODOs umschalten", "Ctrl+Alt+T", "Blendet die Aufgaben- und TODO-Seitenleiste ein/aus"),
     ("Ansicht", "Terminal umschalten", "Ctrl+`", "Blendet das integrierte Terminal ein/aus"),
     ("Ansicht", "Git-Diff anzeigen", "Ctrl+Alt+D", "Öffnet den Git Diff-Viewer für geänderte Dateien"),
     ("Ansicht", "Git-Commit Dialog", "Ctrl+Alt+C", "Öffnet den Dialog zum Stagen und Committen von Git-Änderungen"),

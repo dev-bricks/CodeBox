@@ -10,6 +10,34 @@
 
 Alle wesentlichen Änderungen an CodeBox werden hier dokumentiert.
 
+## [0.3.1] - 2026-09-13
+
+### Integrierte Aufgaben- und TODO-Seitenleiste (TodoPanel & TodoScanner Engine)
+
+- `core/todo_scanner.py`:
+  - Neue Aufgaben-Scanner-Engine zur automatischen Erkennung standardisierter Kommentar-Tags (`TODO`, `FIXME`, `BUG`, `HACK`, `XXX`, `NOTE`) über den gesamten Arbeitsbereich.
+  - Datenklasse `TodoItem` mit Quellcodepfad, relativer Projektposition, Ordnerzugehörigkeit, 1-basierten Zeilen- und Spaltenkoordinaten, Tag-Typ, optionaler Autorenangabe (`TODO(autor):`) und Bereinigung schließender Kommentarzeichen (`*/`, `-->`).
+  - Robuste reguläre Ausdruckserkennung für diverse Sprachkommentarstile (`#`, `//`, `/*`, `<!--`, `--`, `%`, `@`, `;`, `*`, `- [ ]`, `- [x]`) sowie zeilenbasierte Fallbacks unter Ausschluss von Programmvariablen.
+  - Asynchroner Hintergrund-Worker `TodoScanWorker` (`QThread`) für Multi-Root-Arbeitsbereiche mit blockierungsfreier Verarbeitung, Abbruch-Unterstützung, Fortschrittsmeldung und automatischem Ausschluss von VCS- und Cache-Verzeichnissen (`.git`, `node_modules`, `__pycache__` etc.).
+  - `TodoScannerManager` mit Caching, synchronem Einzelfile-Rescan (`rescan_file`) bei Speichervorgängen und Signalübermittlung (`scanStarted`, `scanProgress`, `scanFinished`, `todosUpdated`).
+- `ui/todo_panel.py`:
+  - Neues `TodoPanel` als persistenter Bestandteil der linken Seitenleiste (`sidebar_tabs`, Tab 1: "Aufgaben").
+  - Dynamische Filterung nach Suchtext (Echtzeit über Text, Dateipfad, Autor, Tag) und Tag-Auswahl (`Alle Tags`, `TODO`, `FIXME`, `BUG`, `HACK`, `XXX`, `NOTE`).
+  - Flexible Umschaltung der Baumansicht: Gruppierung nach Datei oder Gruppierung nach Tag / Priorität mit farbigen Badges (`BUG`/`FIXME` in Rot, `HACK`/`XXX` in Gold, `TODO` in Blau, `NOTE` in Grün).
+  - Tastaturfreundliche Bedienung via Return/Enter sowie Doppelklick zum direkten Anspringen der Quellcodezeile im Editor (`todoActivated`).
+  - Kontextmenü: "Zur Fundstelle springen", "Dateipfad kopieren", "Aufgabentext kopieren", "Ganze Zeile kopieren".
+  - Vollständige Barrierefreiheit mit `accessibleName` und `accessibleDescription` auf allen UI-Elementen.
+- `ui/main_window.py`:
+  - Integration der linken Seitenleiste `sidebar_tabs` mit Reitern "Projekt" und "Aufgaben" inklusive dynamischer Badge-Zähler (z. B. `Aufgaben (7)`).
+  - Neues Menüelement *Ansicht -> Aufgaben & TODOs* mit Tastenkürzel `Ctrl+Alt+T`.
+  - Dedizierte Toggle- und Show-Methoden `_toggle_todo_panel()` und `show_todo_panel()`.
+  - Automatischer Rescan des Arbeitsbereichs bei Änderungen von Projektordnern (`workspace.foldersChanged`) und synchroner Rescan geänderter Dateien direkt nach dem Speichern (`_after_tab_saved`).
+  - Sprungmethode `_on_todo_activated` öffnet die Zieldatei, fokussiert den Editor und markiert die Fundstelle zentriert.
+- `ui/command_palette.py` & `ui/shortcuts_dialog.py`:
+  - Registrierung von `Ctrl+Alt+T` in der interaktiven Befehlspalette und im Tastenkürzel-Dialog unter *Ansicht*.
+- `tests/test_todo_scanner.py`:
+  - 6 neue Unittests und Integrationstests für Regex-Erkennung, Dateiscans, Grenzfälle (Binär- und Übergrößendateien), Cache-/Manager-Logik, Panel-UI-Filter/Tastaturbedienung und MainWindow-Integration.
+
 ## [0.3.0] - 2026-09-12
 
 ### LSP Definitionen- & Referenzen-Sprung ("Go to Definition" F12 & "Find References" Shift+F12)

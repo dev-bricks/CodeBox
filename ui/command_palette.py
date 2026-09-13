@@ -315,6 +315,7 @@ class CommandPaletteDialog(QDialog):
         quick_actions = [
             ("Ansicht", "Git-Diff-Viewer öffnen", "Ctrl+Alt+D", lambda: self.main_window.show_diff()),
             ("Ansicht", "Projektbaum ein-/ausblenden", "Ctrl+B", self.main_window._toggle_project_view),
+            ("Ansicht", "Aufgaben-Seitenleiste (TODOs) ein-/ausblenden", "Ctrl+Alt+T", self.main_window._toggle_todo_panel),
             ("Ansicht", "Terminal ein-/ausblenden", "Ctrl+`", self.main_window._toggle_terminal),
             ("Datei", "Datei schnell öffnen (Quick Open)", "Ctrl+P", self.main_window.show_quick_open),
             ("Bearbeiten", "In Dateien suchen (Projektweite Textsuche)", "Ctrl+Shift+F", self.main_window.show_find_in_files),
