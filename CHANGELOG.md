@@ -10,6 +10,27 @@
 
 Alle wesentlichen Änderungen an CodeBox werden hier dokumentiert.
 
+## [0.3.2] - 2026-09-14
+
+### Visuelle Breakpoints im Zeilennummern-Gutter & Zuletzt geöffnete Dateien (Recent Files)
+
+- `core/editor.py`:
+  - Visueller Breakpoint-Indikator im Zeilennummern-Gutter (`LineNumberArea`): Antialiased roter Kreis (`#e51400`) mit dynamischer Skalierung und zentrierter Ausrichtung.
+  - Breakpoint-Management auf `CodeEditor`: `toggle_breakpoint(line)`, `has_breakpoint(line)`, `get_breakpoints()`, `set_breakpoints(lines)`, `clear_breakpoints()`.
+  - Signal `breakpointsChanged` informiert externe Listener über modifizierte Breakpoint-Mengen.
+  - Interaktives Umschalten von Breakpoints per Mausklick in die Gutter-Fläche links neben den Zeilennummern mit Zeiger-Cursor (`PointingHandCursor`).
+- `ui/main_window.py`:
+  - Menüpunkt *Ausführen -> Breakpoint umschalten* (`F9`) und *Ausführen -> Alle Breakpoints löschen* (`Ctrl+Shift+F9`) mit Statusleistenmeldungen und Tastenkürzeln.
+  - Submenü *Datei -> Zuletzt geöffnete Dateien* mit persistenter Nachverfolgung (`recent_files` in Config-Settings), automatischer Bereinigung nicht mehr existierender Pfade, De-Duplizierung und Aktion "Verlauf leeren".
+  - Automatisches Erfassen geöffneter und gespeicherter Dateien in `open_path` und `save_file`.
+  - Robuste C++-Objekt-Lebenszyklus-Absicherung (`isValid`-Check & MainWindow-Parenting) gegen Shiboken-Wrapper-Invalidierung bei Menübaum-Traversierung.
+- `ui/shortcuts_dialog.py`:
+  - Registrierung von `F9` (Breakpoint umschalten) und `Ctrl+Shift+F9` (Alle Breakpoints löschen) in der Tastenkürzel-Übersicht unter *Ausführen*.
+- `ui/command_palette.py`:
+  - Schnellauswahl-Aktionen für Breakpoint-Umschaltung und -Bereinigung in den Quick Actions der Befehlspalette.
+- `tests/test_breakpoints_and_recent_files.py`:
+  - 5 neue automatisierte Tests zur Überprüfung von Editor-Breakpoint-Logik, Gutter-Breiten, MainWindow-Menüaktionen und persistenter Recent-Files-Verwaltung.
+
 ## [0.3.1] - 2026-09-13
 
 ### Integrierte Aufgaben- und TODO-Seitenleiste (TodoPanel & TodoScanner Engine)

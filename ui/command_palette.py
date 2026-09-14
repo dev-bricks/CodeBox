@@ -322,6 +322,8 @@ class CommandPaletteDialog(QDialog):
             ("Bearbeiten", "Zur Definition springen (Go to Definition)", "F12", self.main_window.goto_definition),
             ("Bearbeiten", "Alle Referenzen suchen (Find References)", "Shift+F12", self.main_window.find_references),
             ("Bearbeiten", "Befehlspalette öffnen", "Ctrl+Shift+P", self.main_window.show_command_palette),
+            ("Ausführen", "Breakpoint auf Cursorzeile umschalten", "F9", self.main_window.toggle_current_breakpoint),
+            ("Ausführen", "Alle Breakpoints im Dokument löschen", "Ctrl+Shift+F9", self.main_window.clear_all_breakpoints),
             ("Bearbeiten", "Plugins & Sprachen verwalten", "", self.main_window.open_plugins_dialog),
             ("Bearbeiten", "Einstellungen", "Ctrl+,", self.main_window.open_settings_dialog),
         ]

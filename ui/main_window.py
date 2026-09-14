@@ -7,12 +7,13 @@ from typing import Optional
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QSplitter,
     QStatusBar, QLabel, QComboBox, QToolBar, QFileDialog,
-    QMessageBox, QTabWidget
+    QMessageBox, QTabWidget, QMenu
 )
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QTextCursor
 
 from core.tabs import TabWidget, EditorTab
+from core.editor import CodeEditor
 from core.output import OutputPanel
 from core.workspace import WorkspaceManager
 from features.terminal import TerminalWidget
@@ -87,89 +88,97 @@ class MainWindow(QMainWindow):
         # ---- Menüleiste ----
         menubar = self.menuBar()
 
-        file_menu = menubar.addMenu("Datei")
-        act_new = file_menu.addAction("Neu", self.new_file, "Ctrl+N")
+        self.file_menu = menubar.addMenu("Datei")
+        act_new = self.file_menu.addAction("Neu", self.new_file, "Ctrl+N")
         act_new.setStatusTip("Erstellt eine neue leere Datei")
-        act_open = file_menu.addAction("Öffnen...", self.open_file, "Ctrl+O")
+        act_open = self.file_menu.addAction("Öffnen...", self.open_file, "Ctrl+O")
         act_open.setStatusTip("Öffnet eine bestehende Datei von der Festplatte")
-        act_open_folder = file_menu.addAction("Ordner öffnen...", self.open_folder_dialog, "Ctrl+Shift+O")
+        self.recent_files_menu = QMenu("Zuletzt geöffnete Dateien", self)
+        self.file_menu.addMenu(self.recent_files_menu)
+        self._update_recent_files_menu()
+        act_open_folder = self.file_menu.addAction("Ordner öffnen...", self.open_folder_dialog, "Ctrl+Shift+O")
         act_open_folder.setStatusTip("Öffnet einen Projektordner als einzelnen Arbeitsbereich")
-        act_add_folder = file_menu.addAction("Ordner zum Arbeitsbereich hinzufügen...", self.add_workspace_folder_dialog)
+        act_add_folder = self.file_menu.addAction("Ordner zum Arbeitsbereich hinzufügen...", self.add_workspace_folder_dialog)
         act_add_folder.setStatusTip("Fügt einen weiteren Projektordner zum aktuellen Arbeitsbereich hinzu")
-        file_menu.addSeparator()
-        act_open_ws = file_menu.addAction("Arbeitsbereich öffnen...", self.open_workspace_dialog)
+        self.file_menu.addSeparator()
+        act_open_ws = self.file_menu.addAction("Arbeitsbereich öffnen...", self.open_workspace_dialog)
         act_open_ws.setStatusTip("Öffnet eine .codebox-workspace Datei")
-        act_save_ws = file_menu.addAction("Arbeitsbereich speichern unter...", self.save_workspace_dialog)
+        act_save_ws = self.file_menu.addAction("Arbeitsbereich speichern unter...", self.save_workspace_dialog)
         act_save_ws.setStatusTip("Speichert den aktuellen Arbeitsbereich in eine Datei")
-        act_close_ws = file_menu.addAction("Arbeitsbereich schließen", self.close_workspace)
+        act_close_ws = self.file_menu.addAction("Arbeitsbereich schließen", self.close_workspace)
         act_close_ws.setStatusTip("Schließt alle Ordner des aktuellen Arbeitsbereichs")
-        file_menu.addSeparator()
-        act_quick_open = file_menu.addAction("Schnell öffnen...", self.show_quick_open, "Ctrl+P")
+        self.file_menu.addSeparator()
+        act_quick_open = self.file_menu.addAction("Schnell öffnen...", self.show_quick_open, "Ctrl+P")
         act_quick_open.setStatusTip("Öffnet die Schnellauswahl für Projektdateien (Quick Open)")
-        act_save = file_menu.addAction("Speichern", self.save_file, "Ctrl+S")
+        act_save = self.file_menu.addAction("Speichern", self.save_file, "Ctrl+S")
         act_save.setStatusTip("Speichert die aktuelle Datei")
-        file_menu.addSeparator()
-        act_quit = file_menu.addAction("Beenden", self.close, "Ctrl+Q")
+        self.file_menu.addSeparator()
+        act_quit = self.file_menu.addAction("Beenden", self.close, "Ctrl+Q")
         act_quit.setStatusTip("Schließt die CodeBox-Anwendung")
 
-        edit_menu = menubar.addMenu("Bearbeiten")
-        act_undo = edit_menu.addAction("Rückgängig", self._undo, "Ctrl+Z")
+        self.edit_menu = menubar.addMenu("Bearbeiten")
+        act_undo = self.edit_menu.addAction("Rückgängig", self._undo, "Ctrl+Z")
         act_undo.setStatusTip("Macht die letzte Änderung rückgängig")
-        act_redo = edit_menu.addAction("Wiederherstellen", self._redo, "Ctrl+Y")
+        act_redo = self.edit_menu.addAction("Wiederherstellen", self._redo, "Ctrl+Y")
         act_redo.setStatusTip("Stellt die letzte rückgängig gemachte Änderung wieder her")
-        edit_menu.addSeparator()
-        act_find = edit_menu.addAction("Suchen...", self._find, "Ctrl+F")
+        self.edit_menu.addSeparator()
+        act_find = self.edit_menu.addAction("Suchen...", self._find, "Ctrl+F")
         act_find.setStatusTip("Öffnet den Suchen- und Ersetzen-Dialog")
-        act_replace = edit_menu.addAction("Ersetzen...", self._replace, "Ctrl+H")
+        act_replace = self.edit_menu.addAction("Ersetzen...", self._replace, "Ctrl+H")
         act_replace.setStatusTip("Öffnet den Suchen- und Ersetzen-Dialog im Ersetzen-Modus")
-        act_find_in_files = edit_menu.addAction("In Dateien suchen...", self.show_find_in_files, "Ctrl+Shift+F")
+        act_find_in_files = self.edit_menu.addAction("In Dateien suchen...", self.show_find_in_files, "Ctrl+Shift+F")
         act_find_in_files.setStatusTip("Durchsucht alle Projektdateien im Arbeitsbereich nach Text")
-        act_find_next = edit_menu.addAction("Weitersuchen", self._find_next, "F3")
+        act_find_next = self.edit_menu.addAction("Weitersuchen", self._find_next, "F3")
         act_find_next.setStatusTip("Springt zum nächsten Suchtreffer")
-        act_find_prev = edit_menu.addAction("Rückwärts weitersuchen", self._find_prev, "Shift+F3")
+        act_find_prev = self.edit_menu.addAction("Rückwärts weitersuchen", self._find_prev, "Shift+F3")
         act_find_prev.setStatusTip("Springt zum vorherigen Suchtreffer")
-        act_goto = edit_menu.addAction("Gehe zu Zeile...", self._goto_line, "Ctrl+G")
+        act_goto = self.edit_menu.addAction("Gehe zu Zeile...", self._goto_line, "Ctrl+G")
         act_goto.setStatusTip("Springt zu einer bestimmten Zeilennummer")
-        self.act_goto_def = edit_menu.addAction("Zur Definition springen", self.goto_definition, "F12")
+        self.act_goto_def = self.edit_menu.addAction("Zur Definition springen", self.goto_definition, "F12")
         self.act_goto_def.setStatusTip("Springt zur Definition des aktuellen Symbols (F12)")
-        self.act_find_refs = edit_menu.addAction("Alle Referenzen suchen", self.find_references, "Shift+F12")
+        self.act_find_refs = self.edit_menu.addAction("Alle Referenzen suchen", self.find_references, "Shift+F12")
         self.act_find_refs.setStatusTip("Sucht alle Vorkommen und Referenzen des aktuellen Symbols (Shift+F12)")
-        edit_menu.addSeparator()
-        act_comment = edit_menu.addAction("Zeilenkommentar umschalten", self._toggle_comment, "Ctrl+/")
+        self.edit_menu.addSeparator()
+        act_comment = self.edit_menu.addAction("Zeilenkommentar umschalten", self._toggle_comment, "Ctrl+/")
         act_comment.setStatusTip("Kommentiert die aktuelle Zeile oder Auswahl aus/ein")
-        act_indent = edit_menu.addAction("Einrücken", self._indent, "Tab")
+        act_indent = self.edit_menu.addAction("Einrücken", self._indent, "Tab")
         act_indent.setStatusTip("Rückt die aktuelle Zeile oder Auswahl ein")
-        act_dedent = edit_menu.addAction("Ausrücken", self._dedent, "Shift+Tab")
+        act_dedent = self.edit_menu.addAction("Ausrücken", self._dedent, "Shift+Tab")
         act_dedent.setStatusTip("Rückt die aktuelle Zeile oder Auswahl aus")
-        edit_menu.addSeparator()
-        selection_menu = edit_menu.addMenu("Mehrfachauswahl & Multi-Cursor")
-        act_cursor_above = selection_menu.addAction("Cursor oberhalb hinzufügen", self._add_cursor_above, "Ctrl+Alt+Up")
+        self.edit_menu.addSeparator()
+        self.selection_menu = self.edit_menu.addMenu("Mehrfachauswahl & Multi-Cursor")
+        act_cursor_above = self.selection_menu.addAction("Cursor oberhalb hinzufügen", self._add_cursor_above, "Ctrl+Alt+Up")
         act_cursor_above.setStatusTip("Fügt einen weiteren Cursor in der Zeile darüber ein (Spaltenauswahl)")
-        act_cursor_below = selection_menu.addAction("Cursor unterhalb hinzufügen", self._add_cursor_below, "Ctrl+Alt+Down")
+        act_cursor_below = self.selection_menu.addAction("Cursor unterhalb hinzufügen", self._add_cursor_below, "Ctrl+Alt+Down")
         act_cursor_below.setStatusTip("Fügt einen weiteren Cursor in der Zeile darunter ein (Spaltenauswahl)")
-        act_select_all_occ = selection_menu.addAction("Alle Vorkommen markieren", self._select_all_occurrences, "Ctrl+Shift+L")
+        act_select_all_occ = self.selection_menu.addAction("Alle Vorkommen markieren", self._select_all_occurrences, "Ctrl+Shift+L")
         act_select_all_occ.setStatusTip("Markiert alle Vorkommen des aktuellen Wortes oder der Auswahl mit Multi-Cursorn")
-        act_add_next_occ = selection_menu.addAction("Nächstes Vorkommen hinzufügen", self._add_next_occurrence, "Ctrl+Alt+L")
+        act_add_next_occ = self.selection_menu.addAction("Nächstes Vorkommen hinzufügen", self._add_next_occurrence, "Ctrl+Alt+L")
         act_add_next_occ.setStatusTip("Fügt das nächste Vorkommen zur Mehrfachauswahl hinzu")
-        act_clear_cursors = selection_menu.addAction("Mehrfachcursor aufheben", self._clear_multi_cursors, "Escape")
+        act_clear_cursors = self.selection_menu.addAction("Mehrfachcursor aufheben", self._clear_multi_cursors, "Escape")
         act_clear_cursors.setStatusTip("Hebt alle zusätzlichen Cursor auf und kehrt zum Einzelcursor zurück")
-        edit_menu.addSeparator()
-        act_palette = edit_menu.addAction("Befehlspalette...", self.show_command_palette, "Ctrl+Shift+P")
+        self.edit_menu.addSeparator()
+        act_palette = self.edit_menu.addAction("Befehlspalette...", self.show_command_palette, "Ctrl+Shift+P")
         act_palette.setStatusTip("Öffnet die Befehlspalette für alle Aktionen")
-        act_plugins = edit_menu.addAction("Plugins & Sprachen...", self.open_plugins_dialog)
+        act_plugins = self.edit_menu.addAction("Plugins & Sprachen...", self.open_plugins_dialog)
         act_plugins.setStatusTip("Öffnet die Verwaltung für Sprach-Erweiterungen und Plugins")
-        self.act_vim_mode = edit_menu.addAction("Vim-Modus", self.toggle_vim_mode, "Ctrl+Alt+V")
+        self.act_vim_mode = self.edit_menu.addAction("Vim-Modus", self.toggle_vim_mode, "Ctrl+Alt+V")
         self.act_vim_mode.setCheckable(True)
         self.act_vim_mode.setChecked(bool(self._settings.get("vim_mode", False)))
         self.act_vim_mode.setStatusTip("Schaltet modales Editieren (Normal, Insert, Visual) ein oder aus")
-        act_settings = edit_menu.addAction("Einstellungen...", self.open_settings_dialog, "Ctrl+,")
+        act_settings = self.edit_menu.addAction("Einstellungen...", self.open_settings_dialog, "Ctrl+,")
         act_settings.setStatusTip("Öffnet die Programmeinstellungen")
 
-        run_menu = menubar.addMenu("Ausführen")
-        act_run = run_menu.addAction("Ausführen", self.run_current, "F5")
+        self.run_menu = menubar.addMenu("Ausführen")
+        act_run = self.run_menu.addAction("Ausführen", self.run_current, "F5")
         act_run.setStatusTip("Führt das aktuelle Skript oder Programm aus")
-        act_stop = run_menu.addAction("Stoppen", self._stop_run, "Shift+F5")
+        act_stop = self.run_menu.addAction("Stoppen", self._stop_run, "Shift+F5")
         act_stop.setStatusTip("Bricht den laufenden Ausführungsprozess ab")
+        self.run_menu.addSeparator()
+        self.act_toggle_breakpoint = self.run_menu.addAction("Breakpoint umschalten", self.toggle_current_breakpoint, "F9")
+        self.act_toggle_breakpoint.setStatusTip("Setzt oder entfernt einen Breakpoint in der aktuellen Zeile (F9)")
+        self.act_clear_breakpoints = self.run_menu.addAction("Alle Breakpoints löschen", self.clear_all_breakpoints, "Ctrl+Shift+F9")
+        self.act_clear_breakpoints.setStatusTip("Löscht alle Breakpoints in der aktiven Datei (Ctrl+Shift+F9)")
 
         # ---- Toolbar ----
         toolbar = QToolBar("Hauptleiste")
@@ -464,6 +473,84 @@ class MainWindow(QMainWindow):
         """Gibt den aktiven Tab des aktuell fokussierten Bereichs zurück."""
         tw = self.get_active_tab_widget()
         return tw.current_tab()
+
+    def get_current_editor(self) -> Optional[CodeEditor]:
+        """Gibt den CodeEditor des aktiven Tabs zurück oder None."""
+        tab = self.get_active_tab()
+        return getattr(tab, "editor", None) if tab else None
+
+    def toggle_current_breakpoint(self):
+        """Schaltet den Breakpoint auf der aktuellen Cursorzeile des aktiven Editors um."""
+        editor = self.get_current_editor()
+        if not editor:
+            return
+        line = editor.textCursor().blockNumber() + 1
+        active = editor.toggle_breakpoint(line)
+        status = "gesetzt" if active else "entfernt"
+        self.status_bar.showMessage(f"Breakpoint auf Zeile {line} {status}.", 3000)
+
+    def clear_all_breakpoints(self):
+        """Löscht alle gesetzten Breakpoints im aktuellen Editor."""
+        editor = self.get_current_editor()
+        if not editor:
+            return
+        editor.clear_breakpoints()
+        self.status_bar.showMessage("Alle Breakpoints im aktiven Dokument entfernt.", 3000)
+
+    def _add_to_recent_files(self, file_path: Path | str):
+        """Fügt einen Dateipfad zur Liste der zuletzt geöffneten Dateien hinzu."""
+        if not file_path:
+            return
+        try:
+            p_str = str(Path(file_path).resolve())
+        except Exception:
+            p_str = str(file_path)
+        recent = self._settings.setdefault("recent_files", [])
+        if p_str in recent:
+            recent.remove(p_str)
+        recent.insert(0, p_str)
+        self._settings["recent_files"] = recent[:10]
+        from config import save_settings
+        save_settings(self._settings)
+        self._update_recent_files_menu()
+
+    def _update_recent_files_menu(self):
+        """Aktualisiert das Menü 'Zuletzt geöffnete Dateien'."""
+        if not hasattr(self, 'recent_files_menu'):
+            return
+        try:
+            from shiboken6 import isValid
+            if not isValid(self.recent_files_menu):
+                return
+        except Exception:
+            pass
+        self.recent_files_menu.clear()
+        recent = self._settings.get("recent_files", [])
+        valid_count = 0
+        for p_str in list(recent):
+            p = Path(p_str)
+            if p.exists():
+                act = self.recent_files_menu.addAction(f"{p.name}  ({p.parent})")
+                act.setStatusTip(f"Öffnet {p_str}")
+                act.triggered.connect(lambda checked=False, path=p: self.open_path(path))
+                valid_count += 1
+
+        if valid_count == 0:
+            empty_act = self.recent_files_menu.addAction("(Keine zuletzt geöffneten Dateien)")
+            empty_act.setEnabled(False)
+        else:
+            self.recent_files_menu.addSeparator()
+            clear_act = self.recent_files_menu.addAction("Verlauf leeren")
+            clear_act.setStatusTip("Löscht die Liste der zuletzt geöffneten Dateien")
+            clear_act.triggered.connect(self._clear_recent_files)
+
+    def _clear_recent_files(self):
+        """Leert den Verlauf der zuletzt geöffneten Dateien."""
+        self._settings["recent_files"] = []
+        from config import save_settings
+        save_settings(self._settings)
+        self._update_recent_files_menu()
+        self.status_bar.showMessage("Verlauf der zuletzt geöffneten Dateien geleert.", 3000)
 
     def is_editor_split(self) -> bool:
         """Prüft, ob der geteilte Editor aktuell sichtbar ist."""
@@ -792,6 +879,8 @@ class MainWindow(QMainWindow):
             self._connect_lsp(tab, path)
         self._connect_cursor(tab)
         self._update_status_bar_for_tab(tab)
+        if tab:
+            self._add_to_recent_files(path)
         return tab
 
     def _connect_lsp(self, tab, file_path: Path):
@@ -1253,6 +1342,8 @@ class MainWindow(QMainWindow):
         self.output.run_btn.setEnabled(bool(tab.provider))
         if tab.file_path and tab.provider and not getattr(tab, "_lsp_client", None):
             self._connect_lsp(tab, tab.file_path)
+        if tab.file_path:
+            self._add_to_recent_files(tab.file_path)
         self._after_tab_saved(tab)
 
     def _after_tab_saved(self, tab):

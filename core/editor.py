@@ -18,7 +18,7 @@ from core.vim_mode import VimEngine
 
 
 class LineNumberArea(QWidget):
-    """Zeichnet Zeilennummern und Faltungs-Indikatoren für den CodeEditor"""
+    """Zeichnet Zeilennummern, Breakpoints und Faltungs-Indikatoren für den CodeEditor"""
     def __init__(self, editor):
         super().__init__(editor)
         self.codeEditor = editor
@@ -35,16 +35,21 @@ class LineNumberArea(QWidget):
             block = self.codeEditor.firstVisibleBlock()
             top = int(self.codeEditor.blockBoundingGeometry(block).translated(self.codeEditor.contentOffset()).top())
             y = event.position().y()
+            x = event.position().x()
+            fold_x = self.width() - getattr(self.codeEditor, 'FOLD_AREA_WIDTH', 14)
             while block.isValid():
                 if block.isVisible():
                     h = int(self.codeEditor.blockBoundingRect(block).height())
                     if top <= y < top + h:
                         block_num = block.blockNumber()
-                        if self.codeEditor.is_line_foldable(block_num):
+                        if x >= fold_x - 4 and self.codeEditor.is_line_foldable(block_num):
                             self.codeEditor.toggle_fold(block_num)
                             event.accept()
                             return
-                        break
+                        # Klick im Zeilennummer- oder Breakpoint-Bereich schaltet Breakpoint um
+                        self.codeEditor.toggle_breakpoint(block_num + 1)
+                        event.accept()
+                        return
                     top += h
                 block = block.next()
         super().mousePressEvent(event)
@@ -55,18 +60,19 @@ class LineNumberArea(QWidget):
         y = event.position().y()
         x = event.position().x()
         fold_x = self.width() - getattr(self.codeEditor, 'FOLD_AREA_WIDTH', 14)
-        is_hovering_fold = False
+        bp_w = getattr(self.codeEditor, 'BREAKPOINT_AREA_WIDTH', 14)
+        is_hovering_interactive = False
         while block.isValid():
             if block.isVisible():
                 h = int(self.codeEditor.blockBoundingRect(block).height())
                 if top <= y < top + h:
                     block_num = block.blockNumber()
-                    if self.codeEditor.is_line_foldable(block_num) and x >= fold_x - 4:
-                        is_hovering_fold = True
+                    if (self.codeEditor.is_line_foldable(block_num) and x >= fold_x - 4) or (x <= bp_w + 4):
+                        is_hovering_interactive = True
                     break
                 top += h
             block = block.next()
-        if is_hovering_fold:
+        if is_hovering_interactive:
             self.setCursor(Qt.CursorShape.PointingHandCursor)
         else:
             self.setCursor(Qt.CursorShape.ArrowCursor)
@@ -235,6 +241,7 @@ class CodeEditor(QPlainTextEdit):
     completionRequested = Signal(int, int, str)  # LSP: Zeile, Spalte, Prefix (0-basiert)
     definitionRequested = Signal(int, int, str)  # LSP/Fallback: Zeile, Spalte, Symbol (0-basiert)
     referencesRequested = Signal(int, int, str)  # LSP/Fallback: Zeile, Spalte, Symbol (0-basiert)
+    breakpointsChanged = Signal(object)  # List[int] mit 1-basierten Zeilennummern
     modificationChanged = Signal(bool)
     focusReceived = Signal()
 
@@ -252,6 +259,9 @@ class CodeEditor(QPlainTextEdit):
         self.autocomplete_enabled = True
         self.bracket_matching_enabled = True
         self.linter_errors: List[Dict] = []
+
+        self.BREAKPOINT_AREA_WIDTH = 14
+        self._breakpoints: set[int] = set()
 
         self.lineNumberArea = LineNumberArea(self)
         self.minimap = Minimap(self)
@@ -894,7 +904,8 @@ class CodeEditor(QPlainTextEdit):
         fm = self.fontMetrics()
         char_width = fm.horizontalAdvance('9') if hasattr(fm, 'horizontalAdvance') else fm.width('9')
         fold_w = getattr(self, 'FOLD_AREA_WIDTH', 14)
-        return 16 + char_width * digits + fold_w
+        bp_w = getattr(self, 'BREAKPOINT_AREA_WIDTH', 14)
+        return bp_w + char_width * digits + fold_w + 14
 
     def updateLineNumberAreaWidth(self, _):
         right_margin = self.minimap.width() if self._minimap_visible else 0
@@ -934,12 +945,25 @@ class CodeEditor(QPlainTextEdit):
         top = int(self.blockBoundingGeometry(block).translated(self.contentOffset()).top())
         bottom = top + int(self.blockBoundingRect(block).height())
         fold_width = getattr(self, 'FOLD_AREA_WIDTH', 14)
+        bp_width = getattr(self, 'BREAKPOINT_AREA_WIDTH', 14)
         area_width = self.lineNumberArea.width()
         font_h = self.fontMetrics().height()
 
         while block.isValid() and top <= event.rect().bottom():
             if block.isVisible() and bottom >= event.rect().top():
                 line_num = blockNumber + 1
+
+                # Breakpoint-Indikator zeichnen (roter Kreis im Gutter)
+                if hasattr(self, '_breakpoints') and line_num in self._breakpoints:
+                    painter.save()
+                    painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+                    painter.setPen(Qt.PenStyle.NoPen)
+                    painter.setBrush(QColor(229, 20, 0))
+                    bp_cx = (bp_width // 2) + 1
+                    bp_cy = top + (font_h // 2)
+                    painter.drawEllipse(QPointF(bp_cx, bp_cy), 4.5, 4.5)
+                    painter.restore()
+
                 has_error = any(e['line'] == line_num and e.get('severity') == 'error'
                                 for e in self.linter_errors)
                 has_warning = any(e['line'] == line_num and e.get('severity') == 'warning'
@@ -951,8 +975,9 @@ class CodeEditor(QPlainTextEdit):
                 else:
                     painter.setPen(QColor(100, 100, 100))
 
-                num_rect_w = max(0, area_width - fold_width - 4)
-                painter.drawText(0, top, num_rect_w,
+                num_x = bp_width + 4
+                num_rect_w = max(0, area_width - fold_width - bp_width - 8)
+                painter.drawText(num_x, top, num_rect_w,
                                  font_h, Qt.AlignmentFlag.AlignRight, str(line_num))
 
                 if hasattr(self, 'folding_manager') and self.folding_manager.is_line_foldable(blockNumber):
@@ -987,6 +1012,50 @@ class CodeEditor(QPlainTextEdit):
             top = bottom
             bottom = top + int(self.blockBoundingRect(block).height())
             blockNumber += 1
+
+    # ---- Breakpoint Management ----
+
+    def toggle_breakpoint(self, line: Optional[int] = None) -> bool:
+        """Schaltet einen Breakpoint auf der angegebenen Zeile (1-basiert) oder der Cursorzeile um."""
+        if line is None:
+            line = self.textCursor().blockNumber() + 1
+        line = int(line)
+        if line < 1:
+            return False
+
+        if line in self._breakpoints:
+            self._breakpoints.remove(line)
+            active = False
+        else:
+            self._breakpoints.add(line)
+            active = True
+
+        if hasattr(self, 'lineNumberArea'):
+            self.lineNumberArea.update()
+        self.breakpointsChanged.emit(self.get_breakpoints())
+        return active
+
+    def has_breakpoint(self, line: int) -> bool:
+        """Prüft, ob auf der Zeile (1-basiert) ein Breakpoint gesetzt ist."""
+        return int(line) in self._breakpoints
+
+    def get_breakpoints(self) -> List[int]:
+        """Gibt eine sortierte Liste aller gesetzten Breakpoints (1-basiert) zurück."""
+        return sorted(self._breakpoints)
+
+    def set_breakpoints(self, lines: List[int]):
+        """Setzt die Liste aller Breakpoints (1-basiert)."""
+        self._breakpoints = {int(line_num) for line_num in lines if int(line_num) >= 1}
+        if hasattr(self, 'lineNumberArea'):
+            self.lineNumberArea.update()
+        self.breakpointsChanged.emit(self.get_breakpoints())
+
+    def clear_breakpoints(self):
+        """Entfernt alle gesetzten Breakpoints in diesem Editor."""
+        self._breakpoints.clear()
+        if hasattr(self, 'lineNumberArea'):
+            self.lineNumberArea.update()
+        self.breakpointsChanged.emit([])
 
     # ---- Code Folding ----
 

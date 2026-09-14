@@ -61,6 +61,8 @@ SHORTCUTS_DATA = [
     # Ausführen
     ("Ausführen", "Ausführen", "F5", "Führt das aktuelle Skript oder Programm aus"),
     ("Ausführen", "Stoppen", "Shift+F5", "Bricht den laufenden Ausführungsprozess ab"),
+    ("Ausführen", "Breakpoint umschalten", "F9", "Setzt oder entfernt einen Breakpoint in der aktuellen Zeile"),
+    ("Ausführen", "Alle Breakpoints löschen", "Ctrl+Shift+F9", "Löscht alle gesetzten Breakpoints im aktuellen Editor"),
 
     # Ansicht
     ("Ansicht", "Projektbaum umschalten", "Ctrl+B", "Blendet den Datei- und Projektbaum ein/aus"),
