@@ -9,11 +9,13 @@
 
 ### Supported Versions
 
-CodeBox is maintained on the `main` branch. Active security maintenance is provided for the current development line:
+CodeBox is maintained on the `main` branch. Active security maintenance is provided for current and recent release lines:
 
 | Version | Supported | Notes |
 | ------- | --------- | ----- |
-| `0.1.x` | :white_check_mark: | Current active development line |
+| `0.3.x` | :white_check_mark: | Current active release line |
+| `0.2.x` | :white_check_mark: | Supported release line |
+| `0.1.x` | :white_check_mark: | Supported release line (maintenance) |
 | `< 0.1` | :x: | Unsupported legacy versions |
 
 ### Reporting a Vulnerability
@@ -23,6 +25,7 @@ If you discover a security vulnerability in CodeBox, please report it responsibl
 1. **Do NOT open a public GitHub issue.**
 2. **Use GitHub's [Private Vulnerability Reporting](https://github.com/dev-bricks/CodeBox/security/advisories/new)** to submit your findings confidentially.
 3. If GitHub Advisories is unavailable, contact the maintainers directly via email:
+   - `security@dev-bricks.org`
    - `security@ellmos.ai`
    - `lukas@open-bricks.org`
    - `support@lukasgeiger.com`
@@ -31,6 +34,13 @@ Please include:
 - A description of the vulnerability and potential impact
 - Step-by-step reproduction instructions or a minimal proof-of-concept
 - Affected operating system and CodeBox version
+
+### Response & Triage SLA
+
+We take security reports seriously and adhere to the following service level commitments:
+- **Initial Acknowledgement**: Within 48 hours of receipt.
+- **Triage & Status Assessment**: Within 5 business days with preliminary severity score and remediation roadmap.
+- **Fix Release**: Critical issues are prioritized for immediate hotfix deployment.
 
 ### Security Scope & Runtime Invariants
 
@@ -49,11 +59,13 @@ CodeBox is built around a strict **local-first, zero-egress** architecture:
 
 ### Unterstützte Versionen
 
-CodeBox wird kontinuierlich auf dem `main`-Branch gepflegt. Sicherheitsrelevante Korrekturen werden für den aktuellen Entwicklungszweig bereitgestellt:
+CodeBox wird kontinuierlich auf dem `main`-Branch gepflegt. Sicherheitsrelevante Korrekturen werden für aktuelle und jüngere Versionslinien bereitgestellt:
 
 | Version | Unterstützt | Hinweise |
 | ------- | ----------- | -------- |
-| `0.1.x` | :white_check_mark: | Aktiver Entwicklungszweig |
+| `0.3.x` | :white_check_mark: | Aktiver Entwicklungszweig |
+| `0.2.x` | :white_check_mark: | Unterstützter Versionszweig |
+| `0.1.x` | :white_check_mark: | Unterstützter Versionszweig (Wartung) |
 | `< 0.1` | :x: | Nicht mehr unterstützte Vorversionen |
 
 ### Schwachstelle melden
@@ -63,6 +75,7 @@ Wenn Sie eine Sicherheitslücke in CodeBox entdecken, melden Sie diese bitte ver
 1. **Erstellen Sie KEIN öffentliches GitHub-Issue.**
 2. Nutzen Sie die **[Private Sicherheitsmeldung (GitHub Advisories)](https://github.com/dev-bricks/CodeBox/security/advisories/new)** für eine vertrauliche Meldung.
 3. Alternativ erreichen Sie das Sicherheitsteam direkt per E-Mail:
+   - `security@dev-bricks.org`
    - `security@ellmos.ai`
    - `lukas@open-bricks.org`
    - `support@lukasgeiger.com`
@@ -71,6 +84,13 @@ Bitte fügen Sie Ihrer Meldung folgende Informationen bei:
 - Beschreibung der Schwachstelle und möglicher Auswirkungen
 - Schritt-für-Schritt-Anleitung zur Reproduktion oder Minimalbeispiel
 - Verwendetes Betriebssystem und CodeBox-Versionsnummer
+
+### Reaktions- und Triage-SLA
+
+Wir behandeln Sicherheitsmeldungen mit höchster Priorität und garantieren folgende Service-Level-Vereinbarungen:
+- **Eingangsbestätigung**: Innerhalb von 48 Stunden nach Eingang.
+- **Triage & Statusbewertung**: Innerhalb von 5 Werktagen inklusive vorläufiger Einstufung und Behebungszeitplan.
+- **Patch-Bereitstellung**: Kritische Schwachstellen werden prioritär als Hotfix bereitgestellt.
 
 ### Sicherheitsarchitektur & Laufzeitinvarianten
 

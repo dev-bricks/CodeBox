@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [
-    { name = "dev-bricks Maintainers" }
+    { name = "dev-bricks Maintainers", email = "support@lukasgeiger.com" }
 ]
 keywords = [
     "pyside6",
@@ -51,10 +51,15 @@ lsp = [
     "python-lsp-server[all]>=1.7.0",
 ]
 remote = [
-    "paramiko>=3.0.0",
+    "paramiko>=3.4.0",
 ]
 test = [
-    "pytest>=7.0.0",
+    "pytest>=9.1.1",
+    "ruff>=0.9.0",
+]
+build = [
+    "PyInstaller>=6.10.0",
+    "altgraph>=0.17.4",
 ]
 
 [project.urls]
@@ -64,6 +69,7 @@ Repository = "https://github.com/dev-bricks/CodeBox.git"
 Issues = "https://github.com/dev-bricks/CodeBox/issues"
 Changelog = "https://github.com/dev-bricks/CodeBox/blob/main/CHANGELOG.md"
 Security = "https://github.com/dev-bricks/CodeBox/blob/main/SECURITY.md"
+"Third-Party Licenses" = "https://github.com/dev-bricks/CodeBox/blob/main/THIRD_PARTY_LICENSES.txt"
 "Parent Org" = "https://github.com/dev-bricks"
 "Umbrella Ecosystem" = "https://github.com/open-bricks"
 

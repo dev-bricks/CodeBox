@@ -49,16 +49,31 @@ token.json
 *.key
 *.p12
 *.pfx
+*.cer
+*.crt
+secrets.*
 known_hosts
 keyring/
 *.bak
 
-# Internal
+# Multi-Host Sync Conflicts
+*-WORKSTATION-LG*
+*-ASUS-GEI*
+*.sync-conflict-*
+*.conflict
+*-conflict-*
+*-CONFLIT-*
+
+# Internal & Multi-Agent Locks
 AUFGABEN.txt
 AUFGABEN.md
+LOCK
+LOCK.*
+*.lock
 LOCK.txt
 LOCK.*.txt
 LOCK*.txt
+LOCK.permissions.json
 TEST.txt
 TESTS.txt
 TESTERGEBNISSE.txt
@@ -75,3 +90,7 @@ TODO.txt
 DONE.md
 DONE.txt
 ERLEDIGT.txt
+
+# Node / Web Caches
+node_modules/
+.nyc_output/
