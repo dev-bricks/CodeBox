@@ -82,6 +82,7 @@ def test_core_documentation_files_exist() -> None:
         "SECURITY.md",
         "DEVELOPMENT_PLAN.md",
         "API_STATUS.md",
+        "THIRD_PARTY_LICENSES.txt",
     ]
     for filename in required_files:
         p = PROJECT_ROOT / filename

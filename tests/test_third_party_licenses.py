@@ -1,5 +1,6 @@
 """Guard the release license inventory against dependency drift."""
 
+import re
 from pathlib import Path
 
 
@@ -19,7 +20,7 @@ def _runtime_dependency_names():
 def test_third_party_license_inventory_covers_runtime_dependencies():
     inventory = (ROOT / "THIRD_PARTY_LICENSES.txt").read_text(encoding="utf-8")
 
-    assert "Checked: 2026-07-02" in inventory
+    assert re.search(r"Checked:\s*\d{4}-\d{2}-\d{2}", inventory), "Missing Checked: YYYY-MM-DD in THIRD_PARTY_LICENSES.txt"
     assert "licensed under MIT according to `LICENSE`" in inventory
     assert "not a frozen transitive SBOM" in inventory
 

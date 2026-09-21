@@ -51,11 +51,12 @@ lsp = [
     "python-lsp-server[all]>=1.7.0",
 ]
 remote = [
-    "paramiko>=3.4.0",
+    "paramiko>=5.0.0",
 ]
 test = [
     "pytest>=9.1.1",
     "ruff>=0.9.0",
+    "Pillow>=12.3.0",
 ]
 build = [
     "PyInstaller>=6.10.0",

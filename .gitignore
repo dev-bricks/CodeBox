@@ -4,6 +4,8 @@ __pycache__/
 *.pyo
 *.egg-info/
 .pytest_cache/
+pytest_out.txt
+pytest*.txt
 .mypy_cache/
 .ruff_cache/
 .coverage
