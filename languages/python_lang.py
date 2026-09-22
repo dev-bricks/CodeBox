@@ -3,6 +3,7 @@
 """Python Language Provider"""
 
 import shutil
+import sys
 from typing import List, Dict, Tuple, Optional
 from .base import LanguageProvider
 
@@ -48,10 +49,12 @@ class PythonProvider(LanguageProvider):
         }
 
     def get_run_command(self, file_path: str) -> List[str]:
-        return ["python", "-u", file_path]
+        py_bin = sys.executable if sys.executable else "python"
+        return [py_bin, "-u", file_path]
 
     def get_debug_command(self, file_path: str) -> Optional[List[str]]:
-        return ["python", "-m", "pdb", file_path]
+        py_bin = sys.executable if sys.executable else "python"
+        return [py_bin, "-u", "-m", "pdb", file_path]
 
     def get_linter_command(self, file_path: str) -> Optional[List[str]]:
         if shutil.which("flake8"):

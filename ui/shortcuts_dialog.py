@@ -59,8 +59,12 @@ SHORTCUTS_DATA = [
     ("Bearbeiten", "Plugins & Sprachen", "", "Öffnet die Plugin- und Sprachverwaltung"),
 
     # Ausführen
-    ("Ausführen", "Ausführen", "F5", "Führt das aktuelle Skript oder Programm aus"),
-    ("Ausführen", "Stoppen", "Shift+F5", "Bricht den laufenden Ausführungsprozess ab"),
+    ("Ausführen", "Ausführen", "F5", "Führt das aktuelle Skript oder Programm aus (oder Debugger fortsetzen)"),
+    ("Ausführen", "Debuggen starten", "Ctrl+F5", "Startet das aktuelle Skript mit dem interaktiven Debugger (PDB)"),
+    ("Ausführen", "Stoppen", "Shift+F5", "Bricht den laufenden Ausführungsprozess oder die Debug-Sitzung ab"),
+    ("Ausführen", "Debug: Einzelschritt (Step Over)", "F10", "Führt die nächste Codezeile im Debugger aus (n)"),
+    ("Ausführen", "Debug: Hineinspringen (Step Into)", "F11", "Springt in die aufgerufene Funktion hinein (s)"),
+    ("Ausführen", "Debug: Herausspringen (Step Out)", "Shift+F11", "Führt bis zum Verlassen der Funktion aus (r)"),
     ("Ausführen", "Breakpoint umschalten", "F9", "Setzt oder entfernt einen Breakpoint in der aktuellen Zeile"),
     ("Ausführen", "Alle Breakpoints löschen", "Ctrl+Shift+F9", "Löscht alle gesetzten Breakpoints im aktuellen Editor"),
 

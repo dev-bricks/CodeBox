@@ -10,6 +10,36 @@
 
 Alle wesentlichen Änderungen an CodeBox werden hier dokumentiert.
 
+## [0.3.3] - 2026-09-21
+
+### Interaktive Konsolen-Eingabe (stdin) & Integrierte Debugger-Steuerung (PDB)
+
+- `core/output.py`:
+  - `ConsoleInput(QLineEdit)`: Interaktive Befehls- und Dateneingabezeile mit Tastaturnavigation durch bisherige Eingaben (Pfeiltaste Hoch/Runter).
+  - `OutputPanel`:
+    - Eingabezeile (`input_edit`) und Senden-Button (`send_btn`) mit barrierefreien Attributen (`accessibleName`, `accessibleDescription`, Tooltips).
+    - `send_input(text)`: Überträgt Textzeilen UTF-8-kodiert mit Newline direkt an `stdin` des laufenden `QProcess`, spiegelt Eingaben farblich hervorgehoben (`> text` in `#4ec9b0`) und pflegt eine Befehlshistorie.
+    - Signal `inputSent(str)` zur Entkopplung und Ereignisbeobachtung gesendeter Prozessbefehle.
+    - Integrierte Debugger-Toolbar mit Aktions-Schaltflächen: "Weiter (c)", "Einzelschritt (F10 / n)", "Hinein (F11 / s)", "Heraus (Shift+F11 / r)" inklusive Screenreader-Unterstützung.
+    - `set_debug_mode(bool)` zum dynamischen Ein-/Ausblenden und Aktivieren der Debug-Steuerelemente.
+    - `run_command(command, is_debug=False, initial_commands=None)`: Debugger-Ausführungsmodus mit automatischer Abarbeitung initialer Debugger-Befehle (z.B. Breakpoints `b <line>`).
+- `languages/python_lang.py`:
+  - `get_debug_command(file_path)`: Startet Python mit `sys.executable`, ungebufferten I/O-Streams (`-u`) und Standard-Debugger (`-m pdb`).
+  - `get_run_command(file_path)`: Verwendet `sys.executable` für reproduzierbare Umgebungsisolierung.
+- `ui/main_window.py`:
+  - Menü *Ausführen*: Neu hinzugefügt wurden *Debuggen starten* (`Ctrl+F5`), *Debug: Weiter*, *Debug: Einzelschritt (Step Over)* (`F10`), *Debug: Hineinspringen (Step Into)* (`F11`) und *Debug: Herausspringen (Step Out)* (`Shift+F11`).
+  - Hauptleiste: Neuer Toolbar-Button "Debuggen" (`Ctrl+F5`).
+  - Methoden `debug_current()`, `debug_continue()`, `debug_step_over()`, `debug_step_into()`, `debug_step_out()`.
+  - Intelligente Weiterleitung von `F5` / `run_current()`: Führt während einer aktiven Debug-Sitzung automatisch `debug_continue()` aus.
+  - Automatische Übermittlung aller gesetzten visuellen Breakpoints als Initialkommandos an den interaktiven Debugger.
+  - Statusleisten- und Aktivierungs-Synchronisation von Debug-Aktionen bei Datei- und Sprachwechseln.
+- `ui/command_palette.py`:
+  - Schnellzugriff auf alle Debugger-Befehle (Starten, Weiter, Step Over, Step Into, Step Out) in der Befehlspalette.
+- `ui/shortcuts_dialog.py`:
+  - Vollständige Dokumentation der Tastenkürzel (`Ctrl+F5`, `F10`, `F11`, `Shift+F11`) in der IDE-Tastenkürzelübersicht.
+- `tests/test_interactive_debugger.py`:
+  - 4 automatisierte Tests zur Überprüfung von Konsoleneingabe-Historie, Barrierefreiheit, Signalübertragung, PDB-Befehlsgenerierung und MainWindow-Debugger-Abläufen.
+
 ## [0.3.2] - 2026-09-14
 
 ### Visuelle Breakpoints im Zeilennummern-Gutter & Zuletzt geöffnete Dateien (Recent Files)

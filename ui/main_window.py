@@ -170,10 +170,21 @@ class MainWindow(QMainWindow):
         act_settings.setStatusTip("Öffnet die Programmeinstellungen")
 
         self.run_menu = menubar.addMenu("Ausführen")
-        act_run = self.run_menu.addAction("Ausführen", self.run_current, "F5")
-        act_run.setStatusTip("Führt das aktuelle Skript oder Programm aus")
-        act_stop = self.run_menu.addAction("Stoppen", self._stop_run, "Shift+F5")
-        act_stop.setStatusTip("Bricht den laufenden Ausführungsprozess ab")
+        self.act_run = self.run_menu.addAction("Ausführen", self.run_current, "F5")
+        self.act_run.setStatusTip("Führt das aktuelle Skript oder Programm aus (F5)")
+        self.act_debug = self.run_menu.addAction("Debuggen starten", self.debug_current, "Ctrl+F5")
+        self.act_debug.setStatusTip("Startet die aktuelle Datei im interaktiven Debugger (Ctrl+F5)")
+        self.act_stop = self.run_menu.addAction("Stoppen", self._stop_run, "Shift+F5")
+        self.act_stop.setStatusTip("Bricht den laufenden Ausführungsprozess oder die Debug-Sitzung ab (Shift+F5)")
+        self.run_menu.addSeparator()
+        self.act_debug_continue = self.run_menu.addAction("Debug: Weiter", self.debug_continue)
+        self.act_debug_continue.setStatusTip("Führt das Programm im Debugger bis zum nächsten Breakpoint fort (c)")
+        self.act_debug_step_over = self.run_menu.addAction("Debug: Einzelschritt (Step Over)", self.debug_step_over, "F10")
+        self.act_debug_step_over.setStatusTip("Führt die nächste Zeile aus ohne Unterfunktionen (n / F10)")
+        self.act_debug_step_into = self.run_menu.addAction("Debug: Hineinspringen (Step Into)", self.debug_step_into, "F11")
+        self.act_debug_step_into.setStatusTip("Springt in die aufgerufene Funktion hinein (s / F11)")
+        self.act_debug_step_out = self.run_menu.addAction("Debug: Herausspringen (Step Out)", self.debug_step_out, "Shift+F11")
+        self.act_debug_step_out.setStatusTip("Führt bis zum Verlassen der aktuellen Funktion aus (r / Shift+F11)")
         self.run_menu.addSeparator()
         self.act_toggle_breakpoint = self.run_menu.addAction("Breakpoint umschalten", self.toggle_current_breakpoint, "F9")
         self.act_toggle_breakpoint.setStatusTip("Setzt oder entfernt einen Breakpoint in der aktuellen Zeile (F9)")
@@ -206,6 +217,11 @@ class MainWindow(QMainWindow):
         self.action_run.setToolTip("Aktuelle Datei ausführen (F5)")
         self.action_run.setStatusTip("Führt das aktuelle Skript oder Programm aus")
         self.action_run.setWhatsThis("Führt das aktuelle Skript oder Programm aus")
+
+        self.action_debug = toolbar.addAction("Debuggen", self.debug_current)
+        self.action_debug.setToolTip("Aktuelle Datei mit Debugger starten (Ctrl+F5)")
+        self.action_debug.setStatusTip("Startet das Skript im interaktiven Debugger (PDB)")
+        self.action_debug.setWhatsThis("Startet das Skript im interaktiven Debugger")
 
         # Sprach-Auswahl in Toolbar
         self.lang_combo = QComboBox()
@@ -1621,9 +1637,14 @@ class MainWindow(QMainWindow):
         msg = "Vim-Modus aktiviert" if new_state else "Vim-Modus deaktiviert"
         self.status_bar.showMessage(msg, 3000)
 
-    # ---- Ausführen ----
+    # ---- Ausführen & Debuggen ----
 
     def run_current(self):
+        # Falls aktuell eine Debug-Sitzung läuft, fungiert F5 / Ausführen als Continue
+        if self.output.is_debugging and self.output.is_running():
+            self.debug_continue()
+            return
+
         tab = self.get_active_tab()
         if not tab or not tab.file_path:
             QMessageBox.warning(self, "Ausführen", "Bitte zuerst eine Datei speichern.")
@@ -1634,10 +1655,68 @@ class MainWindow(QMainWindow):
         self._after_tab_saved(tab)
         if tab.provider:
             cmd = tab.provider.get_run_command(str(tab.file_path))
-            self.output.run_command(cmd)
+            self.bottom_tabs.setCurrentWidget(self.output)
+            self.output.run_command(cmd, is_debug=False)
         else:
             QMessageBox.warning(self, "Ausführen",
                                 "Keine Sprachunterstützung für diese Datei.")
+
+    def debug_current(self):
+        """Startet die aktive Datei mit dem Sprach-Debugger und registriert gesetzte Breakpoints."""
+        tab = self.get_active_tab()
+        if not tab or not tab.file_path:
+            QMessageBox.warning(self, "Debuggen", "Bitte zuerst eine Datei speichern.")
+            return
+        if not tab.save():
+            return
+        self._after_tab_saved(tab)
+
+        if not tab.provider:
+            QMessageBox.warning(self, "Debuggen", "Keine Sprachunterstützung für diese Datei.")
+            return
+
+        cmd = tab.provider.get_debug_command(str(tab.file_path))
+        if not cmd:
+            QMessageBox.warning(
+                self,
+                "Debuggen",
+                f"Für '{tab.provider.get_name()}' ist kein Debugger konfiguriert."
+            )
+            return
+
+        # Haltepunkte sammeln
+        initial_cmds = []
+        editor = getattr(tab, "editor", None)
+        if editor:
+            if hasattr(editor, "get_breakpoints"):
+                bps = editor.get_breakpoints()
+            elif hasattr(editor, "_breakpoints"):
+                bps = list(getattr(editor, "_breakpoints", []))
+            elif hasattr(editor, "breakpoints"):
+                bps = list(getattr(editor, "breakpoints", []))
+            else:
+                bps = []
+            for line_no in sorted(bps):
+                initial_cmds.append(f"b {line_no}")
+
+        self.bottom_tabs.setCurrentWidget(self.output)
+        self.output.run_command(cmd, is_debug=True, initial_commands=initial_cmds)
+
+    def debug_continue(self):
+        """Sendet 'c' (Continue) an den aktiven Debugger."""
+        self.output.send_input("c")
+
+    def debug_step_over(self):
+        """Sendet 'n' (Next / Step Over) an den aktiven Debugger."""
+        self.output.send_input("n")
+
+    def debug_step_into(self):
+        """Sendet 's' (Step Into) an den aktiven Debugger."""
+        self.output.send_input("s")
+
+    def debug_step_out(self):
+        """Sendet 'r' (Return / Step Out) an den aktiven Debugger."""
+        self.output.send_input("r")
 
     def _stop_run(self):
         self.output.stop_process()
@@ -1651,10 +1730,23 @@ class MainWindow(QMainWindow):
             if tab and tab.provider:
                 self.lang_label.setText(tab.provider.get_name())
                 self.output.run_btn.setEnabled(True)
+                if hasattr(self, "action_run"):
+                    self.action_run.setEnabled(True)
+                has_dbg = bool(tab.provider.get_debug_command(str(file_path)))
+                if hasattr(self, "action_debug"):
+                    self.action_debug.setEnabled(has_dbg)
+                if hasattr(self, "act_debug"):
+                    self.act_debug.setEnabled(has_dbg)
                 self._connect_lsp(tab, file_path)
             else:
                 self.lang_label.setText("Keine Sprache")
                 self.output.run_btn.setEnabled(False)
+                if hasattr(self, "action_run"):
+                    self.action_run.setEnabled(False)
+                if hasattr(self, "action_debug"):
+                    self.action_debug.setEnabled(False)
+                if hasattr(self, "act_debug"):
+                    self.act_debug.setEnabled(False)
             self._connect_cursor(tab)
             # Ermitteln, ob die Datei zu einem bestehenden Workspace-Ordner gehört
             owning_folder = self.workspace.find_folder_for_file(file_path)
@@ -1674,6 +1766,12 @@ class MainWindow(QMainWindow):
             self.setWindowTitle(format_window_title())
             self.lang_label.setText("Keine Sprache")
             self.output.run_btn.setEnabled(False)
+            if hasattr(self, "action_run"):
+                self.action_run.setEnabled(False)
+            if hasattr(self, "action_debug"):
+                self.action_debug.setEnabled(False)
+            if hasattr(self, "act_debug"):
+                self.act_debug.setEnabled(False)
             if tab:
                 self._connect_cursor(tab)
 
@@ -1690,6 +1788,13 @@ class MainWindow(QMainWindow):
                 tab.editor.set_provider(provider)
                 self.lang_label.setText(provider.get_name())
                 self.output.run_btn.setEnabled(True)
+                if hasattr(self, "action_run"):
+                    self.action_run.setEnabled(True)
+                has_dbg = bool(tab.file_path and provider.get_debug_command(str(tab.file_path)))
+                if hasattr(self, "action_debug"):
+                    self.action_debug.setEnabled(has_dbg)
+                if hasattr(self, "act_debug"):
+                    self.act_debug.setEnabled(has_dbg)
                 if tab.file_path:
                     self._connect_lsp(tab, tab.file_path)
 
