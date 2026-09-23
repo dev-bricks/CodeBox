@@ -8,6 +8,7 @@ Provides git status information for files in the project tree:
 Uses subprocess to call git CLI (no additional dependencies).
 """
 
+import re
 import subprocess
 import logging
 from pathlib import Path
@@ -60,24 +61,58 @@ class GitFileStatus:
         return ""
 
 
-def parse_porcelain_path(raw_path: str) -> str:
+def _decode_c_escapes(raw: str) -> str:
+    """Decodes C-style escape sequences including octal UTF-8 bytes into a string."""
+    raw_bytes = raw.encode("latin-1", errors="replace")
+    byte_pattern = re.compile(rb"\\([abtnvfr\"\\]|[0-7]{1,3})")
+
+    def sub_bytes(m: re.Match) -> bytes:
+        esc = m.group(1)
+        if esc == b"a":
+            return b"\a"
+        if esc == b"b":
+            return b"\b"
+        if esc == b"t":
+            return b"\t"
+        if esc == b"n":
+            return b"\n"
+        if esc == b"v":
+            return b"\v"
+        if esc == b"f":
+            return b"\f"
+        if esc == b"r":
+            return b"\r"
+        if esc == b"\"":
+            return b"\""
+        if esc == b"\\":
+            return b"\\"
+        return bytes([int(esc, 8)])
+
+    decoded_bytes = byte_pattern.sub(sub_bytes, raw_bytes)
+    return decoded_bytes.decode("utf-8", errors="replace")
+
+
+def parse_porcelain_path(raw_path: str, is_rename: bool = False) -> str:
     """Parses a file path from git status --porcelain output, handling renames and C-style quotes.
 
-    Git quotes paths with spaces or special characters in double quotes and C-escapes them.
+    Git quotes paths with spaces or special characters in double quotes and C-escapes them
+    (including octal bytes \\ooo for UTF-8 umlauts and non-ASCII characters).
     Renamed files have the format: "old_path" -> "new_path" or old_path -> new_path.
     """
     raw = raw_path.strip()
-    if " -> " in raw:
-        raw = raw.split(" -> ")[-1].strip()
+    if is_rename:
+        if " -> " in raw:
+            raw = raw.split(" -> ")[-1].strip()
+    else:
+        if " -> " in raw:
+            # If the entire string is enclosed in a single pair of quotes,
+            # the arrow is part of the filename itself, not a rename.
+            if not (raw.startswith('"') and raw.endswith('"') and raw.count('"') == 2):
+                raw = raw.split(" -> ")[-1].strip()
 
     if raw.startswith('"') and raw.endswith('"'):
         raw = raw[1:-1]
-        raw = (
-            raw.replace(r'\"', '"')
-            .replace(r'\\', '\\')
-            .replace(r'\t', '\t')
-            .replace(r'\n', '\n')
-        )
+        raw = _decode_c_escapes(raw)
     return raw
 
 
@@ -131,7 +166,8 @@ class GitRepo:
                 continue
             x = line[0]  # index status
             y = line[1]  # worktree status
-            filepath = parse_porcelain_path(line[3:])
+            is_renamed = (x == "R" or y == "R")
+            filepath = parse_porcelain_path(line[3:], is_rename=is_renamed)
 
             status = GitFileStatus(
                 path=filepath,
@@ -141,7 +177,7 @@ class GitRepo:
                 is_modified=y == "M",
                 is_untracked=x == "?" and y == "?",
                 is_deleted=x == "D" or y == "D",
-                is_renamed=x == "R",
+                is_renamed=is_renamed,
             )
             statuses[filepath] = status
 

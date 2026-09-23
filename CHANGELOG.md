@@ -12,6 +12,13 @@ Alle wesentlichen Änderungen an CodeBox werden hier dokumentiert.
 
 ## [Unreleased]
 
+### Fixed (Bugsearch & Härtungslauf 2026-09-23)
+- `features/git_integration.py`:
+  - `_decode_c_escapes()`: Dekodiert C-Style Oktalsequenzen (`\ooo`) für UTF-8 Zeichen (z. B. deutsche Umlaute `ä, ö, ü, ß`) sowie Steuerzeichen (`\a, \b, \t, \n, \v, \f, \r, \", \\`). Git porcelain Pfade mit Umlauten werden nun fehlerfrei aufgelöst, wodurch Git-Status-Badges in `ProjectView`, Commit-Dialoge, `discard_file_changes` und Diffs für solche Dateien zuverlässig funktionieren.
+  - `parse_porcelain_path()`: Verhindert das fehlerhafte Zerteilen von Dateinamen, die buchstäblich ` -> ` enthalten (z. B. `"notizen -> entwurf.md"`), wenn kein Rename vorliegt (`is_rename=False` oder einzeln gequoteter Pfad).
+  - `GitRepo.get_status()`: Berücksichtigt Umbenennungen sowohl im Index (`X == "R"`) als auch im Worktree (`Y == "R"`) und übergibt das Rename-Flag gezielt an `parse_porcelain_path()`.
+  - 3 neue Regressionstests in `tests/test_git_status_parsing.py`.
+
 ### Marketing, Discoverability & Governance Audit (Pfad B 2026-09-23)
 
 - **Repository Metadata Saturation**:
