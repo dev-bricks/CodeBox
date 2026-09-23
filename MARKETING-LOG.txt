@@ -1,0 +1,36 @@
+# MARKETING-LOG.txt — CodeBox (Pfad B Discoverability & Visibility Recommendations)
+
+Date: 2026-09-23
+Repo: dev-bricks/CodeBox
+
+## Automated Actions Applied (Pfad B Discoverability, Level 1 SBOM & Navigation Parity):
+1. **GitHub Repository Topics Saturation (20/20)**:
+   - Saturated GitHub repository topics via `gh repo edit dev-bricks/CodeBox`: `code-editor`, `desktop-app`, `desktop-ide`, `dev-bricks`, `developer-tools`, `ide`, `language-server-protocol`, `local-first`, `lsp`, `lsp-client`, `lsp-editor`, `offline-code-editor`, `offline-first`, `open-bricks`, `pyside6`, `python`, `python-editor`, `syntax-highlighting`, `windows`, `zero-egress`.
+   - Set canonical homepage URL to `https://github.com/dev-bricks/CodeBox#readme`.
+   - Synchronized PEP 621 `keywords` in `pyproject.toml` with the identical 20 terms.
+2. **Canonical Root NOTICE Attribution**:
+   - Created root `NOTICE` file formalizing copyright attribution to Lukas Geiger, dev-bricks, and umbrella organization open-bricks.
+   - Added `NOTICE` to `license-files` and `[project.urls]` in `pyproject.toml`.
+   - Added Attribution NOTICE Shields.io badge to `README.md` and `README_de.md`.
+3. **Level 1 SBOM & Invariant Matrix (`THIRD_PARTY_LICENSES.md`)**:
+   - Created comprehensive `THIRD_PARTY_LICENSES.md` audit document detailing runtime dependencies (PySide6 LGPL-3.0 dynamic linkage compliance under LGPL-3.0 Section 4), optional remote/LSP tooling (paramiko>=5.0.0, python-lsp-server), build tools (PyInstaller, pytest, ruff), and operating system boundaries (RunAsInvoker unprivileged execution).
+   - Formulated 10 technical governance invariants (`INV-LOCAL-01` through `INV-SLA-10`).
+   - Added `THIRD_PARTY_LICENSES.md` to `license-files` and project URLs in `pyproject.toml`.
+   - Added Level 1 SBOM Shields.io badge to `README.md` and `README_de.md`.
+4. **18-Point Quick Navigation Parity & Dual Reciprocal Anchors**:
+   - Structured both `README.md` and `README_de.md` into 18 symmetrically numbered sections with dual reciprocal anchors (`<a id="..."></a>`).
+   - Added Section 6: Target Personas (`[PERSONA-01]` to `[PERSONA-04]`) with high-intent search query matrices.
+   - Added Section 7: 10-Dimension Comparative Matrix benchmarking CodeBox against VS Code / VSCodium, Sublime Text, PyCharm Community, and CLI editors across `INV-LOCAL-01` to `INV-SLA-10`.
+   - Added Section 16: Third-Party Licenses & Level 1 SBOM.
+   - Updated Section 17 & 18: German statutory liability limitation pursuant to § 521 BGB (Gefälligkeitsrecht) and 48-hour security response SLA (`INV-SLA-10`).
+5. **AI Agent Context & Documentation Sync (`llms.txt`)**:
+   - Refreshed `llms.txt` verification timestamp to `2026-09-23`, updated test counts (295 passed tests, 100%), and indexed root NOTICE, Level 1 SBOM, and § 521 BGB disclaimer.
+6. **CHANGELOG Maintenance**:
+   - Documented Pfad B discoverability and governance audit under `## [Unreleased]` adhering to the version freeze policy (T-20260920-167562623).
+7. **Test Suite Expansion**:
+   - Updated `tests/test_metadata.py` to validate NOTICE attribution, Level 1 SBOM existence, PEP 621 keywords, Section 18 statutory notice, 18-point bilingual navigation parity, and reciprocal HTML anchors.
+
+## Non-Automated Marketing & Discoverability Recommendations:
+1. **GitHub Social Preview**: Set a dedicated Open Graph / social preview image in repository settings matching `assets/banner.svg` styling.
+2. **Community Showcase**: Present CodeBox on Reddit (`r/Python`, `r/LocalFirst`, `r/QtFramework`) highlighting the zero-egress guarantee, sub-second cold start, and declarative JSON plugin architecture.
+3. **Ecosystem Cross-Referencing**: Confirm reciprocal discovery mentions in sibling developer tools (`safe-start-for-codex`, `companion-for-agy`, `ExplorerPro`, `CleanMarkdown`).

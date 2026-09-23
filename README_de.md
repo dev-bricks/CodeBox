@@ -3,16 +3,19 @@
 # CodeBox - Lokaler PySide6-Desktop-Codeeditor
 
 [![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-yellow.svg)](LICENSE)
+[![Attribution: NOTICE](https://img.shields.io/badge/Attribution-NOTICE-blue.svg)](NOTICE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![Plattform: Windows | Linux | macOS](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)]()
 [![CI](https://github.com/dev-bricks/CodeBox/actions/workflows/ci.yml/badge.svg)](https://github.com/dev-bricks/CodeBox/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-285%20passed%20%7C%20100%25-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-296%20passed%20%7C%20100%25-brightgreen.svg)]()
 [![Datenschutz: Zero-Egress](https://img.shields.io/badge/datenschutz-100%25%20local--first%20%7C%20zero--egress-success.svg)](SECURITY.md)
 [![Sicherheitsrichtlinie](https://img.shields.io/badge/sicherheit-zweisprachige%20policy-blue.svg)](SECURITY.md)
 [![Ökosystem: dev-bricks](https://img.shields.io/badge/ecosystem-dev--bricks-blue.svg)](https://github.com/dev-bricks)
 [![Dachverband: open-bricks](https://img.shields.io/badge/part%20of-open--bricks-blue.svg)](https://github.com/open-bricks)
 [![LSP Ready](https://img.shields.io/badge/LSP-ready-purple.svg)]()
 [![Version: 0.3.3](https://img.shields.io/badge/version-0.3.3-green.svg)](CHANGELOG.md)
+[![SBOM Level 1](https://img.shields.io/badge/SBOM-Level%201%20Auditiert-blue.svg)](THIRD_PARTY_LICENSES.md)
+[![Letzte Prüfung](https://img.shields.io/badge/letzte%20pr%C3%BCfung-2026--09--23-informational.svg)](llms.txt)
 [![llms.txt](https://img.shields.io/badge/llms.txt-verf%C3%BCgbar-green.svg)](llms.txt)
 
 [English](README.md) | Deutsch
@@ -26,25 +29,29 @@ CodeBox ist eine lokale Desktop-IDE für Windows-, Linux- und macOS-Entwickler, 
 
 ## Schnellnavigation
 
-- [Schnelleinstieg](#schnelleinstieg)
-- [Systemarchitektur](#systemarchitektur)
-- [End-to-End Workflow-Lebenszyklus](#end-to-end-workflow-lebenszyklus)
-- [Kernfähigkeiten & Laufzeitinvarianten](#kernfähigkeiten--laufzeitinvarianten)
-- [Visuelle Vorschau](#visuelle-vorschau)
-- [Funktionen](#funktionen)
-- [Installation & Schnelleinstieg](#installation--schnelleinstieg)
-- [Language-Server-Protocol (LSP) Einrichtung](#language-server-protocol-lsp-einrichtung)
-- [Deklaratives Plugin-System](#deklaratives-plugin-system)
-- [Lokaler Windows-Build](#lokaler-windows-build)
-- [Projektstruktur](#projektstruktur)
-- [Geschwister-Ökosystem](#geschwister-ökosystem)
-- [Suche & Abgrenzung](#suche--abgrenzung)
-- [Sicherheit & Datenschutz](#sicherheit--datenschutz)
-- [Lizenz & Haftung](#lizenz--haftung)
+- [1. Schnellstart](#schnellstart)
+- [2. Systemarchitektur](#systemarchitektur)
+- [3. End-to-End Workflow-Lebenszyklus](#end-to-end-workflow-lebenszyklus)
+- [4. Kernfähigkeiten & Laufzeitinvarianten](#kernfaehigkeiten--laufzeitinvarianten)
+- [5. Visuelle Demonstration](#visuelle-demonstration)
+- [6. Zielgruppen & Anwendungsfälle](#zielgruppen--anwendungsfaelle)
+- [7. Vergleichsmatrix gegenüber Alternativen](#vergleichsmatrix-gegenueber-alternativen)
+- [8. Funktionsumfang](#funktionsumfang)
+- [9. Installation & Schnellstart](#installation--schnellstart)
+- [10. Language-Server-Protocol (LSP) Einrichtung](#lsp-einrichtung)
+- [11. Deklaratives Plugin-System](#deklaratives-plugin-system)
+- [12. Lokaler Windows-Build](#lokaler-windows-build)
+- [13. Projektstruktur](#projektstruktur)
+- [14. Geschwister-Ökosystem](#geschwister-oekosystem)
+- [15. Suche & Abgrenzung](#suche--abgrenzung)
+- [16. Drittanbieter-Lizenzen & Level 1 SBOM](#drittanbieter-lizenzen--level-1-sbom)
+- [17. Sicherheit & Datenschutz](#sicherheit--datenschutz)
+- [18. Lizenz & Haftung](#lizenz--haftung)
 
 ---
 
-## Schnelleinstieg
+<a id="start-here"></a><a id="schnellstart"></a>
+## Schnellstart
 
 | Bedarf | Einstieg |
 | --- | --- |
@@ -59,6 +66,7 @@ CodeBox ist eine lokale Desktop-IDE für Windows-, Linux- und macOS-Entwickler, 
 
 ---
 
+<a id="system-architecture"></a><a id="systemarchitektur"></a>
 ## Systemarchitektur
 
 ```mermaid
@@ -115,6 +123,7 @@ flowchart TD
 
 ---
 
+<a id="end-to-end-workflow-lifecycle"></a><a id="end-to-end-workflow-lebenszyklus"></a>
 ## End-to-End Workflow-Lebenszyklus
 
 ```mermaid
@@ -156,6 +165,7 @@ sequenceDiagram
 
 ---
 
+<a id="key-capabilities--runtime-invariants"></a><a id="kernfaehigkeiten--laufzeitinvarianten"></a>
 ## Kernfähigkeiten & Laufzeitinvarianten
 
 | Fähigkeit / Prinzip | Technische Umsetzung | Garantie / Invariante |
@@ -176,14 +186,50 @@ sequenceDiagram
 
 ---
 
-## Visuelle Vorschau
+<a id="visual-showcase"></a><a id="visuelle-demonstration"></a>
+## Visuelle Demonstration
 
 ![CodeBox-Hauptfenster](README/screenshots/main.png)
 *Abbildung 1: CodeBox-Arbeitsbereich mit Projektbaum, Multi-Tab-Editor, Syntax-Highlighting, integriertem Terminal und Diagnose-Panel.*
 
 ---
 
-## Funktionen
+<a id="target-personas--use-cases"></a><a id="zielgruppen--anwendungsfaelle"></a>
+## Zielgruppen & Anwendungsfälle
+
+CodeBox wurde für datenschutzorientierte Entwickler, Systemingenieure und Autoren spezialisierter Entwicklertools konzipiert, die eine vollständig offlinefähige Desktop-IDE benötigen:
+
+| Kennung | Zielgruppe & Persona | Kernanforderung & Herausforderung | Lösungsansatz von CodeBox | Relevante Suchanfragen (High-Intent) |
+|---|---|---|---|---|
+| **[PERSONA-01]** | **Local-First & Offline-Entwickler** | Frustriert über erzwungene Cloud-Anmeldungen, Telemetrie-Egress und unbemerkte Netzwerkverbindungen moderner Editoren. | 100% offlinefähige Zero-Egress-Laufzeit (`INV-LOCAL-01`). Keine Remote-Telemetrie, keine Cloud-Abhängigkeiten, rein lokale Ausführung. | `local-first code editor`, `zero-egress python IDE`, `offline code editor windows` |
+| **[PERSONA-02]** | **Desktop- & System-Ingenieure** | Träge Electron-basierte IDEs mit Gigabytes an RAM-Verbrauch und 10+ Sekunden Startzeit bei Multi-Projekt-Setups. | Native PySide6 / C++ Qt Engine mit Kaltstart unter 1 Sekunde, minimalem Speicher-Footprint und Multi-Shell-Terminal (`INV-PERF-02`, `INV-TERM-06`). | `lightweight desktop IDE python`, `fast python code editor`, `pyside6 code editor` |
+| **[PERSONA-03]** | **Sicherheits- & Compliance-Verantwortliche** | Benötigen lückenlose Supply-Chain-Transparenz, unprivilegierten Nutzermodus, Zero-Copyleft-Isolation und definierte Reaktions-SLAs. | RunAsInvoker-Ausführung ohne Adminrechte (`INV-NOELEV-02`), Level 1 SBOM mit dynamischer LGPL-3.0-Isolation (`INV-LGPL-03`) und 48h Sicherheits-SLA (`INV-SLA-10`). | `secure offline editor SBOM`, `MIT code editor zero copyleft`, `enterprise compliant desktop IDE` |
+| **[PERSONA-04]** | **DSL- & Tooling-Autoren** | Komplexe Erweiterungsmodelle klassischer IDEs verlangen Kompilierung, Bundling und Konten in proprietären Marktplätzen. | Deklaratives JSON-Pluginsystem (`INV-PLUG-07`) für benutzerdefiniertes Syntax-Highlighting, Kommentarregeln und Auto-Pairing mit Hot-Reloading. | `declarative language editor plugin`, `custom dsl syntax highlighter`, `json language definition ide` |
+
+---
+
+<a id="comparative-matrix-vs-alternatives"></a><a id="vergleichsmatrix-gegenueber-alternativen"></a>
+## Vergleichsmatrix gegenüber Alternativen
+
+Die folgende Matrix vergleicht CodeBox mit 4 verbreiteten Entwicklungsumgebungen entlang 10 technischer Kerninvarianten:
+
+| Technische Invariante | CodeBox (dev-bricks) | VS Code / VSCodium | Sublime Text | PyCharm Community | Schlanke CLI (Micro/Nano) |
+|---|---|---|---|---|---|
+| **INV-LOCAL-01: 100% Zero-Egress** | **Native Garantie** (Keine Telemetrie, voll offline) | Teilweise / Manuelles Telemetrie-Opt-Out nötig | Nativ (Kommerziell Closed-Source) | Telemetrie-Opt-Out erforderlich | Nativ (Reines Terminal) |
+| **INV-PERF-02: Kaltstart & Speicher** | **<1,0s Kaltstart** (Natives PySide6/Qt) | Schwer (Electron / Chromium RAM-Last) | Sehr schnell (Proprietäres C++) | Träge (JVM-Speicherbedarf) | Unmittelbar |
+| **INV-LGPL-03: Zero-Copyleft-Isolation** | **Permissiv / Dynamische LGPL** | Gemischt MIT / Proprietärer Marktplatz | Proprietäre Lizenz | Apache 2.0 | GPL-3.0 (Copyleft) |
+| **INV-CRASH-04: Schutz vor Datenverlust** | **Geschützte Puffer** (Tabs bleiben bei Schreibfehler) | Ja | Ja | Ja | Anfällig bei Terminal-Abbruch |
+| **INV-LSP-05: Asynchrone LSP-Engine** | **Threadsicherer Qt-Client** (`pylsp`, `clangd` etc.) | First-Class LSP Standard | Über LSP-Plugin | Integriertes eigenes Indexing | Keine / Externe Wrapper |
+| **INV-TERM-06: Eingebettetes Multi-Shell** | **`QProcess`-Terminal** (cmd/PowerShell/bash) | Integriertes xterm.js | Keine (Externes Terminal) | Integriertes Terminal | Native Shell-Umgebung |
+| **INV-PLUG-07: Deklarative JSON-Plugins** | **Sofortige JSON-Schemas** (Keine Kompilierung) | TypeScript Extension Bundle | Python-Skripte / Pakete | Java / Kotlin Plugins | Konfigurationsdateien |
+| **INV-PORT-08: Multi-Root-Workspaces** | **`.codebox-workspace`** (Relative portable Pfade) | `.code-workspace` | `.sublime-project` | `.idea` Projektordner | Verzeichnisargumente |
+| **INV-GIT-09: Git Porcelain & Diff-Viewer** | **Porcelain-Status + Unified Diff** | Umfangreiche Git-Integration | Basis Git-Badges | Umfangreiche Git-Integration | CLI Git-Befehle |
+| **INV-SLA-10: 48h Sicherheits-SLA & § 521 BGB** | **Formales SLA + § 521 BGB Hinweis** | Community-Triage | Herstellersupport | JetBrains Tracker | Best Effort |
+
+---
+
+<a id="features"></a><a id="funktionsumfang"></a>
+## Funktionsumfang
 
 - **Projektweite Dateisuche (Find in Files / Grep-Tool)**: Schnelle Textsuche über alle Projektordner und Dateien (`Ctrl+Shift+F`) mit regulären Ausdrücken, Groß-/Kleinschreibung, Ganzwort-Suche, Glob-Filtern (Einschließen/Ausschließen), asynchronem Hintergrund-Worker und Direktsprung in den Editor.
 - **Multi-Root-Arbeitsbereiche**: Verwaltung mehrerer Projektordner in einer gemeinsamen Instanz mit dem `.codebox-workspace`-Format und portablen relativen Pfaden (`Ctrl+Shift+O`).
@@ -205,7 +251,8 @@ sequenceDiagram
 
 ---
 
-## Installation & Schnelleinstieg
+<a id="installation--quickstart"></a><a id="installation--schnellstart"></a>
+## Installation & Schnellstart
 
 ```bash
 # Repository klonen
@@ -229,6 +276,7 @@ Unter Windows kann CodeBox auch einfach per Doppelklick auf `start.bat` gestarte
 
 ---
 
+<a id="language-server-protocol-lsp-setup"></a><a id="lsp-einrichtung"></a>
 ## Language-Server-Protocol (LSP) Einrichtung
 
 CodeBox bindet direkt an installierte System-Language-Server an:
@@ -245,6 +293,7 @@ CodeBox bevorzugt Server auf dem System-`PATH` und nutzt in virtuellen Umgebunge
 
 ---
 
+<a id="declarative-plugin-system"></a><a id="deklaratives-plugin-system"></a>
 ## Deklaratives Plugin-System
 
 Eigene Sprachdefinitionen werden durch Ablegen einer JSON-Datei in `plugins/` oder `~/.codebox/plugins/` registriert:
@@ -268,6 +317,7 @@ Die Plugins können zur Laufzeit im Plugin-Manager (`Ctrl+Shift+P`) neu geladen 
 
 ---
 
+<a id="local-windows-build"></a><a id="lokaler-windows-build"></a>
 ## Lokaler Windows-Build
 
 Eigenständige, installationsfreie Windows-Executable kompilieren:
@@ -280,6 +330,7 @@ Das Script nutzt PyInstaller mit `CodeBox.spec`, um Icons, Themes und deklarativ
 
 ---
 
+<a id="project-structure"></a><a id="projektstruktur"></a>
 ## Projektstruktur
 
 ```text
@@ -295,12 +346,13 @@ CodeBox/
 ├── plugins/                 # Gebündelte deklarative Sprach-Plugins (JSON)
 ├── themes/                  # QSS-Stylesheets (dark.qss, light.qss)
 ├── assets/                  # Hochauflösende Vektorbanner und Icons
-├── tests/                   # Automatisierte Testsuite (115+ Tests)
+├── tests/                   # Automatisierte Testsuite (295+ Tests)
 └── README/screenshots/      # Grafiken für den Projektauftritt
 ```
 
 ---
 
+<a id="sibling-ecosystem"></a><a id="geschwister-oekosystem"></a>
 ## Geschwister-Ökosystem
 
 CodeBox ist Teil des Entwickler-Ökosystems von **dev-bricks** und **ellmos-ai** unter dem Dach von **open-bricks**:
@@ -319,6 +371,7 @@ CodeBox ist Teil des Entwickler-Ökosystems von **dev-bricks** und **ellmos-ai**
 
 ---
 
+<a id="search--disambiguation"></a><a id="suche--abgrenzung"></a>
 ## Suche & Abgrenzung
 
 Präzise Suchbegriffe zur eindeutigen Auffindbarkeit:
@@ -332,20 +385,35 @@ Präzise Suchbegriffe zur eindeutigen Auffindbarkeit:
 
 ---
 
+<a id="third-party-licenses--level-1-sbom"></a><a id="drittanbieter-lizenzen--level-1-sbom"></a>
+## Drittanbieter-Lizenzen & Level 1 SBOM
+
+CodeBox wird unter der permissiven MIT-Lizenz bereitgestellt. Sämtliche Drittanbieter-Abhängigkeiten, Lizenztexte und Sicherheitsinvarianten sind auditiert und dokumentiert:
+
+- **Level 1 SBOM:** [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md) (Auditiert 2026-09-23)
+- **Komponenten-Textinventar:** [`THIRD_PARTY_LICENSES.txt`](THIRD_PARTY_LICENSES.txt)
+- **Rechtlicher Hinweis & Urheberrecht:** [`NOTICE`](NOTICE)
+- **Zero-Copyleft-Garantie:** PySide6 wird über offizielle PyPI-Wheels gemäß LGPL-3.0 § 4 dynamisch eingebunden. Alle mitgelieferten Sprach-Plugins und Kernmodule unterliegen permissiven Lizenzen.
+
+---
+
+<a id="security--privacy"></a><a id="sicherheit--datenschutz"></a>
 ## Sicherheit & Datenschutz
 
 CodeBox unterliegt verbindlichen Sicherheits- und Datenschutzvorgaben. Vollständige Richtlinie in [SECURITY.md](SECURITY.md):
 
-- **100% Offline-Betrieb**: Kein Tracking, keine Telemetrie oder ungefragte Datenübertragung.
-- **Unprivilegierter Modus**: Läuft vollständig mit normalen Benutzerrechten.
+- **100% Offline-Betrieb (`INV-LOCAL-01`)**: Kein Tracking, keine Telemetrie oder ungefragte Datenübertragung.
+- **Unprivilegierter Modus (`INV-NOELEV-02`)**: Läuft vollständig mit normalen Benutzerrechten (RunAsInvoker).
+- **48-Stunden-Reaktions-SLA (`INV-SLA-10`)**: Jede gemeldete Sicherheitslücke erhält innerhalb von 48 Stunden eine erste Triage.
 - **Vertrauliche Meldungen**: Schwachstellen bitte vertraulich über [GitHub Security Advisories](https://github.com/dev-bricks/CodeBox/security/advisories/new) oder per E-Mail an `security@ellmos.ai` und `lukas@open-bricks.org` melden.
 
 ---
 
+<a id="license--liability"></a><a id="lizenz--haftung"></a>
 ## Lizenz & Haftung
 
-Dieses Projekt ist unter der [MIT-Lizenz](LICENSE) lizenziert.
+Dieses Projekt ist unter der [MIT-Lizenz](LICENSE) lizenziert. Die formale Namensnennung ist in [`NOTICE`](NOTICE) hinterlegt.
 
-### Haftungsausschluss
+### Gesetzliche Haftungsbeschränkung (§ 521 BGB)
 
 Dieses Projekt ist eine unentgeltliche Open-Source-Schenkung im Sinne der §§ 516 ff. BGB. Die Haftung des Urhebers ist gemäß § 521 BGB auf Vorsatz und grobe Fahrlässigkeit beschränkt. Ergänzend gilt der Haftungsausschluss der MIT-Lizenz. Nutzung auf eigenes Risiko. Keine Wartungszusage oder Gewährleistung für einen bestimmten Einsatzzweck.

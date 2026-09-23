@@ -1,6 +1,6 @@
 # CodeBox - Local PySide6 Desktop Code Editor
 
-## Last-checked: 2026-09-20
+## Last-checked: 2026-09-23
 
 > CodeBox is a local-first desktop IDE for Windows, Linux, and macOS developers who want a lightweight PySide6 code editor with multi-tab workspace, project tree, integrated terminal, Git status porcelain indicators, syntax highlighting, Language Server Protocol (LSP) diagnostics, and an extensible JSON/Python language plugin architecture.
 
@@ -8,8 +8,10 @@ Part of the dev-bricks family. Python, MIT.
 
 ## Docs
 
-- [README.md](https://github.com/dev-bricks/CodeBox/blob/main/README.md): Primary documentation, installation guide, system architecture flowchart, sequence diagram, capabilities table, and features.
+- [README.md](https://github.com/dev-bricks/CodeBox/blob/main/README.md): Primary documentation, installation guide, system architecture flowchart, sequence diagram, capabilities table, comparative matrix, and features.
 - [README_de.md](https://github.com/dev-bricks/CodeBox/blob/main/README_de.md): German entry point with localized architecture, workflow diagrams, setup, privacy, and status notes.
+- [NOTICE](https://github.com/dev-bricks/CodeBox/blob/main/NOTICE): Copyright attribution and open-bricks umbrella metadata.
+- [THIRD_PARTY_LICENSES.md](https://github.com/dev-bricks/CodeBox/blob/main/THIRD_PARTY_LICENSES.md): Level 1 Software Bill of Materials (SBOM) and governance invariants (`INV-LOCAL-01` to `INV-SLA-10`).
 - [SECURITY.md](https://github.com/dev-bricks/CodeBox/blob/main/SECURITY.md): Bilingual security policy, supported versions, zero-egress invariants, and reporting protocols.
 - [CHANGELOG.md](https://github.com/dev-bricks/CodeBox/blob/main/CHANGELOG.md): Project release history, version tags, and feature changelog.
 - [DEVELOPMENT_PLAN.md](https://github.com/dev-bricks/CodeBox/blob/main/DEVELOPMENT_PLAN.md): Architectural roadmap and completed milestones.
@@ -38,7 +40,7 @@ Part of the dev-bricks family. Python, MIT.
 - `python main.py`: Launches the CodeBox desktop interface.
 - `python main.py --open <file>`: Launches and directly opens a target file path.
 - `build_exe.bat`: Uses PyInstaller to bundle the application into a standalone executable (`dist/CodeBox.exe`).
-- `pytest`: Runs the automated test suite (284 passed, 1 skipped).
+- `pytest`: Runs the automated test suite (296 passed, 1 skipped, 100%).
 - `ruff check .`: Runs the codebase linting suite.
 
 ## Related Projects (dev-bricks & ellmos family)
@@ -53,13 +55,12 @@ Part of the dev-bricks family. Python, MIT.
 - [ExplorerPro](https://github.com/file-bricks/ExplorerPro): Multi-tab local desktop file manager.
 - [open-bricks](https://github.com/open-bricks/.github): Umbrella open-source organization and standards.
 
-## Audience
+## Audience & Personas
 
-- Windows, Linux, and macOS developers who want a lightweight local PySide6 desktop IDE without cloud accounts or telemetry.
-- Python developers building or experimenting with LSP-integrated code editors.
-- Developers in the dev-bricks / ellmos ecosystem who need a programmable, agent-controllable editor.
-- Hobbyists and students who want a readable, hackable Python codebase as a learning reference.
-- Contributors extending CodeBox with new language providers, themes, or remote editing features.
+- **[PERSONA-01] Local-First & Offline Developers**: Developers requiring an air-gapped IDE with 100% zero-egress guarantee (`INV-LOCAL-01`).
+- **[PERSONA-02] Desktop & Systems Engineers**: Engineers demanding sub-second cold starts (<1.0s) and native PySide6/Qt resource efficiency (`INV-PERF-02`).
+- **[PERSONA-03] Security & Compliance Officers**: Organizations requiring Level 1 SBOM transparency, unprivileged user mode, zero copyleft bleed, and defined 48h response SLAs (`INV-SLA-10`).
+- **[PERSONA-04] DSL & Tooling Authors**: Language tool creators building custom syntax highlighters and auto-pair rules via simple declarative JSON plugins (`INV-PLUG-07`).
 
 ## Search Phrases
 
@@ -80,3 +81,4 @@ CodeBox local desktop IDE
 
 - The primary disambiguators are `dev-bricks`, `PySide6`, `local-first`, `Windows desktop IDE`, `declarative language plugins`, and `Language Server Protocol`.
 - All documentation is fully bilingual (EN/DE) with zero-egress privacy and non-elevation security guarantees.
+- Statutory liability is limited to intent and gross negligence pursuant to § 521 BGB (Gefälligkeitsrecht).

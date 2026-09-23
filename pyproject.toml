@@ -9,6 +9,7 @@ description = "Lightweight local PySide6 desktop code editor with LSP diagnostic
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
+license-files = ["LICENSE", "NOTICE", "THIRD_PARTY_LICENSES.md", "THIRD_PARTY_LICENSES.txt"]
 authors = [
     { name = "dev-bricks Maintainers", email = "support@lukasgeiger.com" }
 ]
@@ -20,7 +21,19 @@ keywords = [
     "lsp",
     "terminal",
     "python",
-    "dev-tools"
+    "dev-tools",
+    "offline-first",
+    "offline-code-editor",
+    "syntax-highlighting",
+    "windows",
+    "desktop-app",
+    "developer-tools",
+    "ide",
+    "lsp-client",
+    "lsp-editor",
+    "zero-egress",
+    "dev-bricks",
+    "open-bricks"
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -64,12 +77,14 @@ build = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/dev-bricks/CodeBox"
+Homepage = "https://github.com/dev-bricks/CodeBox#readme"
 Documentation = "https://github.com/dev-bricks/CodeBox#readme"
 Repository = "https://github.com/dev-bricks/CodeBox.git"
 Issues = "https://github.com/dev-bricks/CodeBox/issues"
 Changelog = "https://github.com/dev-bricks/CodeBox/blob/main/CHANGELOG.md"
 Security = "https://github.com/dev-bricks/CodeBox/blob/main/SECURITY.md"
+Notice = "https://github.com/dev-bricks/CodeBox/blob/main/NOTICE"
+SBOM = "https://github.com/dev-bricks/CodeBox/blob/main/THIRD_PARTY_LICENSES.md"
 "Third-Party Licenses" = "https://github.com/dev-bricks/CodeBox/blob/main/THIRD_PARTY_LICENSES.txt"
 "Parent Org" = "https://github.com/dev-bricks"
 "Umbrella Ecosystem" = "https://github.com/open-bricks"
@@ -78,6 +93,7 @@ Security = "https://github.com/dev-bricks/CodeBox/blob/main/SECURITY.md"
 minversion = "7.0"
 testpaths = ["tests"]
 pythonpath = ["."]
+norecursedirs = [".git", ".github", "node_modules", "dist", "build", "venv"]
 addopts = "-ra -p no:flask"
 
 [tool.ruff]

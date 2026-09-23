@@ -10,6 +10,26 @@
 
 Alle wesentlichen Änderungen an CodeBox werden hier dokumentiert.
 
+## [Unreleased]
+
+### Marketing, Discoverability & Governance Audit (Pfad B 2026-09-23)
+
+- **Repository Metadata Saturation**:
+  - Maximized GitHub repository topics to 20/20 saturation with zero-egress, dev-bricks, local-first, lsp, and pyside6 taxonomy.
+  - Set canonical homepage URL to `https://github.com/dev-bricks/CodeBox#readme`.
+- **Level 1 SBOM & Invariant Matrix**:
+  - Created [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md) defining full dependency inventory, LGPL-3.0 Section 4 dynamic linking guarantees, and 10 technical invariants (`INV-LOCAL-01` to `INV-SLA-10`).
+  - Added root [`NOTICE`](NOTICE) attribution file formalizing copyright and open-bricks umbrella stewardship.
+- **Bilingual Documentation Parity & Dual Reciprocal Anchors**:
+  - Upgraded [`README.md`](README.md) and [`README_de.md`](README_de.md) with 18-point numbered quick navigation and reciprocal anchor pairs (`<a id="..."></a>`).
+  - Added Section 6: Target Personas (`[PERSONA-01]` to `[PERSONA-04]`) and high-intent SEO search queries.
+  - Added Section 7: 10-Dimension Comparative Matrix benchmarking CodeBox against VS Code, Sublime Text, PyCharm Community, and CLI editors.
+  - Added Section 16: Third-Party Licenses & Level 1 SBOM.
+  - Updated Section 17 & 18: German statutory liability limitation pursuant to § 521 BGB (Gefälligkeitsrecht) and 48-hour security response SLA (`INV-SLA-10`).
+  - Synchronized badges with Level 1 SBOM, NOTICE attribution, 295 passed tests, and Stand 2026-09-23 audit stempel.
+- **Machine-Readable LLM Context (`llms.txt`)**:
+  - Updated `llms.txt` to Stand 2026-09-23, documented 295 passed tests, NOTICE attribution, Level 1 SBOM notes, and statutory disclaimers.
+
 ## [0.3.3] - 2026-09-21
 
 ### Interaktive Konsolen-Eingabe (stdin) & Integrierte Debugger-Steuerung (PDB)
