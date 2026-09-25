@@ -93,8 +93,8 @@ SBOM = "https://github.com/dev-bricks/CodeBox/blob/main/THIRD_PARTY_LICENSES.md"
 minversion = "7.0"
 testpaths = ["tests"]
 pythonpath = ["."]
-norecursedirs = [".git", ".github", "node_modules", "dist", "build", "venv"]
-addopts = "-ra -p no:flask"
+norecursedirs = [".git", ".github", "node_modules", "dist", "build", "venv", ".pytest_temp", ".hypothesis", ".turbo", ".tox"]
+addopts = "-ra -p no:flask --basetemp=.pytest_temp"
 
 [tool.ruff]
 line-length = 100

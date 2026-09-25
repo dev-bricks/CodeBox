@@ -58,9 +58,25 @@ known_hosts
 keyring/
 *.bak
 
-# Multi-Host Sync Conflicts
-*-WORKSTATION-LG*
+# Multi-Host Sync Conflicts & Cloud-Sync Artifacts
+*conflicted copy*
+* (Kopie)*
+* (Copy)*
+* (kopie)*
+* (copy)*
+*-ASUS*
 *-ASUS-GEI*
+*-ASUS-GEI.*
+*-LAPTOP*
+*-Mac Studio*
+*-MacBook*
+*-IDEAPAD*
+*-WORKSTATION*
+*-WORKSTATION-LG*
+*_WORKSTATION*
+*_WORKSTATION-LG*
+*-WORKSTATION.*
+*-WORKSTATION-LG.*
 *.sync-conflict-*
 *.conflict
 *-conflict-*
@@ -75,7 +91,13 @@ LOCK.*
 LOCK.txt
 LOCK.*.txt
 LOCK*.txt
+LOCK.user.*
+LOCK.until.*
+LOCK.condition.*
 LOCK.permissions.json
+.automation-lock
+uv.lock
+!package-lock.json
 TEST.txt
 TESTS.txt
 TESTERGEBNISSE.txt
@@ -93,6 +115,13 @@ DONE.md
 DONE.txt
 ERLEDIGT.txt
 
-# Node / Web Caches
+# Node / Web / Test Caches
 node_modules/
 .nyc_output/
+.pytest_temp/
+.pytest_tmp*/
+.hypothesis/
+.turbo/
+.tox/
+*.orig
+*.rej

@@ -1,6 +1,6 @@
 # CodeBox - Local PySide6 Desktop Code Editor
 
-## Last-checked: 2026-09-23
+## Last-checked: 2026-09-25
 
 > CodeBox is a local-first desktop IDE for Windows, Linux, and macOS developers who want a lightweight PySide6 code editor with multi-tab workspace, project tree, integrated terminal, Git status porcelain indicators, syntax highlighting, Language Server Protocol (LSP) diagnostics, and an extensible JSON/Python language plugin architecture.
 
@@ -40,7 +40,7 @@ Part of the dev-bricks family. Python, MIT.
 - `python main.py`: Launches the CodeBox desktop interface.
 - `python main.py --open <file>`: Launches and directly opens a target file path.
 - `build_exe.bat`: Uses PyInstaller to bundle the application into a standalone executable (`dist/CodeBox.exe`).
-- `pytest`: Runs the automated test suite (296 passed, 1 skipped, 100%).
+- `pytest`: Runs the automated test suite (299 passed, 1 skipped, 100%).
 - `ruff check .`: Runs the codebase linting suite.
 
 ## Related Projects (dev-bricks & ellmos family)

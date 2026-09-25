@@ -1,9 +1,9 @@
 # Third-Party License Audit & Governance Invariants
 
-> **Project:** CodeBox (`dev-bricks/CodeBox`)  
-> **Repository:** [https://github.com/dev-bricks/CodeBox](https://github.com/dev-bricks/CodeBox)  
-> **Audit Date:** 2026-09-23  
-> **Audit Standard:** Level 1 Software Bill of Materials (SBOM) & Open-Source Governance  
+> **Project:** CodeBox (`dev-bricks/CodeBox`)<br>
+> **Repository:** [https://github.com/dev-bricks/CodeBox](https://github.com/dev-bricks/CodeBox)<br>
+> **Audit Date:** 2026-09-25<br>
+> **Audit Standard:** Level 1 Software Bill of Materials (SBOM) & Open-Source Governance<br>
 > **Scope:** Direct runtime dependencies, Qt GUI dynamic linkage, build/packaging tooling, system API boundaries, Level 1 SBOM, and runtime safety invariants.
 
 ---

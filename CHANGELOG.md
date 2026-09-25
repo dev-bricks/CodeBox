@@ -12,6 +12,26 @@ Alle wesentlichen Änderungen an CodeBox werden hier dokumentiert.
 
 ## [Unreleased]
 
+### Repository Hygiene, CI Lifecycle Hardening & Lock Defense (Pfad A 2026-09-25)
+
+- **CI-Workflow Härtung & Concurrency-Schutz**:
+  - `.github/workflows/welcome.yml`: Auf `actions/first-interaction@v3` aktualisiert, Job-Timeout auf 5 Minuten begrenzt und `concurrency: cancel-in-progress: true` ergänzt.
+  - `.github/workflows/stale.yml`: Job-Timeout auf 10 Minuten begrenzt und `concurrency: cancel-in-progress: true` hinzugefügt.
+  - `.github/workflows/ci.yml`: `timeout-minutes: 10` für Lint-Job und `timeout-minutes: 25` für die Multi-OS Test-Matrix ergänzt.
+  - `.github/workflows/linux-platform-smoke.yml`: `timeout-minutes: 15` für Smoke- und macOS-Smoke-Jobs konfiguriert.
+- **Multi-Host Cloud-Sync-, Lock- & Cache-Schutz (`.gitignore`)**:
+  - Flottenweite Abwehrmuster gegen Cloud-Konflikte (`*conflicted copy*`, `* (Kopie)*`, `* (Copy)*`), gerätespezifische Host-Spiegel (`*-ASUS*`, `*-LAPTOP*`, `*-Mac Studio*`, `*-MacBook*`, `*-IDEAPAD*`, `*-WORKSTATION*`, `*-WORKSTATION-LG*`), agentische Lock-Artefakte (`LOCK.user.*`, `LOCK.until.*`, `LOCK.condition.*`, `.automation-lock`, `uv.lock`, `!package-lock.json`) und temporäre Cache-Pfade (`.pytest_temp/`, `.pytest_tmp*/`, `.hypothesis/`, `.turbo/`, `.tox/`, `*.orig`, `*.rej`) verankert.
+- **PEP 621 Standardisierung & Test-Runner-Härtung (`pyproject.toml`)**:
+  - `[tool.pytest.ini_options]`: `norecursedirs` um `.pytest_temp`, `.hypothesis`, `.turbo`, `.tox` erweitert und `addopts` mit `--basetemp=.pytest_temp` gehärtet.
+  - Strikte Version-Freeze-Disziplin per T-20260920-167562623 eingehalten (`version = "0.3.3"` unverändert beibehalten).
+- **SBOM- & Governance-Audit (`THIRD_PARTY_LICENSES.md`, `THIRD_PARTY_LICENSES.txt`)**:
+  - Level 1 SBOM Drittanbieter-Lizenzaudit auf Stand 2026-09-25 re-auditiert. Bestätigung der 10 Governance- und Laufzeitinvarianten (`INV-LOCAL-01` bis `INV-SLA-10`), des unprivilegierten RunAsInvoker Non-Elevation Modus und der strikten LGPL-3.0 Section 4 dynamischen Verlinkung für PySide6.
+- **Doku-, Kontext- & Badge-Synchronisation (`llms.txt`, `README.md`, `README_de.md`)**:
+  - `llms.txt` und README-Badges auf Stand 2026-09-25 und 299/300 verifizierte Tests aktualisiert.
+  - Lokales `MARKETING-LOG.txt` um Pfad A Revisionsbericht 2026-09-25 ergänzt.
+- **Vertragstest-Erweiterung (`tests/test_metadata.py`)**:
+  - Neue Contract-Tests für CI-Workflow-Concurrency/Timeouts, erweiterte .gitignore Lock-Defense-Muster, pyproject.toml Test-Härtung und synchrone Changelog/Marketing-Log-Einträge.
+
 ### Fixed (Bugsearch & Härtungslauf 2026-09-23)
 - `features/git_integration.py`:
   - `_decode_c_escapes()`: Dekodiert C-Style Oktalsequenzen (`\ooo`) für UTF-8 Zeichen (z. B. deutsche Umlaute `ä, ö, ü, ß`) sowie Steuerzeichen (`\a, \b, \t, \n, \v, \f, \r, \", \\`). Git porcelain Pfade mit Umlauten werden nun fehlerfrei aufgelöst, wodurch Git-Status-Badges in `ProjectView`, Commit-Dialoge, `discard_file_changes` und Diffs für solche Dateien zuverlässig funktionieren.

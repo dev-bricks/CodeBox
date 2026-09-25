@@ -1,7 +1,24 @@
 # MARKETING-LOG.txt — CodeBox (Pfad B Discoverability & Visibility Recommendations)
 
-Date: 2026-09-23
+Date: 2026-09-25
 Repo: dev-bricks/CodeBox
+
+## Automated Actions Applied (Pfad A Repository Hygiene, CI Hardening & Lock Defense - 2026-09-25):
+1. **CI-Workflow Härtung & Concurrency-Schutz**:
+   - `.github/workflows/welcome.yml`: Upgraded to `actions/first-interaction@v3`, set 5-minute job timeout, and added `concurrency: cancel-in-progress: true`.
+   - `.github/workflows/stale.yml`: Added `concurrency: cancel-in-progress: true` and 10-minute job timeout.
+   - `.github/workflows/ci.yml`: Added `timeout-minutes: 10` to lint job and `timeout-minutes: 25` to multi-OS test matrix.
+   - `.github/workflows/linux-platform-smoke.yml`: Added `timeout-minutes: 15` to both smoke and macos-smoke jobs.
+2. **Multi-Host Cloud-Sync & Lock Defense (`.gitignore`)**:
+   - Standardized .gitignore with fleetwide cloud conflict markers (`*conflicted copy*`, `* (Kopie)*`, `* (Copy)*`), host-specific naming (`*-ASUS*`, `*-LAPTOP*`, `*-Mac Studio*`, `*-MacBook*`, `*-WORKSTATION*`, `*-WORKSTATION-LG*`), multi-agent lock patterns (`LOCK.user.*`, `LOCK.until.*`, `LOCK.condition.*`, `.automation-lock`, `uv.lock`, `!package-lock.json`), and test cache directories (`.pytest_temp/`, `.pytest_tmp*/`, `.hypothesis/`, `.turbo/`, `.tox/`, `*.orig`, `*.rej`).
+3. **PEP 621 Standardisierung & Test Configuration**:
+   - Updated `pyproject.toml` pytest configuration: expanded `norecursedirs` to include `.pytest_temp`, `.hypothesis`, `.turbo`, `.tox` and set `--basetemp=.pytest_temp` in `addopts`.
+   - Strict version freeze discipline adhered to: `0.3.3` preserved unchanged (T-20260920-167562623).
+4. **Level 1 SBOM & Governance Re-Audit**:
+   - Re-audited `THIRD_PARTY_LICENSES.md` and `THIRD_PARTY_LICENSES.txt` as of 2026-09-25.
+   - Confirmed 10 technical invariants (`INV-LOCAL-01` through `INV-SLA-10`), unprivileged RunAsInvoker non-elevation mode, and LGPL-3.0 Section 4 dynamic linking compliance.
+5. **Contract Test Suite Expansion (`tests/test_metadata.py`)**:
+   - Added automated regression contract tests verifying welcome.yml v3 / timeout / concurrency, stale.yml timeout / concurrency, .gitignore multi-host / lock patterns, and CHANGELOG / MARKETING-LOG recency.
 
 ## Automated Actions Applied (Pfad B Discoverability, Level 1 SBOM & Navigation Parity):
 1. **GitHub Repository Topics Saturation (20/20)**:

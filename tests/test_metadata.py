@@ -288,3 +288,75 @@ def test_bundled_plugins_valid_json() -> None:
         assert isinstance(data["extensions"], list) and len(data["extensions"]) > 0
         assert isinstance(data["keywords"], list) and len(data["keywords"]) > 0
         assert isinstance(data["auto_close_pairs"], dict)
+
+
+def test_welcome_and_stale_workflow_hardening() -> None:
+    """Verify welcome.yml and stale.yml contain least-privilege permissions, concurrency, and timeouts."""
+    welcome_path = PROJECT_ROOT / ".github" / "workflows" / "welcome.yml"
+    assert welcome_path.is_file(), "welcome.yml must exist"
+    welcome_text = welcome_path.read_text(encoding="utf-8")
+    assert "actions/first-interaction@v3" in welcome_text
+    assert "timeout-minutes: 5" in welcome_text
+    assert "cancel-in-progress: true" in welcome_text
+    assert "issues: write" in welcome_text
+    assert "pull-requests: write" in welcome_text
+
+    stale_path = PROJECT_ROOT / ".github" / "workflows" / "stale.yml"
+    assert stale_path.is_file(), "stale.yml must exist"
+    stale_text = stale_path.read_text(encoding="utf-8")
+    assert "actions/stale@v9" in stale_text
+    assert "timeout-minutes: 10" in stale_text
+    assert "cancel-in-progress: true" in stale_text
+    assert "cron: '30 1 * * *'" in stale_text
+    assert "issues: write" in stale_text
+    assert "pull-requests: write" in stale_text
+
+
+def test_ci_and_smoke_job_timeouts() -> None:
+    """Verify ci.yml and linux-platform-smoke.yml define finite job-level timeouts."""
+    ci_text = (PROJECT_ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    assert "timeout-minutes: 10" in ci_text
+    assert "timeout-minutes: 25" in ci_text
+
+    smoke_text = (PROJECT_ROOT / ".github" / "workflows" / "linux-platform-smoke.yml").read_text(encoding="utf-8")
+    assert "timeout-minutes: 15" in smoke_text
+
+
+def test_gitignore_fleetwide_defense() -> None:
+    """Verify .gitignore blocks multi-host sync conflicts, multi-agent lock files, and test caches."""
+    content = (PROJECT_ROOT / ".gitignore").read_text(encoding="utf-8")
+    required_patterns = [
+        "*conflicted copy*",
+        "*-ASUS*",
+        "*-LAPTOP*",
+        "*-Mac Studio*",
+        "*-MacBook*",
+        "*-WORKSTATION*",
+        "*-WORKSTATION-LG*",
+        "LOCK.user.*",
+        "LOCK.until.*",
+        "LOCK.condition.*",
+        ".automation-lock",
+        "uv.lock",
+        "!package-lock.json",
+        ".pytest_temp/",
+        ".hypothesis/",
+        ".turbo/",
+        ".tox/",
+    ]
+    for pat in required_patterns:
+        assert pat in content, f"Missing pattern {pat} in .gitignore"
+
+
+def test_changelog_and_marketing_log_recency(pyproject_data: dict) -> None:
+    """Verify CHANGELOG, MARKETING-LOG, and pyproject pytest options match Pfad A 2026-09-25 baseline."""
+    changelog = (PROJECT_ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+    assert "Repository Hygiene, CI Lifecycle Hardening & Lock Defense (Pfad A 2026-09-25)" in changelog
+
+    marketing = (PROJECT_ROOT / "MARKETING-LOG.txt").read_text(encoding="utf-8")
+    assert "Pfad A Repository Hygiene, CI Hardening & Lock Defense - 2026-09-25" in marketing
+
+    pytest_opts = pyproject_data.get("tool", {}).get("pytest", {}).get("ini_options", {})
+    norecursedirs = pytest_opts.get("norecursedirs", [])
+    assert ".pytest_temp" in norecursedirs
+    assert "--basetemp=.pytest_temp" in pytest_opts.get("addopts", "")
