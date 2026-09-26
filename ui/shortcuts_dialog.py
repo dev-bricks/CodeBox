@@ -47,6 +47,8 @@ SHORTCUTS_DATA = [
     ("Bearbeiten", "Gehe zu Zeile", "Ctrl+G", "Springt zu einer bestimmten Zeilennummer"),
     ("Bearbeiten", "Zur Definition springen", "F12", "Springt zur Definition des aktuellen Symbols"),
     ("Bearbeiten", "Alle Referenzen suchen", "Shift+F12", "Sucht alle Vorkommen und Referenzen des aktuellen Symbols"),
+    ("Bearbeiten", "Snippet einfügen", "Ctrl+Shift+J", "Öffnet den Snippet-Manager zum Einfügen und Verwalten von Code-Snippets"),
+    ("Bearbeiten", "Snippet erweitern", "Tab", "Erweitert ein Snippet-Kürzel oder springt zum nächsten Platzhalter"),
     ("Bearbeiten", "Cursor oberhalb hinzufügen", "Ctrl+Alt+Up", "Fügt einen weiteren Cursor in der Zeile darüber ein (Spaltenauswahl)"),
     ("Bearbeiten", "Cursor unterhalb hinzufügen", "Ctrl+Alt+Down", "Fügt einen weiteren Cursor in der Zeile darunter ein (Spaltenauswahl)"),
     ("Bearbeiten", "Alle Vorkommen markieren", "Ctrl+Shift+L", "Markiert alle Vorkommen des aktuellen Worts oder der Auswahl mit Multi-Cursorn"),

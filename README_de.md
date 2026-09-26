@@ -13,7 +13,7 @@
 [![Ökosystem: dev-bricks](https://img.shields.io/badge/ecosystem-dev--bricks-blue.svg)](https://github.com/dev-bricks)
 [![Dachverband: open-bricks](https://img.shields.io/badge/part%20of-open--bricks-blue.svg)](https://github.com/open-bricks)
 [![LSP Ready](https://img.shields.io/badge/LSP-ready-purple.svg)]()
-[![Version: 0.3.3](https://img.shields.io/badge/version-0.3.3-green.svg)](CHANGELOG.md)
+[![Version: 0.3.4](https://img.shields.io/badge/version-0.3.4-green.svg)](CHANGELOG.md)
 [![SBOM Level 1](https://img.shields.io/badge/SBOM-Level%201%20Auditiert-blue.svg)](THIRD_PARTY_LICENSES.md)
 [![Letzte Prüfung](https://img.shields.io/badge/letzte%20pr%C3%BCfung-2026--09--25-informational.svg)](llms.txt)
 [![llms.txt](https://img.shields.io/badge/llms.txt-verf%C3%BCgbar-green.svg)](llms.txt)

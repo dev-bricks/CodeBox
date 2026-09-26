@@ -3,7 +3,7 @@
 """CodeEditor - Erweiterter Editor mit Zeilennummern, Bracket Matching und Auto-Completion"""
 
 import re
-from typing import List, Dict, Tuple, Optional
+from typing import List, Dict, Tuple, Optional, Union
 from PySide6.QtWidgets import (
     QPlainTextEdit, QWidget, QTextEdit, QCompleter
 )
@@ -15,6 +15,7 @@ from PySide6.QtGui import (
 from core.folding import FoldingManager
 from core.multi_cursor import MultiCursorManager
 from core.vim_mode import VimEngine
+from core.snippets import SnippetManager, SnippetSession, Snippet, parse_snippet
 
 
 class LineNumberArea(QWidget):
@@ -271,6 +272,9 @@ class CodeEditor(QPlainTextEdit):
         self._provider = None
         self.tab_size = 4
 
+        self._snippet_session: Optional[SnippetSession] = None
+        self._snippet_manager = SnippetManager.get_instance()
+
         self.FOLD_AREA_WIDTH = 14
         self.folding_manager = FoldingManager(self)
         self.multi_cursor_manager = MultiCursorManager(self)
@@ -361,11 +365,63 @@ class CodeEditor(QPlainTextEdit):
         tc.movePosition(QTextCursor.MoveOperation.EndOfWord)
         tc.movePosition(QTextCursor.MoveOperation.StartOfWord, QTextCursor.MoveMode.KeepAnchor)
         tc.removeSelectedText()
-        if self._provider and completion in self._provider.get_snippets():
-            tc.insertText(self._provider.get_snippets()[completion])
+        self.setTextCursor(tc)
+
+        lang = self._provider.get_name().lower() if self._provider else ""
+        snippet = self._snippet_manager.get_snippet(completion, lang)
+        if snippet:
+            self.expand_snippet(snippet)
+        elif self._provider and completion in self._provider.get_snippets():
+            self.expand_snippet(self._provider.get_snippets()[completion])
         else:
             tc.insertText(completion)
-        self.setTextCursor(tc)
+            self.setTextCursor(tc)
+
+    def get_word_before_cursor(self) -> str:
+        """Gibt das alphanumerische Wort direkt vor dem Cursor zurück (ohne Auswahl)."""
+        cursor = self.textCursor()
+        if cursor.hasSelection():
+            return ""
+        block_text = cursor.block().text()
+        pos_in_block = cursor.positionInBlock()
+        prefix = block_text[:pos_in_block]
+        match = re.search(r'([a-zA-Z_][a-zA-Z0-9_-]*)$', prefix)
+        return match.group(1) if match else ""
+
+    def expand_snippet(self, snippet: Union[Snippet, str], trigger_len: int = 0) -> bool:
+        """
+        Expandiert ein Snippet an der aktuellen Cursor-Position.
+        Unterstützt Tab-Stops ($1, ${1:default}, $0) und passt die Einrückung an.
+        """
+        cursor = self.textCursor()
+        if trigger_len > 0:
+            cursor.setPosition(cursor.position() - trigger_len, QTextCursor.MoveMode.KeepAnchor)
+            cursor.removeSelectedText()
+
+        # Basis-Einrückung der aktuellen Zeile ermitteln
+        block_text = cursor.block().text()
+        leading_spaces = len(block_text) - len(block_text.lstrip(' '))
+        indent_str = ' ' * leading_spaces
+
+        body = snippet.body if isinstance(snippet, Snippet) else str(snippet)
+        lines = body.split('\n')
+        if len(lines) > 1 and indent_str:
+            indented_body = lines[0] + '\n' + '\n'.join(
+                indent_str + line if line.strip() else line for line in lines[1:]
+            )
+        else:
+            indented_body = body
+
+        rendered_text, tab_stops = parse_snippet(indented_body)
+
+        base_pos = cursor.position()
+        cursor.beginEditBlock()
+        cursor.insertText(rendered_text)
+        cursor.endEditBlock()
+
+        self._snippet_session = SnippetSession(self, base_pos, rendered_text, tab_stops)
+        self._snippet_session.start()
+        return True
 
     def text_under_cursor(self) -> str:
         tc = self.textCursor()
@@ -653,6 +709,9 @@ class CodeEditor(QPlainTextEdit):
             self.multi_cursor_manager.paint_extra_carets(self)
 
     def mousePressEvent(self, event):
+        if getattr(self, '_snippet_session', None) and self._snippet_session.is_active:
+            self._snippet_session.cancel()
+            self._snippet_session = None
         if event.button() == Qt.MouseButton.LeftButton:
             modifiers = event.modifiers()
             if modifiers & Qt.KeyboardModifier.AltModifier:
@@ -694,6 +753,24 @@ class CodeEditor(QPlainTextEdit):
                 event.ignore()
                 return
 
+        # Snippet-Navigation bei aktiver SnippetSession
+        if getattr(self, '_snippet_session', None) and self._snippet_session.is_active:
+            if event.key() == Qt.Key.Key_Tab and not bool(event.modifiers() & Qt.KeyboardModifier.ShiftModifier):
+                if self._snippet_session.next_stop():
+                    event.accept()
+                    return
+            elif event.key() == Qt.Key.Key_Backtab or (
+                event.key() == Qt.Key.Key_Tab and bool(event.modifiers() & Qt.KeyboardModifier.ShiftModifier)
+            ):
+                if self._snippet_session.prev_stop():
+                    event.accept()
+                    return
+            elif event.key() == Qt.Key.Key_Escape:
+                self._snippet_session.cancel()
+                self._snippet_session = None
+                event.accept()
+                return
+
         # Vim-Modus Tasten-Handling
         if hasattr(self, 'vim_engine') and self.vim_engine.is_enabled():
             if self.vim_engine.handle_key_event(event):
@@ -727,7 +804,7 @@ class CodeEditor(QPlainTextEdit):
             if self.multi_cursor_manager.handle_key_press(event):
                 return
 
-        # Tab & Shift+Tab / Backtab (Einrücken / Ausrücken)
+        # Tab & Shift+Tab / Backtab (Einrücken / Ausrücken / Snippet-Expansion)
         if event.key() == Qt.Key.Key_Backtab or (
             event.key() == Qt.Key.Key_Tab and bool(event.modifiers() & Qt.KeyboardModifier.ShiftModifier)
         ):
@@ -738,7 +815,13 @@ class CodeEditor(QPlainTextEdit):
             if self.textCursor().hasSelection():
                 self.indent_selection(self.tab_size)
             else:
-                self.textCursor().insertText(' ' * self.tab_size)
+                trigger = self.get_word_before_cursor()
+                lang = self._provider.get_name().lower() if self._provider else ""
+                snippet = self._snippet_manager.get_snippet(trigger, lang) if trigger else None
+                if snippet:
+                    self.expand_snippet(snippet, trigger_len=len(trigger))
+                else:
+                    self.textCursor().insertText(' ' * self.tab_size)
             return
 
         # Ctrl+/ oder Ctrl+# (Kommentar umschalten)

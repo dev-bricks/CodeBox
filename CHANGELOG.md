@@ -57,6 +57,24 @@ Alle wesentlichen Änderungen an CodeBox werden hier dokumentiert.
 - **Machine-Readable LLM Context (`llms.txt`)**:
   - Updated `llms.txt` to Stand 2026-09-23, documented 295 passed tests, NOTICE attribution, Level 1 SBOM notes, and statutory disclaimers.
 
+## [0.3.4] - 2026-09-26
+
+### Added
+- **Snippet-Manager & Tab-Trigger-Erweiterung (`core/snippets.py`, `core/editor.py`)**:
+  - `core/snippets.py`: Zentrales Datenmodell (`Snippet`, `SnippetTabStop`), robuster Template-Parser (`parse_snippet`) mit Unterstützung für Tab-Stops (`$1`, `$2`), Platzhalter mit Standardwerten (`${1:default}`) und definierte oder implizite Exit-Points (`$0`).
+  - `SnippetSession`: Interaktive Platzhalter-Navigation im Editor via `QTextCursor`. Ermöglicht flüssiges Durchspringen mit `Tab` und `Shift+Tab`/`Backtab`, Vorbelegung markierter Platzhalter zur direkten Überschreibung und sauberes Beenden am `$0`-Punkt.
+  - Standard-Snippetkatalog für 10 Programmier- und Auszeichnungssprachen: Python (`def`, `asyncdef`, `class`, `if`, `ifelse`, `elif`, `for`, `while`, `try`, `tryfin`, `with`, `main`, `prop`, `init`, `repr`, `lambda`, `print`, `doc`), JavaScript & TypeScript (`fn`, `afn`, `class`, `if`, `ifelse`, `for`, `forof`, `forin`, `try`, `clg`, `cerr`, `import`, `prom`, `asyncfn`, `interface`, `type`, `enum`), C/C++ (`main`, `class`, `for`, `cout`, `include`), Rust (`fn`, `struct`, `enum`, `impl`, `match`, `println`), Go (`func`, `main`, `struct`, `interface`, `iferr`), Java (`main`, `class`, `sout`, `for`, `try`), HTML (`html5`, `div`, `btn`, `script`, `link`), Markdown (`link`, `img`, `code`, `tbl`, `todo`) und globale Kommentare (`todo`, `fixme`, `note`).
+  - Benutzerdefinierte Snippets: Persistente Speicherung und Verwaltung in `config/snippets.json` mit voller CRUD-Unterstützung (`add_custom_snippet`, `remove_custom_snippet`, `load_custom_snippets`, `save_custom_snippets`).
+  - `core/editor.py`: Automatische Tab-Trigger-Erweiterung beim Drücken der `Tab`-Taste direkt nach einem Schlüsselwort (`get_word_before_cursor`, `expand_snippet`), proportionale Einrückungsanpassung bei mehrzeiligen Snippets und Modernisierung von `insert_completion`.
+- **Snippet-Manager Benutzeroberfläche (`ui/snippets_dialog.py`)**:
+  - `SnippetsDialog`: Responsiver, barrierefreier PySide6-Dialog mit Echtzeit-Volltextsuche, Sprachfilter-Dropdown, tabellarischer Übersicht (Trigger, Sprache, Beschreibung, Herkunfts-Badge) und interaktiver Monospace-Code-Vorschau.
+  - Schaltflächen zum direkten Einfügen in das aktive Dokument (`Enter`), Erstellen (`SnippetEditDialog`), Bearbeiten und Löschen benutzerdefinierter Snippets.
+  - Menüpunkt *Bearbeiten > Snippet einfügen...* (`Ctrl+Shift+J`) und `show_snippets_dialog` in `ui/main_window.py`.
+  - Registrierung in der Befehlspalette (`ui/command_palette.py`) und Tastenkürzelübersicht (`ui/shortcuts_dialog.py`).
+- **Testsuite & Qualitätssicherung (`tests/test_snippets.py`, `tests/test_diff_viewer.py`)**:
+  - 14 neue Unit- und Integrationstests für Template-Parsing, Escaping, Session-Navigation, Editor-Tab-Trigger, Einrückungserhalt, Dialog-Filterung, Subdialoge und Menü-Verträge.
+  - Härtung von `test_diff_viewer_no_git_repo` gegen `--basetemp=.pytest_temp` Pfadableitungen.
+
 ## [0.3.3] - 2026-09-21
 
 ### Interaktive Konsolen-Eingabe (stdin) & Integrierte Debugger-Steuerung (PDB)

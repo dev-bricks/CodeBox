@@ -1,6 +1,6 @@
 # CodeBox - Local PySide6 Desktop Code Editor
 
-## Last-checked: 2026-09-25
+## Last-checked: 2026-09-26
 
 > CodeBox is a local-first desktop IDE for Windows, Linux, and macOS developers who want a lightweight PySide6 code editor with multi-tab workspace, project tree, integrated terminal, Git status porcelain indicators, syntax highlighting, Language Server Protocol (LSP) diagnostics, and an extensible JSON/Python language plugin architecture.
 
@@ -19,6 +19,7 @@ Part of the dev-bricks family. Python, MIT.
 
 ## Features & Architecture
 
+- **Snippet Manager & Tab-Trigger Expansion**: Native tab-stop navigation (`$1`, `${1:default}`, `$0`) via `Tab` / `Shift+Tab`, built-in snippets across 10 programming and markup languages, persistent custom JSON storage, and interactive `SnippetsDialog` (`Ctrl+Shift+J`).
 - **Multi-Root Workspaces**: Load and manage multiple project folders simultaneously with portable `.codebox-workspace` files, dynamic tree switcher, cross-folder Quick Open, and per-root Git status.
 - **Quick-Open & Command Palette**: Centralized keyboard-driven launcher (`Ctrl+P` for project file finder, `Ctrl+Shift+P` for interactive command palette).
 - **Git Staging & Commit Dialog**: Dedicated staging (`git add`, `git restore --staged`), change discard, diff inspections, and commit workflow dialog (`Ctrl+Alt+C`, sidebar button, and context menu).

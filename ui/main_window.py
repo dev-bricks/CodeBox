@@ -145,6 +145,8 @@ class MainWindow(QMainWindow):
         act_indent.setStatusTip("Rückt die aktuelle Zeile oder Auswahl ein")
         act_dedent = self.edit_menu.addAction("Ausrücken", self._dedent, "Shift+Tab")
         act_dedent.setStatusTip("Rückt die aktuelle Zeile oder Auswahl aus")
+        act_snippets = self.edit_menu.addAction("Snippet einfügen...", self.show_snippets_dialog, "Ctrl+Shift+J")
+        act_snippets.setStatusTip("Öffnet den Snippet-Manager zum Einfügen und Verwalten von Code-Snippets (Ctrl+Shift+J)")
         self.edit_menu.addSeparator()
         self.selection_menu = self.edit_menu.addMenu("Mehrfachauswahl & Multi-Cursor")
         act_cursor_above = self.selection_menu.addAction("Cursor oberhalb hinzufügen", self._add_cursor_above, "Ctrl+Alt+Up")
@@ -1498,6 +1500,20 @@ class MainWindow(QMainWindow):
         tab = self.get_active_tab()
         if tab and tab.editor:
             tab.editor.unindent_selection()
+
+    def show_snippets_dialog(self):
+        """Öffnet den Snippet-Manager zur Auswahl, Vorschau und Verwaltung von Code-Snippets."""
+        from ui.snippets_dialog import SnippetsDialog
+
+        active_tab = self.get_active_tab()
+        current_lang = ""
+        if active_tab and hasattr(active_tab, "editor") and active_tab.editor and active_tab.editor._provider:
+            current_lang = active_tab.editor._provider.get_name().lower()
+
+        dialog = SnippetsDialog(current_language=current_lang, parent=self)
+        if active_tab and hasattr(active_tab, "editor") and active_tab.editor:
+            dialog.snippetSelected.connect(lambda s: active_tab.editor.expand_snippet(s))
+        dialog.exec()
 
     def _toggle_fold_current(self):
         """Schaltet die Faltung an der aktuellen Cursor-Zeile um."""

@@ -81,7 +81,9 @@ def test_side_by_side_highlighter_instantiation(qapp):
     assert hl_new is not None
 
 
-def test_diff_viewer_no_git_repo(qapp, tmp_path):
+def test_diff_viewer_no_git_repo(qapp, tmp_path, monkeypatch):
+    from features.git_integration import GitRepo
+    monkeypatch.setattr(GitRepo, "is_git_repo", lambda self: False)
     dialog = DiffViewerDialog(repo_root=tmp_path)
     assert dialog.file_combo.count() >= 1
     assert "Kein Git-Repository" in dialog.file_combo.itemText(0)
