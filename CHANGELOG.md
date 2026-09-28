@@ -10,6 +10,13 @@
 
 Alle wesentlichen Änderungen an CodeBox werden hier dokumentiert.
 
+## [Unreleased]
+
+### Repository-Hygiene & interne Dateien [2026-09-28]
+- **Interne Dateien geschuetzt (`.gitignore`):** `BEFUNDE.md`, `MARKETING-LOG.txt`, `TASKPLAN_STATUS_*.md` und `_after-care/` in `.gitignore` aufgenommen.
+- **Git-Tracking bereinigt:** `BEFUNDE.md` aus dem Git-Tracking entfernt (`git rm --cached`), bleibt lokal erhalten.
+- **Vertragstests (`tests/test_metadata.py`):** `test_gitignore_internal_file_hygiene` hinzugefuegt (T-20260926-434768981).
+
 ## [0.3.3] - 2026-09-21
 
 ### Interaktive Konsolen-Eingabe (stdin) & Integrierte Debugger-Steuerung (PDB)

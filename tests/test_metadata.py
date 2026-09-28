@@ -204,3 +204,11 @@ def test_bundled_plugins_valid_json() -> None:
         assert isinstance(data["extensions"], list) and len(data["extensions"]) > 0
         assert isinstance(data["keywords"], list) and len(data["keywords"]) > 0
         assert isinstance(data["auto_close_pairs"], dict)
+
+
+def test_gitignore_internal_file_hygiene() -> None:
+    """Verify internal maintenance files are protected in .gitignore."""
+    gitignore = (PROJECT_ROOT / ".gitignore").read_text(encoding="utf-8")
+    for pattern in ["BEFUNDE.md", "MARKETING-LOG.txt", "TODO.md", "DONE.md", "DECISIONS.md"]:
+        assert pattern in gitignore, f"{pattern} must be ignored in .gitignore"
+
