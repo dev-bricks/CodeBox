@@ -69,6 +69,9 @@ SHORTCUTS_DATA = [
     ("Ausführen", "Debug: Herausspringen (Step Out)", "Shift+F11", "Führt bis zum Verlassen der Funktion aus (r)"),
     ("Ausführen", "Breakpoint umschalten", "F9", "Setzt oder entfernt einen Breakpoint in der aktuellen Zeile"),
     ("Ausführen", "Alle Breakpoints löschen", "Ctrl+Shift+F9", "Löscht alle gesetzten Breakpoints im aktuellen Editor"),
+    ("Ausführen", "Debugger-Panel anzeigen", "Ctrl+Shift+D", "Blendet das Debugger-Panel mit Variablen und Call-Stack ein"),
+    ("Ausführen", "Ausdruck überwachen", "Ctrl+Shift+W", "Fügt einen neuen Ausdruck zur Variablenüberwachung hinzu"),
+    ("Ausführen", "Aufruf-Stapel aktualisieren", "", "Fragt den aktuellen Call-Stack beim Debugger ab (w)"),
 
     # Ansicht
     ("Ansicht", "Projektbaum umschalten", "Ctrl+B", "Blendet den Datei- und Projektbaum ein/aus"),

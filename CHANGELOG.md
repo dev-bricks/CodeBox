@@ -57,6 +57,20 @@ Alle wesentlichen Änderungen an CodeBox werden hier dokumentiert.
 - **Machine-Readable LLM Context (`llms.txt`)**:
   - Updated `llms.txt` to Stand 2026-09-23, documented 295 passed tests, NOTICE attribution, Level 1 SBOM notes, and statutory disclaimers.
 
+## [0.3.5] - 2026-09-28
+
+### Added
+- **Debugger Watch-Expressions & Call-Stack Panel (`core/debugger.py`, `ui/debug_panel.py`)**:
+  - `core/debugger.py`: Robustes Datenmodell (`StackFrame`, `WatchExpression`), PDB-Stack-Parser (`parse_pdb_stack`) mit Unterstützung für Windows- und POSIX-Dateipfade, Erkennung des aktiven Frames (`>`) und Quelltextzeilen (`->`), PDB-Ausdrucks-Evaluierung (`parse_pdb_eval_response`) und fehlertoleranter Ausdrucksrechner (`safe_eval_expression`).
+  - `ui/debug_panel.py`: Neues `DebugPanel` mit geteilter Ansicht (`QSplitter`), bestehend aus `WatchTreeWidget` (Variablen- und Ausdrucksüberwachung mit Spalten für Ausdruck, Wert und Typ) und `CallStackTreeWidget` (interaktiver Aufruf-Stapel mit visueller Hervorhebung des aktuellen Frames `▶`).
+  - Vollständiges CRUD für Variablenüberwachungen: Hinzufügen per Dialog (`Ctrl+Shift+W`), Inline-Bearbeitung (`F2`), Löschen (`Entf`), Kontextmenüs und Schnellauswertungsleiste mit Sofort-Feedback.
+  - Interaktive Stack-Navigation: Doppelklick oder `Enter` auf einen Stack-Frame öffnet direkt die Datei und navigiert zur exakten Zeile (`frameActivated` Signal verknüpft mit `open_path_at`).
+  - `core/output.py`: Entkoppeltes Streaming von Debugger-Ausgaben über das Signal `debugOutputReceived` an das Debug-Panel zur synchronen Zustandsaktualisierung.
+  - `core/editor.py`: Neues Signal `addWatchRequested` und Kontextmenü-Eintrag *"Zu Überwachung hinzufügen: '...' "* für markierten Code oder Symbole unter dem Cursor.
+  - `ui/main_window.py`: Integration des `DebugPanel` als Tab 5 in den unteren Bereich (`bottom_tabs`), Tastenkürzel `Ctrl+Shift+D` zum Ein-/Ausblenden und Fokussieren, Menüeinträge unter *Ausführen* und *Ansicht*, sowie automatische Aktualisierung bei Debug-Einzelschritten.
+  - `ui/shortcuts_dialog.py`: Registrierung der Tastenkürzel `Ctrl+Shift+D` und `Ctrl+Shift+W` im Abschnitt *Ausführen*.
+  - `tests/test_debug_panel.py`: 12 neue automatisierte Unit- und Integrationstests für Parsing, Datenmodelle, Baum-Widgets, Shortcuts, Navigation und Hauptfenster-Integration (100% bestanden).
+
 ## [0.3.4] - 2026-09-26
 
 ### Added

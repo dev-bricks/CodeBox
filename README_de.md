@@ -7,15 +7,15 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![Plattform: Windows | Linux | macOS](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)]()
 [![CI](https://github.com/dev-bricks/CodeBox/actions/workflows/ci.yml/badge.svg)](https://github.com/dev-bricks/CodeBox/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-299%20passed%20%7C%20100%25-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-329%20passed%20%7C%20100%25-brightgreen.svg)]()
 [![Datenschutz: Zero-Egress](https://img.shields.io/badge/datenschutz-100%25%20local--first%20%7C%20zero--egress-success.svg)](SECURITY.md)
 [![Sicherheitsrichtlinie](https://img.shields.io/badge/sicherheit-zweisprachige%20policy-blue.svg)](SECURITY.md)
 [![Ökosystem: dev-bricks](https://img.shields.io/badge/ecosystem-dev--bricks-blue.svg)](https://github.com/dev-bricks)
 [![Dachverband: open-bricks](https://img.shields.io/badge/part%20of-open--bricks-blue.svg)](https://github.com/open-bricks)
 [![LSP Ready](https://img.shields.io/badge/LSP-ready-purple.svg)]()
-[![Version: 0.3.4](https://img.shields.io/badge/version-0.3.4-green.svg)](CHANGELOG.md)
+[![Version: 0.3.5](https://img.shields.io/badge/version-0.3.5-green.svg)](CHANGELOG.md)
 [![SBOM Level 1](https://img.shields.io/badge/SBOM-Level%201%20Auditiert-blue.svg)](THIRD_PARTY_LICENSES.md)
-[![Letzte Prüfung](https://img.shields.io/badge/letzte%20pr%C3%BCfung-2026--09--25-informational.svg)](llms.txt)
+[![Letzte Prüfung](https://img.shields.io/badge/letzte%20pr%C3%BCfung-2026--09--28-informational.svg)](llms.txt)
 [![llms.txt](https://img.shields.io/badge/llms.txt-verf%C3%BCgbar-green.svg)](llms.txt)
 
 [English](README.md) | Deutsch
@@ -231,6 +231,8 @@ Die folgende Matrix vergleicht CodeBox mit 4 verbreiteten Entwicklungsumgebungen
 <a id="features"></a><a id="funktionsumfang"></a>
 ## Funktionsumfang
 
+- **Debugger Watch-Expressions & Call-Stack Panel**: Umfassende Variablen- und Ausdrucksüberwachung (`Ctrl+Shift+W`), interaktiver Aufruf-Stapel mit Direktsprung in den Quellcode, Schnellauswertungsleiste und Live-Synchronisation mit PDB-Debug-Sessions (`Ctrl+Shift+D`).
+- **Snippet-Manager mit Tab-Trigger-Erweiterung**: Platzhalter-Navigation (`$1`, `${1:default}`, `$0`) via `Tab` / `Shift+Tab`, Standard-Vorlagenkatalog für 10 Sprachen, persistente JSON-Verwaltung und interaktiver `SnippetsDialog` (`Ctrl+Shift+J`).
 - **Projektweite Dateisuche (Find in Files / Grep-Tool)**: Schnelle Textsuche über alle Projektordner und Dateien (`Ctrl+Shift+F`) mit regulären Ausdrücken, Groß-/Kleinschreibung, Ganzwort-Suche, Glob-Filtern (Einschließen/Ausschließen), asynchronem Hintergrund-Worker und Direktsprung in den Editor.
 - **Multi-Root-Arbeitsbereiche**: Verwaltung mehrerer Projektordner in einer gemeinsamen Instanz mit dem `.codebox-workspace`-Format und portablen relativen Pfaden (`Ctrl+Shift+O`).
 - **Schnellauswahl & Befehlspalette**: Schneller Datei-Finder (`Ctrl+P`) mit intelligentem Treffer-Scoring und interaktive Befehlspalette (`Ctrl+Shift+P`) zur tastaturgesteuerten IDE-Bedienung.

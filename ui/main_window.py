@@ -33,6 +33,7 @@ from core.todo_scanner import TodoItem, TodoScannerManager
 from ui.problems_panel import ProblemsPanel
 from ui.references_panel import ReferencesPanel
 from ui.todo_panel import TodoPanel
+from ui.debug_panel import DebugPanel
 from ui.plugins_dialog import PluginsDialog
 from ui.shortcuts_dialog import ShortcutsDialog
 from ui.command_palette import CommandPaletteDialog
@@ -192,6 +193,13 @@ class MainWindow(QMainWindow):
         self.act_toggle_breakpoint.setStatusTip("Setzt oder entfernt einen Breakpoint in der aktuellen Zeile (F9)")
         self.act_clear_breakpoints = self.run_menu.addAction("Alle Breakpoints löschen", self.clear_all_breakpoints, "Ctrl+Shift+F9")
         self.act_clear_breakpoints.setStatusTip("Löscht alle Breakpoints in der aktiven Datei (Ctrl+Shift+F9)")
+        self.run_menu.addSeparator()
+        self.act_show_debugger = self.run_menu.addAction("Debugger-Panel anzeigen", self.show_debug_panel, "Ctrl+Shift+D")
+        self.act_show_debugger.setStatusTip("Blendet das Debugger-Panel mit Variablen und Call-Stack ein (Ctrl+Shift+D)")
+        self.act_add_watch = self.run_menu.addAction("Ausdruck überwachen...", self.prompt_add_watch_expression, "Ctrl+Shift+W")
+        self.act_add_watch.setStatusTip("Fügt einen neuen Ausdruck zur Variablenüberwachung hinzu (Ctrl+Shift+W)")
+        self.act_refresh_stack = self.run_menu.addAction("Aufruf-Stapel aktualisieren", self.refresh_debugger_state)
+        self.act_refresh_stack.setStatusTip("Fragt den aktuellen Call-Stack beim aktiven Debugger ab (w)")
 
         # ---- Toolbar ----
         toolbar = QToolBar("Hauptleiste")
@@ -267,6 +275,11 @@ class MainWindow(QMainWindow):
             "Git-Commit Dialog...", lambda: self.show_git_commit(), "Ctrl+Alt+C"
         )
         self._toggle_commit_action.setStatusTip("Öffnet den Dialog zum Stagen und Committen von Git-Änderungen")
+
+        self._toggle_debug_action = view_menu.addAction(
+            "Debugger-Panel", self.show_debug_panel, "Ctrl+Shift+D"
+        )
+        self._toggle_debug_action.setStatusTip("Blendet das Debugger-Panel mit Variablen und Call-Stack ein")
 
         # Theme-Submenü
         from features.theme_manager import get_available_themes, apply_theme
@@ -418,6 +431,13 @@ class MainWindow(QMainWindow):
         self.references.referenceActivated.connect(self._activate_reference)
         self.bottom_tabs.addTab(self.references, "Referenzen")
         self.bottom_tabs.setTabToolTip(3, "LSP- und Symbol-Referenzen")
+
+        self.debug_panel = DebugPanel(parent=self, main_window=self)
+        self.debug_panel.frameActivated.connect(self._on_debug_frame_activated)
+        self.debug_panel.refreshRequested.connect(self.refresh_debugger_state)
+        self.debug_panel.attach_output_panel(self.output)
+        self.bottom_tabs.addTab(self.debug_panel, "Debugger")
+        self.bottom_tabs.setTabToolTip(4, "Überwachungsausdrücke, Variablen und Aufruf-Stapel")
 
         self.v_splitter.addWidget(self.bottom_tabs)
         self.v_splitter.setSizes([600, 200])
@@ -1715,23 +1735,34 @@ class MainWindow(QMainWindow):
             for line_no in sorted(bps):
                 initial_cmds.append(f"b {line_no}")
 
+        if hasattr(self, "debug_panel"):
+            self.debug_panel.set_session_active(True)
+
         self.bottom_tabs.setCurrentWidget(self.output)
         self.output.run_command(cmd, is_debug=True, initial_commands=initial_cmds)
 
     def debug_continue(self):
         """Sendet 'c' (Continue) an den aktiven Debugger."""
+        if hasattr(self, "debug_panel"):
+            self.debug_panel.set_session_active(True)
         self.output.send_input("c")
 
     def debug_step_over(self):
         """Sendet 'n' (Next / Step Over) an den aktiven Debugger."""
+        if hasattr(self, "debug_panel"):
+            self.debug_panel.set_session_active(True)
         self.output.send_input("n")
 
     def debug_step_into(self):
         """Sendet 's' (Step Into) an den aktiven Debugger."""
+        if hasattr(self, "debug_panel"):
+            self.debug_panel.set_session_active(True)
         self.output.send_input("s")
 
     def debug_step_out(self):
         """Sendet 'r' (Return / Step Out) an den aktiven Debugger."""
+        if hasattr(self, "debug_panel"):
+            self.debug_panel.set_session_active(True)
         self.output.send_input("r")
 
     def _stop_run(self):
@@ -1881,6 +1912,19 @@ class MainWindow(QMainWindow):
             tab._lsp_ref_slot = _ref_slot
             tab.editor.referencesRequested.connect(_ref_slot)
 
+            old_watch_slot = getattr(tab, "_watch_slot", None)
+            if old_watch_slot is not None:
+                try:
+                    tab.editor.addWatchRequested.disconnect(old_watch_slot)
+                except (TypeError, RuntimeError):
+                    pass
+
+            def _watch_slot(expr):
+                self.add_watch_expression(expr)
+
+            tab._watch_slot = _watch_slot
+            tab.editor.addWatchRequested.connect(_watch_slot)
+
 
     def _open_file_from_project(self, file_path):
         """Öffnet eine Datei aus dem Projektbaum."""
@@ -1969,6 +2013,53 @@ class MainWindow(QMainWindow):
             self.bottom_tabs.show()
             self.bottom_tabs.setCurrentWidget(self.terminal)
             self.terminal.input.setFocus()
+
+    def show_debug_panel(self):
+        """Blendet das untere Panel ein und wechselt zum Debugger-Reiter."""
+        if hasattr(self, "bottom_tabs") and hasattr(self, "debug_panel"):
+            self.bottom_tabs.show()
+            self.bottom_tabs.setCurrentWidget(self.debug_panel)
+            self.debug_panel.watch_input.setFocus()
+
+    def add_watch_expression(self, expression: str):
+        """Fügt einen neuen Ausdruck zur Variablenüberwachung hinzu und öffnet das Debug-Panel."""
+        if hasattr(self, "debug_panel"):
+            self.show_debug_panel()
+            self.debug_panel.add_watch(expression)
+            self.status_bar.showMessage(f"Ausdruck '{expression}' zur Überwachung hinzugefügt", 3000)
+
+    def prompt_add_watch_expression(self):
+        """Öffnet einen Eingabedialog zum Hinzufügen einer Watch-Expression."""
+        from PySide6.QtWidgets import QInputDialog, QLineEdit
+        tab = self.get_active_tab()
+        default_expr = ""
+        if tab and tab.editor:
+            default_expr = tab.editor.textCursor().selectedText().strip() or tab.editor.get_symbol_at_cursor()
+
+        expr, ok = QInputDialog.getText(
+            self,
+            "Ausdruck überwachen",
+            "Zu überwachender Ausdruck:",
+            QLineEdit.EchoMode.Normal,
+            default_expr,
+        )
+        if ok and expr.strip():
+            self.add_watch_expression(expr.strip())
+
+    def _on_debug_frame_activated(self, file_path: str, line_number: int):
+        """Springt zur Position des ausgewählten Stack-Frames im Editor."""
+        if not file_path:
+            return
+        p = Path(file_path)
+        if not p.is_absolute() and getattr(self.project_view, "_root_path", None):
+            p = Path(self.project_view._root_path) / p
+        self.open_path_at(file_path=str(p), line=max(1, line_number), column=1)
+
+    def refresh_debugger_state(self):
+        """Sendet Befehle zur Aktualisierung des Call-Stacks und der Watch-Expressions."""
+        if hasattr(self, "debug_panel"):
+            self.debug_panel.request_stack_update()
+            self.debug_panel.evaluate_all_watches_in_debugger()
 
     def show_diff(self, file_path: Optional[Path] = None, staged: bool = False):
         """Öffnet den Git Diff-Viewer für das Projekt oder eine bestimmte Datei."""

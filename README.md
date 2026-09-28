@@ -7,15 +7,15 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![Platform: Windows | Linux | macOS](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)]()
 [![CI](https://github.com/dev-bricks/CodeBox/actions/workflows/ci.yml/badge.svg)](https://github.com/dev-bricks/CodeBox/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-299%20passed%20%7C%20100%25-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-329%20passed%20%7C%20100%25-brightgreen.svg)]()
 [![Privacy: Zero-Egress](https://img.shields.io/badge/privacy-100%25%20local--first%20%7C%20zero--egress-success.svg)](SECURITY.md)
 [![Security Policy](https://img.shields.io/badge/security-bilingual%20policy-blue.svg)](SECURITY.md)
 [![Ecosystem: dev-bricks](https://img.shields.io/badge/ecosystem-dev--bricks-blue.svg)](https://github.com/dev-bricks)
 [![Part of: open-bricks](https://img.shields.io/badge/part%20of-open--bricks-blue.svg)](https://github.com/open-bricks)
 [![LSP Ready](https://img.shields.io/badge/LSP-ready-purple.svg)]()
-[![Version: 0.3.4](https://img.shields.io/badge/version-0.3.4-green.svg)](CHANGELOG.md)
+[![Version: 0.3.5](https://img.shields.io/badge/version-0.3.5-green.svg)](CHANGELOG.md)
 [![SBOM Level 1](https://img.shields.io/badge/SBOM-Level%201%20Audited-blue.svg)](THIRD_PARTY_LICENSES.md)
-[![Last Checked](https://img.shields.io/badge/last%20checked-2026--09--25-informational.svg)](llms.txt)
+[![Last Checked](https://img.shields.io/badge/last%20checked-2026--09--28-informational.svg)](llms.txt)
 [![llms.txt](https://img.shields.io/badge/llms.txt-available-green.svg)](llms.txt)
 
 [Deutsch](README_de.md) | English
@@ -231,6 +231,8 @@ The following matrix benchmarks CodeBox against 4 prevalent desktop development 
 <a id="features"></a><a id="funktionsumfang"></a>
 ## Features & Capabilities
 
+- **Debugger Watch-Expressions & Call-Stack Panel**: Interactive variable and expression monitoring (`Ctrl+Shift+W`), call stack frame inspection with direct source-line jumping, instant expression evaluation bar, and live PDB session synchronization (`Ctrl+Shift+D`).
+- **Snippet Manager & Tab-Trigger Expansion**: Native tab-stop navigation (`$1`, `${1:default}`, `$0`) via `Tab` / `Shift+Tab`, built-in snippet catalogs for 10 programming and markup languages, persistent custom JSON storage, and interactive `SnippetsDialog` (`Ctrl+Shift+J`).
 - **Quick-Open & Command Palette**: Instant file fuzzy matching (`Ctrl+P`) and interactive command palette (`Ctrl+Shift+P`) for keyboard-driven navigation.
 - **Git Staging & Commit Dialog**: Built-in Git staging (`git add`, `git restore --staged`), discard changes, diff inspection, and commit dialog (`Ctrl+Alt+C`) directly from the project sidebar and view menu.
 - **Integrated Git Diff-Viewer**: Side-by-side and unified diffs directly in the IDE (`Ctrl+Alt+D`).

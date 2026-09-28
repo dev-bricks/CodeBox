@@ -243,6 +243,7 @@ class CodeEditor(QPlainTextEdit):
     definitionRequested = Signal(int, int, str)  # LSP/Fallback: Zeile, Spalte, Symbol (0-basiert)
     referencesRequested = Signal(int, int, str)  # LSP/Fallback: Zeile, Spalte, Symbol (0-basiert)
     breakpointsChanged = Signal(object)  # List[int] mit 1-basierten Zeilennummern
+    addWatchRequested = Signal(str)  # Debugger: Ausdruck zur Überwachung hinzufügen
     modificationChanged = Signal(bool)
     focusReceived = Signal()
 
@@ -481,6 +482,14 @@ class CodeEditor(QPlainTextEdit):
 
         act_comment = menu.addAction("Zeilenkommentar umschalten\tCtrl+/")
         act_comment.triggered.connect(self.toggle_comment)
+
+        # Debugger Watch-Aktion
+        selected_text = self.textCursor().selectedText().strip()
+        watch_candidate = selected_text or symbol
+        if watch_candidate:
+            short_cand = watch_candidate[:25] + ("..." if len(watch_candidate) > 25 else "")
+            act_watch = menu.addAction(f"Zu Überwachung hinzufügen: '{short_cand}'")
+            act_watch.triggered.connect(lambda: self.addWatchRequested.emit(watch_candidate))
 
         menu.exec(event.globalPos())
 
