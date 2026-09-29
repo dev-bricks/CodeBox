@@ -322,7 +322,7 @@ class GitCommitDialog(QDialog):
         for rel_path, status in sorted(status_dict.items()):
             if status.is_staged:
                 self.staged_items.append((rel_path, status))
-            if status.is_modified or status.is_untracked or status.is_deleted:
+            if status.is_modified or status.is_untracked or (status.work_status == "D"):
                 self.unstaged_items.append((rel_path, status))
 
         self._populate_list(self.list_staged, self.staged_items, is_staged=True)
@@ -337,9 +337,13 @@ class GitCommitDialog(QDialog):
         # Highlight initial file if provided
         if self.initial_file:
             try:
-                rel = self.initial_file.relative_to(self.repo_root).as_posix()
+                p = Path(self.initial_file)
+                if p.is_absolute():
+                    rel = p.resolve().relative_to(self.repo_root.resolve()).as_posix()
+                else:
+                    rel = p.as_posix()
                 self._select_path_in_lists(rel)
-            except ValueError:
+            except (ValueError, TypeError, OSError):
                 pass
 
         self._update_action_buttons_state()
@@ -513,10 +517,10 @@ class GitCommitDialog(QDialog):
 
     def _open_diff_viewer(self, rel_path: Optional[str], staged: bool):
         try:
-            from ui.diff_viewer import GitDiffDialog
+            from ui.diff_viewer import DiffViewerDialog
 
             init_file = (self.repo_root / rel_path) if rel_path else None
-            dialog = GitDiffDialog(
+            dialog = DiffViewerDialog(
                 main_window=self.main_window,
                 repo_root=self.repo_root,
                 initial_file=init_file,

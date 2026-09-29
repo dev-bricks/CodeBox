@@ -200,9 +200,10 @@ class GitRepo:
             args.extend(["--", filepath])
         diff = self._run_git(*args)
         if (not diff) and filepath and not staged:
-            full_path = self.repo_path / filepath
+            clean_filepath = filepath.replace("\\", "/")
+            full_path = self.repo_path / clean_filepath
             if full_path.is_file():
-                status = self.get_status().get(filepath.replace("\\", "/"))
+                status = self.get_status().get(clean_filepath)
                 if status and status.is_untracked:
                     try:
                         import difflib
@@ -210,8 +211,8 @@ class GitRepo:
                         diff_lines = list(difflib.unified_diff(
                             [],
                             content,
-                            fromfile=f"a/{filepath}",
-                            tofile=f"b/{filepath}",
+                            fromfile=f"a/{clean_filepath}",
+                            tofile=f"b/{clean_filepath}",
                         ))
                         if diff_lines:
                             return "".join(diff_lines).strip()
@@ -290,18 +291,24 @@ class GitRepo:
 
     def discard_file_changes(self, filepath: str) -> bool:
         """Discards worktree changes for a file (restore or clean)."""
+        import shutil
         clean_path = filepath.replace("\\", "/")
         status_dict = self.get_status()
         status = status_dict.get(clean_path)
         if status and status.is_untracked:
-            target = self.repo_path / filepath
+            target = self.repo_path / clean_path
             try:
-                if target.is_file():
+                if target.is_file() or target.is_symlink():
                     target.unlink()
                     return True
+                elif target.is_dir():
+                    shutil.rmtree(target)
+                    return True
             except OSError:
-                code, _, _ = self._run_git_result("clean", "-f", "--", clean_path)
+                code, _, _ = self._run_git_result("clean", "-fd", "--", clean_path)
                 return code == 0
+            code, _, _ = self._run_git_result("clean", "-fd", "--", clean_path)
+            return code == 0
         code, _, _ = self._run_git_result("restore", "--", clean_path)
         if code != 0:
             code, _, _ = self._run_git_result("checkout", "--", clean_path)

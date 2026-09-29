@@ -12,6 +12,17 @@ Alle wesentlichen Änderungen an CodeBox werden hier dokumentiert.
 
 ## [Unreleased]
 
+### Fixed (Bugsweep 2026-09-29)
+- **Git Staging & Commit-Dialog (`ui/git_commit_dialog.py`, `ui/diff_viewer.py`, `features/git_integration.py`)**:
+  - `_open_diff_viewer()`: Behebt unberechtigten `ImportError: cannot import name 'GitDiffDialog' from 'ui.diff_viewer'` beim Klick auf Diff-Schaltflächen im Commit-Dialog; `GitDiffDialog = DiffViewerDialog` als abwärtskompatiblen Alias in `ui/diff_viewer.py` verankert und in `ui/__init__.py` exportiert.
+  - `GitCommitDialog.refresh()`: Staged-Deletion-Duplikation behoben; Dateien, die für die Löschung bereitgestellt sind (`index_status='D', work_status=' '`), werden nicht mehr fälschlich zusätzlich in `unstaged_items` eingereiht.
+  - `GitCommitDialog.refresh()`: Relative `initial_file`-Pfade (z. B. `Path('README.md')`) werden nun fehlerfrei aufgelöst und im UI selektiert (verhindert unbemerkten `ValueError`).
+  - `DiffViewerDialog.refresh_diff()`: Unterstützt nun Strings und relative `Path`-Objekte für `select_file` ohne `AttributeError` oder `ValueError`.
+  - `DiffViewerDialog.open_selected_in_editor()`: Schaltfläche 'Im Editor öffnen' wird für gelöschte Dateien (`[D]`) defensiv deaktiviert und fängt Zugriffe auf nicht-existente Dateien ab.
+  - `GitRepo.discard_file_changes()`: Verwirft nun auch unversionierte Verzeichnisse (`target.is_dir()`) zuverlässig via `shutil.rmtree()` und `git clean -fd`.
+  - `GitRepo.get_diff()`: Normalisiert Backslashes in Pfad-Headern unversionierter Dateien auf POSIX-konforme Formatierung (`--- a/...`, `+++ b/...`).
+  - 7 neue hermetische Regressionstests in `tests/test_bugsweep_git_commit_and_diff_resilience_20260929.py`.
+
 ### Repository Hygiene, CI Lifecycle Hardening & Lock Defense (Pfad A 2026-09-25)
 
 - **CI-Workflow Härtung & Concurrency-Schutz**:

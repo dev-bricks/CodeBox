@@ -438,10 +438,13 @@ class DiffViewerDialog(QDialog):
 
             if select_file:
                 try:
-                    rel = select_file.resolve().relative_to(self.repo_root.resolve()).as_posix()
+                    p = Path(select_file)
+                    if not p.is_absolute():
+                        p = self.repo_root / p
+                    rel = p.resolve().relative_to(self.repo_root.resolve()).as_posix()
                     if rel == path_key:
                         target_index = idx
-                except ValueError:
+                except (ValueError, TypeError, OSError):
                     pass
             elif current_data == path_key:
                 target_index = idx
@@ -472,7 +475,8 @@ class DiffViewerDialog(QDialog):
         is_all = selected_data in ("__ALL__", None, "")
         filepath = None if is_all else str(selected_data)
 
-        self.btn_open_editor.setEnabled(not is_all)
+        file_on_disk = (self.repo_root / filepath).is_file() if filepath else False
+        self.btn_open_editor.setEnabled(not is_all and file_on_disk)
 
         mode = self.mode_combo.currentData()
 
@@ -656,7 +660,13 @@ class DiffViewerDialog(QDialog):
             return
 
         target_path = self.repo_root / str(selected_data)
+        if not target_path.is_file():
+            return
         self.fileOpenRequested.emit(target_path)
         if self.main_window and hasattr(self.main_window, "open_path"):
             self.main_window.open_path(target_path)
         self.accept()
+
+
+# Abwärtskompatibler Alias für GitDiffDialog
+GitDiffDialog = DiffViewerDialog
