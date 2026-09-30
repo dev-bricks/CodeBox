@@ -1,0 +1,762 @@
+{
+  "Datei": {
+    "de": "Datei",
+    "en": "File",
+    "es": "Archivo",
+    "zh": "文件",
+    "ja": "ファイル",
+    "ru": "Файл"
+  },
+  "Bearbeiten": {
+    "de": "Bearbeiten",
+    "en": "Edit",
+    "es": "Editar",
+    "zh": "编辑",
+    "ja": "編集",
+    "ru": "Правка"
+  },
+  "Ansicht": {
+    "de": "Ansicht",
+    "en": "View",
+    "es": "Ver",
+    "zh": "视图",
+    "ja": "表示",
+    "ru": "Вид"
+  },
+  "Ausführen": {
+    "de": "Ausführen",
+    "en": "Run",
+    "es": "Ejecutar",
+    "zh": "运行",
+    "ja": "実行",
+    "ru": "Запуск"
+  },
+  "Terminal": {
+    "de": "Terminal",
+    "en": "Terminal",
+    "es": "Terminal",
+    "zh": "终端",
+    "ja": "ターミナル",
+    "ru": "Терминал"
+  },
+  "Tools": {
+    "de": "Tools",
+    "en": "Tools",
+    "es": "Herramientas",
+    "zh": "工具",
+    "ja": "ツール",
+    "ru": "Инструменты"
+  },
+  "Hilfe": {
+    "de": "Hilfe",
+    "en": "Help",
+    "es": "Ayuda",
+    "zh": "帮助",
+    "ja": "ヘルプ",
+    "ru": "Справка"
+  },
+  "Sprache": {
+    "de": "Sprache",
+    "en": "Language",
+    "es": "Idioma",
+    "zh": "语言",
+    "ja": "言語",
+    "ru": "Язык"
+  },
+  "Mehrfachauswahl & Multi-Cursor": {
+    "de": "Mehrfachauswahl & Multi-Cursor",
+    "en": "Multi-Selection & Multi-Cursor",
+    "es": "Selección múltiple y multi-cursor",
+    "zh": "多重选择与多光标",
+    "ja": "複数選択とマルチカーソル",
+    "ru": "Множественное выделение и мультикурсор"
+  },
+  "Neu": {
+    "de": "Neu",
+    "en": "New",
+    "es": "Nuevo",
+    "zh": "新建",
+    "ja": "新規",
+    "ru": "Создать"
+  },
+  "Öffnen...": {
+    "de": "Öffnen...",
+    "en": "Open...",
+    "es": "Abrir...",
+    "zh": "打开...",
+    "ja": "開く...",
+    "ru": "Открыть..."
+  },
+  "Öffnen": {
+    "de": "Öffnen",
+    "en": "Open",
+    "es": "Abrir",
+    "zh": "打开",
+    "ja": "開く",
+    "ru": "Открыть"
+  },
+  "Zuletzt geöffnete Dateien": {
+    "de": "Zuletzt geöffnete Dateien",
+    "en": "Recent Files",
+    "es": "Archivos recientes",
+    "zh": "最近打开的文件",
+    "ja": "最近開いたファイル",
+    "ru": "Недавние файлы"
+  },
+  "Ordner öffnen...": {
+    "de": "Ordner öffnen...",
+    "en": "Open Folder...",
+    "es": "Abrir carpeta...",
+    "zh": "打开文件夹...",
+    "ja": "フォルダーを開く...",
+    "ru": "Открыть папку..."
+  },
+  "Ordner zum Arbeitsbereich hinzufügen...": {
+    "de": "Ordner zum Arbeitsbereich hinzufügen...",
+    "en": "Add Folder to Workspace...",
+    "es": "Agregar carpeta al espacio de trabajo...",
+    "zh": "添加文件夹到工作区...",
+    "ja": "ワークスペースにフォルダーを追加...",
+    "ru": "Добавить папку в рабочую область..."
+  },
+  "Arbeitsbereich öffnen...": {
+    "de": "Arbeitsbereich öffnen...",
+    "en": "Open Workspace...",
+    "es": "Abrir espacio de trabajo...",
+    "zh": "打开工作区...",
+    "ja": "ワークスペースを開く...",
+    "ru": "Открыть рабочую область..."
+  },
+  "Arbeitsbereich speichern unter...": {
+    "de": "Arbeitsbereich speichern unter...",
+    "en": "Save Workspace As...",
+    "es": "Guardar espacio de trabajo como...",
+    "zh": "工作区另存为...",
+    "ja": "ワークスペースに名前を付けて保存...",
+    "ru": "Сохранить рабочую область как..."
+  },
+  "Arbeitsbereich schließen": {
+    "de": "Arbeitsbereich schließen",
+    "en": "Close Workspace",
+    "es": "Cerrar espacio de trabajo",
+    "zh": "关闭工作区",
+    "ja": "ワークスペースを閉じる",
+    "ru": "Закрыть рабочую область"
+  },
+  "Schnell öffnen...": {
+    "de": "Schnell öffnen...",
+    "en": "Quick Open...",
+    "es": "Apertura rápida...",
+    "zh": "快速打开...",
+    "ja": "クイックオープン...",
+    "ru": "Быстрое открытие..."
+  },
+  "Speichern": {
+    "de": "Speichern",
+    "en": "Save",
+    "es": "Guardar",
+    "zh": "保存",
+    "ja": "保存",
+    "ru": "Сохранить"
+  },
+  "Speichern unter...": {
+    "de": "Speichern unter...",
+    "en": "Save As...",
+    "es": "Guardar como...",
+    "zh": "另存为...",
+    "ja": "名前を付けて保存...",
+    "ru": "Сохранить как..."
+  },
+  "Alle speichern": {
+    "de": "Alle speichern",
+    "en": "Save All",
+    "es": "Guardar todo",
+    "zh": "全部保存",
+    "ja": "すべて保存",
+    "ru": "Сохранить всё"
+  },
+  "Schließen": {
+    "de": "Schließen",
+    "en": "Close",
+    "es": "Cerrar",
+    "zh": "关闭",
+    "ja": "閉じる",
+    "ru": "Закрыть"
+  },
+  "Beenden": {
+    "de": "Beenden",
+    "en": "Exit",
+    "es": "Salir",
+    "zh": "退出",
+    "ja": "終了",
+    "ru": "Выход"
+  },
+  "Rückgängig": {
+    "de": "Rückgängig",
+    "en": "Undo",
+    "es": "Deshacer",
+    "zh": "撤销",
+    "ja": "元に戻す",
+    "ru": "Отменить"
+  },
+  "Wiederherstellen": {
+    "de": "Wiederherstellen",
+    "en": "Redo",
+    "es": "Rehacer",
+    "zh": "恢复",
+    "ja": "やり直し",
+    "ru": "Повторить"
+  },
+  "Ausschneiden": {
+    "de": "Ausschneiden",
+    "en": "Cut",
+    "es": "Cortar",
+    "zh": "剪切",
+    "ja": "切り取り",
+    "ru": "Вырезать"
+  },
+  "Kopieren": {
+    "de": "Kopieren",
+    "en": "Copy",
+    "es": "Copiar",
+    "zh": "复制",
+    "ja": "コピー",
+    "ru": "Копировать"
+  },
+  "Einfügen": {
+    "de": "Einfügen",
+    "en": "Paste",
+    "es": "Pegar",
+    "zh": "粘贴",
+    "ja": "貼り付け",
+    "ru": "Вставить"
+  },
+  "Suchen...": {
+    "de": "Suchen...",
+    "en": "Find...",
+    "es": "Buscar...",
+    "zh": "查找...",
+    "ja": "検索...",
+    "ru": "Найти..."
+  },
+  "Suchen": {
+    "de": "Suchen",
+    "en": "Find",
+    "es": "Buscar",
+    "zh": "查找",
+    "ja": "検索",
+    "ru": "Найти"
+  },
+  "Ersetzen...": {
+    "de": "Ersetzen...",
+    "en": "Replace...",
+    "es": "Reemplazar...",
+    "zh": "替换...",
+    "ja": "置換...",
+    "ru": "Заменить..."
+  },
+  "Ersetzen": {
+    "de": "Ersetzen",
+    "en": "Replace",
+    "es": "Reemplazar",
+    "zh": "替换",
+    "ja": "置換",
+    "ru": "Заменить"
+  },
+  "In Dateien suchen...": {
+    "de": "In Dateien suchen...",
+    "en": "Find in Files...",
+    "es": "Buscar en archivos...",
+    "zh": "在文件中查找...",
+    "ja": "ファイル内検索...",
+    "ru": "Поиск в файлах..."
+  },
+  "Weitersuchen": {
+    "de": "Weitersuchen",
+    "en": "Find Next",
+    "es": "Buscar siguiente",
+    "zh": "查找下一个",
+    "ja": "次を検索",
+    "ru": "Найти далее"
+  },
+  "Rückwärts weitersuchen": {
+    "de": "Rückwärts weitersuchen",
+    "en": "Find Previous",
+    "es": "Buscar anterior",
+    "zh": "查找上一个",
+    "ja": "前を検索",
+    "ru": "Найти ранее"
+  },
+  "Gehe zu Zeile...": {
+    "de": "Gehe zu Zeile...",
+    "en": "Go to Line...",
+    "es": "Ir a la línea...",
+    "zh": "跳转到行...",
+    "ja": "指定行へ移動...",
+    "ru": "Перейти к строке..."
+  },
+  "Zur Definition springen": {
+    "de": "Zur Definition springen",
+    "en": "Go to Definition",
+    "es": "Ir a la definición",
+    "zh": "跳转到定义",
+    "ja": "定義へ移動",
+    "ru": "Перейти к определению"
+  },
+  "Alle Referenzen suchen": {
+    "de": "Alle Referenzen suchen",
+    "en": "Find All References",
+    "es": "Buscar todas las referencias",
+    "zh": "查找所有引用",
+    "ja": "すべての参照を検索",
+    "ru": "Найти все ссылки"
+  },
+  "Zeilenkommentar umschalten": {
+    "de": "Zeilenkommentar umschalten",
+    "en": "Toggle Line Comment",
+    "es": "Alternar comentario de línea",
+    "zh": "切换行注释",
+    "ja": "行コメントの切り替え",
+    "ru": "Переключить строчный комментарий"
+  },
+  "Einrücken": {
+    "de": "Einrücken",
+    "en": "Indent",
+    "es": "Indentar",
+    "zh": "缩进",
+    "ja": "インデント",
+    "ru": "Увеличить отступ"
+  },
+  "Ausrücken": {
+    "de": "Ausrücken",
+    "en": "Dedent",
+    "es": "Desindentar",
+    "zh": "减少缩进",
+    "ja": "逆インデント",
+    "ru": "Уменьшить отступ"
+  },
+  "Snippet einfügen...": {
+    "de": "Snippet einfügen...",
+    "en": "Insert Snippet...",
+    "es": "Insertar fragmento...",
+    "zh": "插入代码片段...",
+    "ja": "スニペットを挿入...",
+    "ru": "Вставить фрагмент кода..."
+  },
+  "Cursor oberhalb hinzufügen": {
+    "de": "Cursor oberhalb hinzufügen",
+    "en": "Add Cursor Above",
+    "es": "Agregar cursor arriba",
+    "zh": "在上方添加光标",
+    "ja": "上側にカーソルを追加",
+    "ru": "Добавить курсор выше"
+  },
+  "Cursor unterhalb hinzufügen": {
+    "de": "Cursor unterhalb hinzufügen",
+    "en": "Add Cursor Below",
+    "es": "Agregar cursor abajo",
+    "zh": "在下方添加光标",
+    "ja": "下側にカーソルを追加",
+    "ru": "Добавить курсор ниже"
+  },
+  "Alle Vorkommen markieren": {
+    "de": "Alle Vorkommen markieren",
+    "en": "Select All Occurrences",
+    "es": "Seleccionar todas las coincidencias",
+    "zh": "选中所有匹配项",
+    "ja": "すべての一致を選択",
+    "ru": "Выделить все совпадения"
+  },
+  "Nächstes Vorkommen hinzufügen": {
+    "de": "Nächstes Vorkommen hinzufügen",
+    "en": "Add Next Occurrence",
+    "es": "Agregar siguiente coincidencia",
+    "zh": "添加下一个匹配项",
+    "ja": "次の一致を追加",
+    "ru": "Добавить следующее совпадение"
+  },
+  "Mehrfachcursor aufheben": {
+    "de": "Mehrfachcursor aufheben",
+    "en": "Clear Multi-Cursors",
+    "es": "Eliminar multicursores",
+    "zh": "清除多光标",
+    "ja": "マルチカーソルを解除",
+    "ru": "Снять мультикурсоры"
+  },
+  "Befehlspalette...": {
+    "de": "Befehlspalette...",
+    "en": "Command Palette...",
+    "es": "Paleta de comandos...",
+    "zh": "命令面板...",
+    "ja": "コマンドパレット...",
+    "ru": "Палитра команд..."
+  },
+  "Plugins & Sprachen...": {
+    "de": "Plugins & Sprachen...",
+    "en": "Plugins & Languages...",
+    "es": "Complementos e idiomas...",
+    "zh": "插件与语言...",
+    "ja": "プラグインと言語...",
+    "ru": "Плагины и языки..."
+  },
+  "Vim-Modus": {
+    "de": "Vim-Modus",
+    "en": "Vim Mode",
+    "es": "Modo Vim",
+    "zh": "Vim 模式",
+    "ja": "Vim モード",
+    "ru": "Режим Vim"
+  },
+  "Einstellungen...": {
+    "de": "Einstellungen...",
+    "en": "Settings...",
+    "es": "Configuración...",
+    "zh": "设置...",
+    "ja": "設定...",
+    "ru": "Настройки..."
+  },
+  "Debuggen starten": {
+    "de": "Debuggen starten",
+    "en": "Start Debugging",
+    "es": "Iniciar depuración",
+    "zh": "开始调试",
+    "ja": "デバッグの開始",
+    "ru": "Начать отладку"
+  },
+  "Stoppen": {
+    "de": "Stoppen",
+    "en": "Stop",
+    "es": "Detener",
+    "zh": "停止",
+    "ja": "停止",
+    "ru": "Остановить"
+  },
+  "Debug: Weiter": {
+    "de": "Debug: Weiter",
+    "en": "Debug: Continue",
+    "es": "Depurar: Continuar",
+    "zh": "调试: 继续",
+    "ja": "デバッグ: 続行",
+    "ru": "Отладка: Продолжить"
+  },
+  "Debug: Einzelschritt (Step Over)": {
+    "de": "Debug: Einzelschritt (Step Over)",
+    "en": "Debug: Step Over",
+    "es": "Depurar: Paso a paso principal",
+    "zh": "调试: 单步跳过",
+    "ja": "デバッグ: ステップオーバー",
+    "ru": "Отладка: Шаг с обходом"
+  },
+  "Debug: Hineinspringen (Step Into)": {
+    "de": "Debug: Hineinspringen (Step Into)",
+    "en": "Debug: Step Into",
+    "es": "Depurar: Paso a paso por instrucciones",
+    "zh": "调试: 单步步入",
+    "ja": "デバッグ: ステップイン",
+    "ru": "Отладка: Шаг с заходом"
+  },
+  "Debug: Herausspringen (Step Out)": {
+    "de": "Debug: Herausspringen (Step Out)",
+    "en": "Debug: Step Out",
+    "es": "Depurar: Paso a paso para salir",
+    "zh": "调试: 单步跳出",
+    "ja": "デバッグ: ステップアウト",
+    "ru": "Отладка: Шаг с выходом"
+  },
+  "Breakpoint umschalten": {
+    "de": "Breakpoint umschalten",
+    "en": "Toggle Breakpoint",
+    "es": "Alternar punto de interrupción",
+    "zh": "切换断点",
+    "ja": "ブレークポイントの切り替え",
+    "ru": "Переключить точку останова"
+  },
+  "Alle Breakpoints löschen": {
+    "de": "Alle Breakpoints löschen",
+    "en": "Clear All Breakpoints",
+    "es": "Borrar todos los puntos de interrupción",
+    "zh": "清除所有断点",
+    "ja": "すべてのブレークポイントを消去",
+    "ru": "Очистить все точки останова"
+  },
+  "Debugger-Panel anzeigen": {
+    "de": "Debugger-Panel anzeigen",
+    "en": "Show Debugger Panel",
+    "es": "Mostrar panel del depurador",
+    "zh": "显示调试器面板",
+    "ja": "デバッガーパネルを表示",
+    "ru": "Показать панель отладчика"
+  },
+  "Ausdruck überwachen...": {
+    "de": "Ausdruck überwachen...",
+    "en": "Add Watch Expression...",
+    "es": "Agregar expresión de inspección...",
+    "zh": "添加监视表达式...",
+    "ja": "ウォッチ式の追加...",
+    "ru": "Добавить контрольное выражение..."
+  },
+  "Aufruf-Stapel aktualisieren": {
+    "de": "Aufruf-Stapel aktualisieren",
+    "en": "Refresh Call Stack",
+    "es": "Actualizar pila de llamadas",
+    "zh": "刷新调用栈",
+    "ja": "呼び出しスタックの更新",
+    "ru": "Обновить стек вызовов"
+  },
+  "Minimap anzeigen": {
+    "de": "Minimap anzeigen",
+    "en": "Show Minimap",
+    "es": "Mostrar minimapa",
+    "zh": "显示缩略图",
+    "ja": "ミニマップを表示",
+    "ru": "Показать мини-карту"
+  },
+  "Projektbaum umschalten": {
+    "de": "Projektbaum umschalten",
+    "en": "Toggle Project View",
+    "es": "Alternar vista de proyecto",
+    "zh": "切换项目视图",
+    "ja": "プロジェクトビューの切り替え",
+    "ru": "Переключить дерево проекта"
+  },
+  "Terminal umschalten": {
+    "de": "Terminal umschalten",
+    "en": "Toggle Terminal",
+    "es": "Alternar terminal",
+    "zh": "切换终端",
+    "ja": "ターミナルの切り替え",
+    "ru": "Переключить терминал"
+  },
+  "Output umschalten": {
+    "de": "Output umschalten",
+    "en": "Toggle Output",
+    "es": "Alternar salida",
+    "zh": "切换输出",
+    "ja": "出力の切り替え",
+    "ru": "Переключить вывод"
+  },
+  "Probleme umschalten": {
+    "de": "Probleme umschalten",
+    "en": "Toggle Problems",
+    "es": "Alternar problemas",
+    "zh": "切换问题面板",
+    "ja": "問題の切り替え",
+    "ru": "Переключить проблемы"
+  },
+  "TODOs umschalten": {
+    "de": "TODOs umschalten",
+    "en": "Toggle TODOs",
+    "es": "Alternar TODOs",
+    "zh": "切换待办事项",
+    "ja": "TODOの切り替え",
+    "ru": "Переключить задачи"
+  },
+  "Einstellungen": {
+    "de": "Einstellungen",
+    "en": "Settings",
+    "es": "Configuración",
+    "zh": "设置",
+    "ja": "設定",
+    "ru": "Настройки"
+  },
+  "Schriftart:": {
+    "de": "Schriftart:",
+    "en": "Font Family:",
+    "es": "Fuente:",
+    "zh": "字体:",
+    "ja": "フォント:",
+    "ru": "Шрифт:"
+  },
+  "Schriftgröße:": {
+    "de": "Schriftgröße:",
+    "en": "Font Size:",
+    "es": "Tamaño de fuente:",
+    "zh": "字体大小:",
+    "ja": "フォントサイズ:",
+    "ru": "Размер шрифта:"
+  },
+  "Tab-Breite (Leerzeichen):": {
+    "de": "Tab-Breite (Leerzeichen):",
+    "en": "Tab Width (Spaces):",
+    "es": "Ancho de tabulación (espacios):",
+    "zh": "制表符宽度 (空格):",
+    "ja": "タブ幅 (スペース):",
+    "ru": "Ширина табуляции (пробелы):"
+  },
+  "Theme:": {
+    "de": "Theme:",
+    "en": "Theme:",
+    "es": "Tema:",
+    "zh": "主题:",
+    "ja": "テーマ:",
+    "ru": "Тема:"
+  },
+  "Sprache:": {
+    "de": "Sprache:",
+    "en": "Language:",
+    "es": "Idioma:",
+    "zh": "语言:",
+    "ja": "言語:",
+    "ru": "Язык:"
+  },
+  "Dateien beim Ausführen automatisch speichern": {
+    "de": "Dateien beim Ausführen automatisch speichern",
+    "en": "Auto-save files before running",
+    "es": "Guardar archivos automáticamente antes de ejecutar",
+    "zh": "运行前自动保存文件",
+    "ja": "実行前にファイルを自動保存",
+    "ru": "Автосохранение файлов перед запуском"
+  },
+  "Vim-Modus aktivieren (Modal Editing: Normal, Insert, Visual)": {
+    "de": "Vim-Modus aktivieren (Modal Editing: Normal, Insert, Visual)",
+    "en": "Enable Vim Mode (Modal Editing: Normal, Insert, Visual)",
+    "es": "Habilitar modo Vim (Edición modal: Normal, Insertar, Visual)",
+    "zh": "启用 Vim 模式 (模态编辑: Normal, Insert, Visual)",
+    "ja": "Vim モードを有効化 (モーダル編集: Normal, Insert, Visual)",
+    "ru": "Включить режим Vim (Модальное редактирование: Normal, Insert, Visual)"
+  },
+  "Bereit": {
+    "de": "Bereit",
+    "en": "Ready",
+    "es": "Listo",
+    "zh": "就绪",
+    "ja": "準備完了",
+    "ru": "Готово"
+  },
+  "Gespeichert": {
+    "de": "Gespeichert",
+    "en": "Saved",
+    "es": "Guardado",
+    "zh": "已保存",
+    "ja": "保存済み",
+    "ru": "Сохранено"
+  },
+  "Fehler": {
+    "de": "Fehler",
+    "en": "Error",
+    "es": "Error",
+    "zh": "错误",
+    "ja": "エラー",
+    "ru": "Ошибка"
+  },
+  "Warnung": {
+    "de": "Warnung",
+    "en": "Warning",
+    "es": "Advertencia",
+    "zh": "警告",
+    "ja": "警告",
+    "ru": "Предупреждение"
+  },
+  "Information": {
+    "de": "Information",
+    "en": "Information",
+    "es": "Información",
+    "zh": "信息",
+    "ja": "情報",
+    "ru": "Информация"
+  },
+  "Erfolg": {
+    "de": "Erfolg",
+    "en": "Success",
+    "es": "Éxito",
+    "zh": "成功",
+    "ja": "成功",
+    "ru": "Успешно"
+  },
+  "Abbrechen": {
+    "de": "Abbrechen",
+    "en": "Cancel",
+    "es": "Cancelar",
+    "zh": "取消",
+    "ja": "キャンセル",
+    "ru": "Отмена"
+  },
+  "OK": {
+    "de": "OK",
+    "en": "OK",
+    "es": "Aceptar",
+    "zh": "确定",
+    "ja": "OK",
+    "ru": "ОК"
+  },
+  "Ja": {
+    "de": "Ja",
+    "en": "Yes",
+    "es": "Sí",
+    "zh": "是",
+    "ja": "はい",
+    "ru": "Да"
+  },
+  "Nein": {
+    "de": "Nein",
+    "en": "No",
+    "es": "No",
+    "zh": "否",
+    "ja": "いいえ",
+    "ru": "Нет"
+  },
+  "Suchtreffer": {
+    "de": "Suchtreffer",
+    "en": "Search Results",
+    "es": "Resultados de búsqueda",
+    "zh": "搜索结果",
+    "ja": "検索結果",
+    "ru": "Результаты поиска"
+  },
+  "Keine Treffer gefunden": {
+    "de": "Keine Treffer gefunden",
+    "en": "No matches found",
+    "es": "No se encontraron coincidencias",
+    "zh": "未找到匹配项",
+    "ja": "一致は見つかりませんでした",
+    "ru": "Совпадений не найдено"
+  },
+  "Zeile {line}, Spalte {col}": {
+    "de": "Zeile {line}, Spalte {col}",
+    "en": "Line {line}, Column {col}",
+    "es": "Línea {line}, Columna {col}",
+    "zh": "第 {line} 行，第 {col} 列",
+    "ja": "行 {line}、列 {col}",
+    "ru": "Строка {line}, Колонка {col}"
+  },
+  "Datei {name} wurde gespeichert.": {
+    "de": "Datei {name} wurde gespeichert.",
+    "en": "File {name} has been saved.",
+    "es": "El archivo {name} ha sido guardado.",
+    "zh": "文件 {name} 已保存。",
+    "ja": "ファイル {name} を保存しました。",
+    "ru": "Файл {name} сохранён."
+  },
+  "3 Treffer gefunden": {
+    "de": "3 Treffer gefunden",
+    "en": "3 matches found",
+    "es": "3 coincidencias encontradas",
+    "zh": "找到 3 个匹配项",
+    "ja": "3 件の一致が見つかりました",
+    "ru": "Найдено 3 совпадения"
+  },
+  "Regex-Fehler": {
+    "de": "Regex-Fehler",
+    "en": "Regex error",
+    "es": "Error de expresión regular",
+    "zh": "正则表达式错误",
+    "ja": "正規表現エラー",
+    "ru": "Ошибка регулярного выражения"
+  },
+  "Änderungen verwerfen": {
+    "de": "Änderungen verwerfen",
+    "en": "Discard changes",
+    "es": "Descartar cambios",
+    "zh": "放弃更改",
+    "ja": "変更を破棄",
+    "ru": "Отменить изменения"
+  },
+  "Über CodeBox...": {
+    "de": "Über CodeBox...",
+    "en": "About CodeBox...",
+    "es": "Acerca de CodeBox...",
+    "zh": "关于 CodeBox...",
+    "ja": "CodeBox について...",
+    "ru": "О программе CodeBox..."
+  }
+}

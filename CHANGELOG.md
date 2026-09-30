@@ -12,6 +12,17 @@ Alle wesentlichen Änderungen an CodeBox werden hier dokumentiert.
 
 ## [Unreleased]
 
+### Added (I18N Expansion & Tier-2 6-Sprachen-Architektur 2026-09-30)
+- **Policy P-006 Tier-2 6-Sprachen-Standard (`translator.py`, `manage_translations.py`, `locales/translations.json`)**:
+  - `translator.py`: Vollwertiges `TranslationSystem` v2.0 mit 6 Standardsprachen (`de`, `en`, `es`, `zh`, `ja`, `ru`), deterministischer 4-Stufen-Fallback-Kette (`target -> en -> de -> key`), Systemsprachenerkennung (`detect_system_language()`), thread-sicherem Singleton `get_translator()` und globalem Helper `t(key, **kwargs)` mit kwargs-Interpolation und Fehlerisolation.
+  - `locales/translations.json`: 95 UI-, Menü-, Dialog-, Status- und Aktionsschlüssel lückenlos über alle 6 Sprachen kuratiert (570 Strings, 100% Schlüsselparität, 0 fehlend, echte deutsche Umlaute und spanische Diakritika intakt).
+  - `manage_translations.py`: CLI-Management- und CI-Auditing-Tool mit `--check`-Gate (Exit 0 bei 100% Parität) und `--stats`-Übersicht.
+  - `config/__init__.py`: `"language": "de"` in `DEFAULT_SETTINGS` ergänzt.
+  - `ui/settings_dialog.py`: Neues Sprachauswahlfeld ("Sprache:") mit nativer Anzeige aller 6 Sprachen in den Programmeinstellungen verankert.
+  - `ui/main_window.py`: Neues Untermenü *Ansicht > Sprache* mit exklusiver `QActionGroup`-Auswahl für alle 6 Sprachen, dynamische Menü-Umschaltung via `retranslate_ui()` ohne Anwendungsneustart und synchrone Persistierung in den Einstellungen.
+  - `README.es.md`: Vollständige spanische Gesamtdokumentation gemäß Leerlauf-Sprachzug mit 1:1 Parität zu allen 18 Abschnitten, wechselseitigen Ankern und synchronisierten Sprachumschaltern in `README.md` und `README_de.md`.
+  - `tests/test_i18n.py`: 10 neue automatisierte Vertragstests für P-006-Sprachen, Fallback-Hierarchie, Schlüssel-Parität, Subprozess-CLI-Auditing, Umlaute, Einstellungen-Persistenz und dynamischen MainWindow-Sprachwechsel (100% bestanden).
+
 ### Fixed (Bugsweep 2026-09-29)
 - **Git Staging & Commit-Dialog (`ui/git_commit_dialog.py`, `ui/diff_viewer.py`, `features/git_integration.py`)**:
   - `_open_diff_viewer()`: Behebt unberechtigten `ImportError: cannot import name 'GitDiffDialog' from 'ui.diff_viewer'` beim Klick auf Diff-Schaltflächen im Commit-Dialog; `GitDiffDialog = DiffViewerDialog` als abwärtskompatiblen Alias in `ui/diff_viewer.py` verankert und in `ui/__init__.py` exportiert.

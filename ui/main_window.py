@@ -10,7 +10,9 @@ from PySide6.QtWidgets import (
     QMessageBox, QTabWidget, QMenu
 )
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QTextCursor
+from PySide6.QtGui import QTextCursor, QActionGroup
+
+from translator import get_translator, TranslationSystem
 
 from core.tabs import TabWidget, EditorTab
 from core.editor import CodeEditor
@@ -38,7 +40,7 @@ from ui.plugins_dialog import PluginsDialog
 from ui.shortcuts_dialog import ShortcutsDialog
 from ui.command_palette import CommandPaletteDialog
 from version import format_window_title, APP_VERSION
-from config import load_settings
+from config import load_settings, save_settings
 
 
 class MainWindow(QMainWindow):
@@ -52,6 +54,8 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self._settings = load_settings()
+        self._current_ui_language = self._settings.get("language", "de")
+        get_translator(self._current_ui_language)
         self.setWindowTitle(format_window_title())
         self.setGeometry(100, 100, 1200, 800)
         self._lsp_manager = LSPManager()
@@ -250,7 +254,8 @@ class MainWindow(QMainWindow):
         toolbar.addWidget(self.lang_combo)
 
         # ---- Ansicht-Menü ----
-        view_menu = menubar.addMenu("Ansicht")
+        self.view_menu = menubar.addMenu("Ansicht")
+        view_menu = self.view_menu
         self._toggle_project_action = view_menu.addAction(
             "Projektbaum", self._toggle_project_view, "Ctrl+B"
         )
@@ -290,6 +295,19 @@ class MainWindow(QMainWindow):
                 lambda checked=False, t=theme_name: apply_theme(QApplication.instance(), t)
             )
             t_act.setStatusTip(f"Farbschema auf '{theme_name.capitalize()}' umstellen")
+
+        # UI-Sprache Submenü (Policy P-006)
+        self.ui_lang_menu = view_menu.addMenu("Sprache")
+        self._ui_lang_group = QActionGroup(self)
+        self._ui_lang_group.setExclusive(True)
+        for code in TranslationSystem.SUPPORTED_LANGUAGES:
+            name = TranslationSystem.LANGUAGE_NAMES.get(code, code)
+            act = self.ui_lang_menu.addAction(f"{name} ({code})")
+            act.setCheckable(True)
+            if code == self._current_ui_language:
+                act.setChecked(True)
+            act.triggered.connect(lambda checked=False, c=code: self.set_ui_language(c))
+            self._ui_lang_group.addAction(act)
 
         # Code-Faltung Submenü
         folding_menu = view_menu.addMenu("Code-Faltung")
@@ -336,7 +354,8 @@ class MainWindow(QMainWindow):
         self._move_tab_split_action.setStatusTip("Verschiebt das aktuelle Dokument in die andere Editorhälfte")
 
         # ---- Hilfe-Menü ----
-        help_menu = menubar.addMenu("Hilfe")
+        self.help_menu = menubar.addMenu("Hilfe")
+        help_menu = self.help_menu
         act_shortcuts = help_menu.addAction("Tastenkürzel-Übersicht", self.open_shortcuts_dialog, "F1")
         act_shortcuts.setStatusTip("Öffnet die Übersicht aller verfügbaren Tastenkombinationen")
         act_help_plugins = help_menu.addAction("Plugins & Sprachen...", self.open_plugins_dialog)
@@ -1648,6 +1667,51 @@ class MainWindow(QMainWindow):
                     tab.editor.set_vim_mode_enabled(vim_mode)
 
         self._update_vim_status_label(self.get_active_tab())
+
+        # UI-Sprache anwenden (Policy P-006)
+        new_lang = self._settings.get("language", "de")
+        if getattr(self, "_current_ui_language", None) != new_lang:
+            self.set_ui_language(new_lang)
+
+    def set_ui_language(self, lang_code: str):
+        """Wechselt die UI-Sprache und aktualisiert die Benutzeroberfläche."""
+        if lang_code not in TranslationSystem.SUPPORTED_LANGUAGES:
+            return
+        self._current_ui_language = lang_code
+        get_translator().set_language(lang_code)
+        self._settings["language"] = lang_code
+        save_settings(self._settings)
+
+        # Haken im Sprachmenü synchronisieren
+        if hasattr(self, "_ui_lang_group"):
+            for act in self._ui_lang_group.actions():
+                if f"({lang_code})" in act.text():
+                    act.setChecked(True)
+
+        self.retranslate_ui()
+
+    def retranslate_ui(self):
+        """Aktualisiert alle übersetzbaren Texte im Hauptfenster."""
+        tr = get_translator()
+        tab = self.get_active_tab() if hasattr(self, "get_active_tab") else None
+        file_path = tab.file_path if (tab and hasattr(tab, "file_path")) else None
+        self.setWindowTitle(format_window_title(file_path))
+        if hasattr(self, "file_menu"):
+            self.file_menu.setTitle(tr.t("Datei"))
+        if hasattr(self, "edit_menu"):
+            self.edit_menu.setTitle(tr.t("Bearbeiten"))
+        if hasattr(self, "run_menu"):
+            self.run_menu.setTitle(tr.t("Ausführen"))
+        if hasattr(self, "view_menu"):
+            self.view_menu.setTitle(tr.t("Ansicht"))
+        if hasattr(self, "help_menu"):
+            self.help_menu.setTitle(tr.t("Hilfe"))
+        if hasattr(self, "ui_lang_menu"):
+            self.ui_lang_menu.setTitle(tr.t("Sprache"))
+        if hasattr(self, "selection_menu"):
+            self.selection_menu.setTitle(tr.t("Mehrfachauswahl & Multi-Cursor"))
+        if hasattr(self, "recent_files_menu"):
+            self.recent_files_menu.setTitle(tr.t("Zuletzt geöffnete Dateien"))
 
     def toggle_vim_mode(self, checked: Optional[bool] = None):
         """Schaltet den modalen Vim-Modus an allen offenen Editoren ein oder aus."""

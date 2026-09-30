@@ -18,7 +18,7 @@
 [![Letzte Prüfung](https://img.shields.io/badge/letzte%20pr%C3%BCfung-2026--09--28-informational.svg)](llms.txt)
 [![llms.txt](https://img.shields.io/badge/llms.txt-verf%C3%BCgbar-green.svg)](llms.txt)
 
-[English](README.md) | Deutsch
+[English](README.md) | Deutsch | [Español](README.es.md)
 
 CodeBox ist eine lokale Desktop-IDE für Windows-, Linux- und macOS-Entwickler, die einen leichtgewichtigen PySide6-Codeeditor mit Multi-Tab-Arbeitsbereich, Projektbaum, integriertem Terminal, Git-Porcelain-Statusanzeigen, Syntax-Highlighting, Language-Server-Protocol-Diagnosen (LSP) und einer erweiterbaren deklarativen JSON/Python-Plugin-Architektur suchen.
 

@@ -12,7 +12,8 @@ DEFAULT_SETTINGS = {
     "show_minimap": True,
     "recent_files": [],
     "recent_workspaces": [],
-    "vim_mode": False
+    "vim_mode": False,
+    "language": "de"
 }
 
 _SETTINGS_FILE = Path(__file__).parent / "settings.json"
