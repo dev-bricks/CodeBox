@@ -96,6 +96,32 @@ class TestStatusForPath(unittest.TestCase):
         self.assertIsNotNone(result)
         self.assertTrue(result.is_modified)
 
+    def test_windows_forward_slashes_and_case(self):
+        status = _file_status("src/main.py", is_modified=True)
+        result = status_for_path("c:/PROJECT/src/main.py", r"C:\project", {"src/main.py": status})
+        self.assertIs(result, status)
+
+    def test_windows_unc_share(self):
+        status = _file_status("src/main.py", is_modified=True)
+        result = status_for_path(
+            r"\\server\share\repo\src\main.py", r"\\server\share\repo", {"src/main.py": status}
+        )
+        self.assertIs(result, status)
+
+    def test_windows_other_drive_is_outside(self):
+        self.assertIsNone(status_for_path(r"D:\repo\main.py", r"C:\repo", {"main.py": _file_status("main.py")}))
+
+    def test_sibling_prefix_is_outside(self):
+        self.assertIsNone(status_for_path("/repo-other/main.py", "/repo", {"main.py": _file_status("main.py")}))
+
+    def test_parent_traversal_is_outside(self):
+        self.assertIsNone(status_for_path("/repo/../main.py", "/repo", {"../main.py": _file_status("../main.py")}))
+
+    def test_posix_literal_backslash_filename(self):
+        name = r"file\name.py"
+        status = _file_status(name, is_modified=True)
+        self.assertIs(status_for_path("/repo/" + name, "/repo", {name: status}), status)
+
 
 if __name__ == "__main__":
     unittest.main()
