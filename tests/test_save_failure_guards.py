@@ -102,7 +102,7 @@ def test_initial_save_failure_restores_untitled_state():
             "ui.main_window.QFileDialog.getSaveFileName",
             return_value=("C:/tmp/never-written.py", "Python (*.py)"),
         ),
-        patch("pathlib.Path.write_text", side_effect=OSError("disk full")),
+        patch("core.tabs.QSaveFile.open", return_value=False),
         patch("PySide6.QtWidgets.QMessageBox.critical", return_value=None),
     ):
         window.save_file()
