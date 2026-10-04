@@ -67,6 +67,7 @@ class _FakeQProcess:
         self.readyReadStandardOutput = _DummySignal()
         self.readyReadStandardError = _DummySignal()
         self.finished = _DummySignal()
+        self.errorOccurred = _DummySignal()
 
     def setWorkingDirectory(self, cwd: str) -> None:
         self.cwd = cwd
@@ -93,7 +94,7 @@ def _exercise_window_open_and_run() -> None:
     print("Test 1: Offscreen-Hauptfenster öffnet Datei und löst Run-Command aus")
     app = _ensure_app()
     with tempfile.TemporaryDirectory(prefix="codebox-linux-window-") as tmpdir_str:
-        tmpdir = Path(tmpdir_str)
+        tmpdir = Path(tmpdir_str).resolve()
         project_dir = tmpdir / "Projekt Übersicht"
         project_dir.mkdir(parents=True)
         script_path = project_dir / "überblick.py"
@@ -119,10 +120,17 @@ def _exercise_window_open_and_run() -> None:
                 _assert(window.output.run_btn.isEnabled(), "Run-Button blieb deaktiviert.")
 
                 captured: list[list[str]] = []
-                window.output.run_command = lambda command: captured.append(command)
+                captured_debug_modes: list[bool] = []
+
+                def capture_command(command, is_debug=False):
+                    captured.append(command)
+                    captured_debug_modes.append(is_debug)
+
+                window.output.run_command = capture_command
                 window.run_current()
 
-                _assert(captured == [["python", "-u", str(script_path)]], repr(captured))
+                _assert(captured == [[sys.executable or "python", "-u", str(script_path)]], repr(captured))
+                _assert(captured_debug_modes == [False], repr(captured_debug_modes))
             finally:
                 window.close()
                 app.processEvents()

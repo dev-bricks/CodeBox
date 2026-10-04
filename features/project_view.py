@@ -10,7 +10,7 @@ Git-Status-Indikatoren (M/S/U/D) werden rechts neben dem Dateinamen eingeblendet
 
 from __future__ import annotations
 
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Optional, Dict, TYPE_CHECKING
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QTreeView, QFileSystemModel,
@@ -52,9 +52,12 @@ def status_for_path(
     Returns:
         GitFileStatus oder None.
     """
+    path_type = PureWindowsPath if PureWindowsPath(repo_root).drive else PurePosixPath
     try:
-        rel = Path(abs_path).relative_to(repo_root)
+        rel = path_type(abs_path).relative_to(path_type(repo_root))
     except ValueError:
+        return None
+    if ".." in rel.parts:
         return None
     return status_dict.get(rel.as_posix())
 

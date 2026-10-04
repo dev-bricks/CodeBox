@@ -17,6 +17,11 @@ Alle wesentlichen Änderungen an CodeBox werden hier dokumentiert.
 - **Git-Tracking bereinigt:** `BEFUNDE.md` aus dem Git-Tracking entfernt (`git rm --cached`), bleibt lokal erhalten.
 - **Vertragstests (`tests/test_metadata.py`):** `test_gitignore_internal_file_hygiene` hinzugefuegt (T-20260926-434768981).
 
+### Fixed (2026-10-02: Editor-Dateien bei Speicherfehlern erhalten)
+- Editor-Tabs kodieren UTF-8 vor dem Öffnen der Ausgabe und verwenden QSaveFile ohne direkten Schreib-Fallback. Teilwrites und fehlgeschlagene Commits überschreiben den bisherigen Code nicht.
+- Ungültiges UTF-8 wird als Speicherfehler gemeldet; geänderte Dokumente und geteilte Ansichten werden erst nach erfolgreichem Commit als unverändert markiert.
+- Regressionen prüfen Öffnungs-, Schreib- und Commitfehler, leere Dokumente, native Zeilenenden und geteilte Dokumente. Grenzen stehen in SAVE_SAFETY.md; Version und bestehender EXE-Build bleiben unverändert.
+
 ### Added (I18N Expansion & Tier-2 6-Sprachen-Architektur 2026-09-30)
 - **Policy P-006 Tier-2 6-Sprachen-Standard (`translator.py`, `manage_translations.py`, `locales/translations.json`)**:
   - `translator.py`: Vollwertiges `TranslationSystem` v2.0 mit 6 Standardsprachen (`de`, `en`, `es`, `zh`, `ja`, `ru`), deterministischer 4-Stufen-Fallback-Kette (`target -> en -> de -> key`), Systemsprachenerkennung (`detect_system_language()`), thread-sicherem Singleton `get_translator()` und globalem Helper `t(key, **kwargs)` mit kwargs-Interpolation und Fehlerisolation.
