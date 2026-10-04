@@ -1,6 +1,6 @@
 # CodeBox - Local PySide6 Desktop Code Editor
 
-## Last-checked: 2026-09-30
+## Last-checked: 2026-10-04
 
 > CodeBox is a local-first desktop IDE for Windows, Linux, and macOS developers who want a lightweight PySide6 code editor with multi-tab workspace, project tree, integrated terminal, Git status porcelain indicators, syntax highlighting, Language Server Protocol (LSP) diagnostics, and an extensible JSON/Python language plugin architecture.
 
@@ -44,15 +44,15 @@ Part of the dev-bricks family. Python, MIT.
 - `python main.py`: Launches the CodeBox desktop interface.
 - `python main.py --open <file>`: Launches and directly opens a target file path.
 - `python manage_translations.py --check`: Validates 100% key parity across all 6 Policy P-006 languages.
-- `build_exe.bat`: Uses PyInstaller to bundle the application into a standalone executable (`dist/CodeBox.exe`).
-- `pytest`: Runs the automated test suite (329 passed, 1 skipped, 100%).
+- `build_exe.bat`: Uses PyInstaller to bundle the application into a standalone executable (`%LOCALAPPDATA%\CodeBox\build\dist\CodeBox.exe`, override with `CODEBOX_BUILD_ROOT`).
+- `pytest`: Runs the automated test suite (360 passed, 1 skipped).
 - `ruff check .`: Runs the codebase linting suite.
 
 ## Related Projects (dev-bricks & ellmos family)
 
 - [safe-start-for-codex](https://github.com/dev-bricks/safe-start-for-codex): Startup gating utility for local Codex automations.
 - [companion-for-agy](https://github.com/dev-bricks/companion-for-agy): Node.js wrapper for the Antigravity TUI.
-- [automation-master](https://github.com/dev-bricks/automation-master): Task orchestration and automation supervisor.
+- automation-master (not public): Task orchestration and automation supervisor.
 - [automizer-for-claude-desktop](https://github.com/dev-bricks/automizer-for-claude-desktop): Automation bridge for Claude Desktop.
 - [ellmos-codecommander-mcp](https://github.com/ellmos-ai/ellmos-codecommander-mcp): Code analysis and AST processing MCP server.
 - [ellmos-filecommander-mcp](https://github.com/ellmos-ai/ellmos-filecommander-mcp): Filesystem and process orchestration MCP server.

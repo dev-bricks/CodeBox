@@ -7,7 +7,7 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![Plataforma: Windows | Linux | macOS](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)]()
 [![CI](https://github.com/dev-bricks/CodeBox/actions/workflows/ci.yml/badge.svg)](https://github.com/dev-bricks/CodeBox/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-347%20passed%20%7C%20100%25-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-360%20passed%20%7C%20100%25-brightgreen.svg)]()
 [![Privacidad: Zero-Egress](https://img.shields.io/badge/privacy-100%25%20local--first%20%7C%20zero--egress-success.svg)](SECURITY.md)
 [![Política de Seguridad](https://img.shields.io/badge/security-bilingual%20policy-blue.svg)](SECURITY.md)
 [![Ecosistema: dev-bricks](https://img.shields.io/badge/ecosystem-dev--bricks-blue.svg)](https://github.com/dev-bricks)
@@ -15,7 +15,7 @@
 [![LSP Listo](https://img.shields.io/badge/LSP-ready-purple.svg)]()
 [![Versión: 0.3.5](https://img.shields.io/badge/version-0.3.5-green.svg)](CHANGELOG.md)
 [![SBOM Nivel 1](https://img.shields.io/badge/SBOM-Level%201%20Audited-blue.svg)](THIRD_PARTY_LICENSES.md)
-[![Última comprobación](https://img.shields.io/badge/last%20checked-2026--09--30-informational.svg)](llms.txt)
+[![Última comprobación](https://img.shields.io/badge/last%20checked-2026--10--04-informational.svg)](llms.txt)
 [![llms.txt](https://img.shields.io/badge/llms.txt-available-green.svg)](llms.txt)
 
 [English](README.md) | [Deutsch](README_de.md) | Español
@@ -318,7 +318,7 @@ Compile un ejecutable independiente para Windows sin dependencias externas:
 build_exe.bat
 ```
 
-El script de compilación utiliza PyInstaller con `CodeBox.spec` para empaquetar los iconos de la aplicación, los temas predeterminados y los complementos declarativos en `dist\CodeBox.exe`.
+El script de compilación utiliza PyInstaller con `CodeBox.spec` para empaquetar los iconos de la aplicación, los temas predeterminados y los complementos declarativos en `%LOCALAPPDATA%\CodeBox\build\dist\CodeBox.exe` (ubicación configurable con la variable de entorno `CODEBOX_BUILD_ROOT`).
 
 ---
 
@@ -341,7 +341,7 @@ CodeBox/
 ├── plugins/                 # Complementos de lenguaje declarativos integrados (JSON)
 ├── themes/                  # Hojas de estilo QSS (dark.qss, light.qss)
 ├── assets/                  # Banners vectoriales de alta resolución e iconos de escritorio
-├── tests/                   # Suite completa de pruebas automatizadas (340+ pruebas)
+├── tests/                   # Suite completa de pruebas automatizadas (360 pruebas)
 └── README/screenshots/      # Recursos gráficos para la muestra visual
 ```
 
@@ -356,7 +356,7 @@ CodeBox se integra con el ecosistema de herramientas para desarrolladores de **d
 | --- | --- | --- |
 | [dev-bricks/safe-start-for-codex](https://github.com/dev-bricks/safe-start-for-codex) | Utilidad de inicio controlado para automatizaciones locales de Codex | `dev-bricks` |
 | [dev-bricks/companion-for-agy](https://github.com/dev-bricks/companion-for-agy) | Envoltorio de orquestación en Node.js para Antigravity | `dev-bricks` |
-| [dev-bricks/automation-master](https://github.com/dev-bricks/automation-master) | Orquestador de tareas y supervisor de automatización | `dev-bricks` |
+| automation-master (no público) | Orquestador de tareas y supervisor de automatización | `dev-bricks` |
 | [dev-bricks/automizer-for-claude-desktop](https://github.com/dev-bricks/automizer-for-claude-desktop) | Puente de automatización para Claude Desktop | `dev-bricks` |
 | [ellmos-ai/ellmos-codecommander-mcp](https://github.com/ellmos-ai/ellmos-codecommander-mcp) | Servidor MCP de análisis AST, refactorización y diagnóstico | `ellmos-ai` |
 | [ellmos-ai/ellmos-filecommander-mcp](https://github.com/ellmos-ai/ellmos-filecommander-mcp) | Servidor MCP para manipulación segura de archivos y procesos | `ellmos-ai` |

@@ -7,7 +7,7 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![Plattform: Windows | Linux | macOS](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)]()
 [![CI](https://github.com/dev-bricks/CodeBox/actions/workflows/ci.yml/badge.svg)](https://github.com/dev-bricks/CodeBox/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-329%20passed%20%7C%20100%25-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-360%20passed%20%7C%20100%25-brightgreen.svg)]()
 [![Datenschutz: Zero-Egress](https://img.shields.io/badge/datenschutz-100%25%20local--first%20%7C%20zero--egress-success.svg)](SECURITY.md)
 [![Sicherheitsrichtlinie](https://img.shields.io/badge/sicherheit-zweisprachige%20policy-blue.svg)](SECURITY.md)
 [![Ökosystem: dev-bricks](https://img.shields.io/badge/ecosystem-dev--bricks-blue.svg)](https://github.com/dev-bricks)
@@ -15,7 +15,7 @@
 [![LSP Ready](https://img.shields.io/badge/LSP-ready-purple.svg)]()
 [![Version: 0.3.5](https://img.shields.io/badge/version-0.3.5-green.svg)](CHANGELOG.md)
 [![SBOM Level 1](https://img.shields.io/badge/SBOM-Level%201%20Auditiert-blue.svg)](THIRD_PARTY_LICENSES.md)
-[![Letzte Prüfung](https://img.shields.io/badge/letzte%20pr%C3%BCfung-2026--09--28-informational.svg)](llms.txt)
+[![Letzte Prüfung](https://img.shields.io/badge/letzte%20pr%C3%BCfung-2026--10--04-informational.svg)](llms.txt)
 [![llms.txt](https://img.shields.io/badge/llms.txt-verf%C3%BCgbar-green.svg)](llms.txt)
 
 [English](README.md) | Deutsch | [Español](README.es.md)
@@ -241,6 +241,7 @@ Die folgende Matrix vergleicht CodeBox mit 4 verbreiteten Entwicklungsumgebungen
 - **Multi-Cursor & Column Selection**: Synchrone Bearbeitung an beliebig vielen Cursor-Positionen, Spaltenauswahl (`Alt+Shift+Ziehen`), Vorkommen-Markierung (`Ctrl+Shift+L` / `Ctrl+Alt+L`) und atomares Undo/Redo.
 - **Code-Faltung & Split-Editor**: Interaktives Ein-/Ausklappen von Funktionsblöcken und horizontale/vertikale Editor-Teilung mit synchronisierten Dokument-Buffern.
 - **Präzises Syntax-Highlighting**: Vorkonfigurierte Highlightings für Python, JavaScript, TypeScript, C++, Rust, Go und Java mit satzzeichensicherem Wortgrenzen-Matching.
+- **Mehrsprachige Oberfläche (6 Sprachen)**: Deutsch, Englisch, Spanisch, Chinesisch, Japanisch und Russisch, zur Laufzeit umschaltbar über *Ansicht -> Sprache* oder den Einstellungsdialog, mit 4-stufiger Fallback-Kette (`Zielsprache -> en -> de -> Schlüssel`).
 - **Deklarative Plugin-Architektur**: Neue Sprachen in wenigen Minuten per JSON-Schema definieren (`plugins/`, `~/.codebox/plugins/`).
 - **Interaktive Verwaltungsdialoge**: Vollständige GUI-Dialoge zur Verwaltung von Sprach-Plugins und Tastaturkürzeln (`F1`).
 - **Integriertes Terminal**: Native Terminalemulation mit Befehlshistorie, Streaming und automatischer Pfadsynchronisation.
@@ -328,7 +329,7 @@ Eigenständige, installationsfreie Windows-Executable kompilieren:
 build_exe.bat
 ```
 
-Das Script nutzt PyInstaller mit `CodeBox.spec`, um Icons, Themes und deklarative Plugins in `dist\CodeBox.exe` zu bündeln.
+Das Script nutzt PyInstaller mit `CodeBox.spec`, um Icons, Themes und deklarative Plugins in `%LOCALAPPDATA%\CodeBox\build\dist\CodeBox.exe` zu bündeln (Speicherort per Umgebungsvariable `CODEBOX_BUILD_ROOT` änderbar).
 
 ---
 
@@ -339,8 +340,11 @@ Das Script nutzt PyInstaller mit `CodeBox.spec`, um Icons, Themes und deklarativ
 CodeBox/
 ├── main.py                  # Anwendungseinstiegspunkt & CLI-Parameter
 ├── version.py               # Zentrale Versionskonstanten & Fenstertitel-Formatierung
+├── translator.py            # TranslationSystem v2.0 mit 4-stufiger Fallback-Kette (P-006)
+├── manage_translations.py   # CLI zur Paritätsprüfung der Übersetzungen (--check) für CI/CD
 ├── pyproject.toml           # PEP 621 Metadaten & Pytest-Konfiguration
 ├── requirements.txt         # Laufzeitabhängigkeiten (PySide6)
+├── locales/                 # Lokalisierungskataloge (translations.json, 6 Sprachen)
 ├── core/                    # Editor-Tabs, Highlighter, Minimap, Output-Panel
 ├── features/                # Terminal, Projektbaum, LSP-Manager, Linter, Themes, Plugins
 ├── languages/               # Sprachdefinitionen, Provider und deklarativer Parser
@@ -348,7 +352,7 @@ CodeBox/
 ├── plugins/                 # Gebündelte deklarative Sprach-Plugins (JSON)
 ├── themes/                  # QSS-Stylesheets (dark.qss, light.qss)
 ├── assets/                  # Hochauflösende Vektorbanner und Icons
-├── tests/                   # Automatisierte Testsuite (295+ Tests)
+├── tests/                   # Automatisierte Testsuite (360 Tests)
 └── README/screenshots/      # Grafiken für den Projektauftritt
 ```
 
@@ -363,7 +367,7 @@ CodeBox ist Teil des Entwickler-Ökosystems von **dev-bricks** und **ellmos-ai**
 | --- | --- | --- |
 | [dev-bricks/safe-start-for-codex](https://github.com/dev-bricks/safe-start-for-codex) | Startup-Gating für lokale Codex-Automationen | `dev-bricks` |
 | [dev-bricks/companion-for-agy](https://github.com/dev-bricks/companion-for-agy) | Node.js Orchestrierungs-Wrapper für Antigravity | `dev-bricks` |
-| [dev-bricks/automation-master](https://github.com/dev-bricks/automation-master) | Task-Orchestrierung und Automations-Supervisor | `dev-bricks` |
+| automation-master (nicht öffentlich) | Task-Orchestrierung und Automations-Supervisor | `dev-bricks` |
 | [dev-bricks/automizer-for-claude-desktop](https://github.com/dev-bricks/automizer-for-claude-desktop) | Automationsbrücke für Claude Desktop | `dev-bricks` |
 | [ellmos-ai/ellmos-codecommander-mcp](https://github.com/ellmos-ai/ellmos-codecommander-mcp) | AST-Analyse, Refactoring und Code-Diagnose MCP-Server | `ellmos-ai` |
 | [ellmos-ai/ellmos-filecommander-mcp](https://github.com/ellmos-ai/ellmos-filecommander-mcp) | Dateisystem-Manipulation & Prozess-Supervisor MCP | `ellmos-ai` |

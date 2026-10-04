@@ -7,7 +7,7 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![Platform: Windows | Linux | macOS](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)]()
 [![CI](https://github.com/dev-bricks/CodeBox/actions/workflows/ci.yml/badge.svg)](https://github.com/dev-bricks/CodeBox/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-329%20passed%20%7C%20100%25-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-360%20passed%20%7C%20100%25-brightgreen.svg)]()
 [![Privacy: Zero-Egress](https://img.shields.io/badge/privacy-100%25%20local--first%20%7C%20zero--egress-success.svg)](SECURITY.md)
 [![Security Policy](https://img.shields.io/badge/security-bilingual%20policy-blue.svg)](SECURITY.md)
 [![Ecosystem: dev-bricks](https://img.shields.io/badge/ecosystem-dev--bricks-blue.svg)](https://github.com/dev-bricks)
@@ -15,7 +15,7 @@
 [![LSP Ready](https://img.shields.io/badge/LSP-ready-purple.svg)]()
 [![Version: 0.3.5](https://img.shields.io/badge/version-0.3.5-green.svg)](CHANGELOG.md)
 [![SBOM Level 1](https://img.shields.io/badge/SBOM-Level%201%20Audited-blue.svg)](THIRD_PARTY_LICENSES.md)
-[![Last Checked](https://img.shields.io/badge/last%20checked-2026--09--28-informational.svg)](llms.txt)
+[![Last Checked](https://img.shields.io/badge/last%20checked-2026--10--04-informational.svg)](llms.txt)
 [![llms.txt](https://img.shields.io/badge/llms.txt-available-green.svg)](llms.txt)
 
 English | [Deutsch](README_de.md) | [Español](README.es.md)
@@ -245,6 +245,7 @@ The following matrix benchmarks CodeBox against 4 prevalent desktop development 
 - **Project File Tree**: Tree view with proxy search filtering, context actions, and Git porcelain status badges.
 - **Multi-Tab Workspace**: Drag-and-drop tab reordering, save-failure protection, and absolute path tooltips.
 - **Minimap Preview & Navigation**: Synchronized minimap overview, bracket auto-pairing, and go-to-line navigation (`Ctrl+G`).
+- **Multilingual UI (6 languages)**: German, English, Spanish, Chinese, Japanese, and Russian, switchable at runtime via *View -> Language* or the settings dialog, with a 4-stage fallback chain (`target -> en -> de -> key`).
 - **Dual Theme System**: Seamless light/dark palette switching powered by `features/theme_manager.py`.
 - **LSP Diagnostics & Completion**: Asynchronous background queries providing real-time diagnostics and code completions.
 - **Automated Linters**: On-save Ruff, flake8, and ESLint integration piped directly to the unified Problems Panel.
@@ -326,7 +327,7 @@ Compile a standalone, zero-dependency Windows executable:
 build_exe.bat
 ```
 
-The build script uses PyInstaller with `CodeBox.spec` to bundle application icons, default themes, and declarative plugins into `dist\CodeBox.exe`.
+The build script uses PyInstaller with `CodeBox.spec` to bundle application icons, default themes, and declarative plugins into `%LOCALAPPDATA%\CodeBox\build\dist\CodeBox.exe` (override the location with the `CODEBOX_BUILD_ROOT` environment variable).
 
 ---
 
@@ -337,8 +338,11 @@ The build script uses PyInstaller with `CodeBox.spec` to bundle application icon
 CodeBox/
 ├── main.py                  # Application entry point & CLI parameter parser
 ├── version.py               # Central version constants & window title formatter
+├── translator.py            # TranslationSystem v2.0 with 4-stage fallback chain (P-006)
+├── manage_translations.py   # Translation parity validator CLI (--check) for CI/CD
 ├── pyproject.toml           # PEP 621 packaging metadata & pytest configuration
 ├── requirements.txt         # Production runtime dependencies (PySide6)
+├── locales/                 # Localization catalogs (translations.json, 6 languages)
 ├── core/                    # Core editor tabs, highlighter, minimap, output panel
 ├── features/                # Terminal, project tree, LSP manager, linter, themes, plugins
 ├── languages/               # Language definitions, providers, and declarative parser
@@ -346,7 +350,7 @@ CodeBox/
 ├── plugins/                 # Bundled declarative language plugins (JSON)
 ├── themes/                  # QSS stylesheets (dark.qss, light.qss)
 ├── assets/                  # High-resolution vector banners and desktop icons
-├── tests/                   # Comprehensive automated test suite (295+ tests)
+├── tests/                   # Comprehensive automated test suite (360 tests)
 └── README/screenshots/      # Visual showcase assets
 ```
 
@@ -361,7 +365,7 @@ CodeBox integrates with the **dev-bricks** and **ellmos-ai** developer tooling e
 | --- | --- | --- |
 | [dev-bricks/safe-start-for-codex](https://github.com/dev-bricks/safe-start-for-codex) | Startup gating utility for local Codex automations | `dev-bricks` |
 | [dev-bricks/companion-for-agy](https://github.com/dev-bricks/companion-for-agy) | Node.js orchestration wrapper for Antigravity | `dev-bricks` |
-| [dev-bricks/automation-master](https://github.com/dev-bricks/automation-master) | Task orchestration and automation supervisor | `dev-bricks` |
+| automation-master (not public) | Task orchestration and automation supervisor | `dev-bricks` |
 | [dev-bricks/automizer-for-claude-desktop](https://github.com/dev-bricks/automizer-for-claude-desktop) | Automation bridge for Claude Desktop | `dev-bricks` |
 | [ellmos-ai/ellmos-codecommander-mcp](https://github.com/ellmos-ai/ellmos-codecommander-mcp) | AST analysis, refactoring, and code diagnosis MCP server | `ellmos-ai` |
 | [ellmos-ai/ellmos-filecommander-mcp](https://github.com/ellmos-ai/ellmos-filecommander-mcp) | Safe filesystem manipulation and process supervisor MCP | `ellmos-ai` |
