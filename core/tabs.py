@@ -4,11 +4,12 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Optional
 
 from PySide6.QtWidgets import QTabWidget, QMessageBox
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Signal, QIODevice, QSaveFile
 from PySide6.QtGui import QTextDocument
 
 from .editor import CodeEditor
@@ -78,11 +79,23 @@ class EditorTab:
     def save(self) -> bool:
         """Speichert die Datei"""
         if self.file_path:
+            output = None
             try:
-                self.file_path.write_text(
-                    self.editor.toPlainText(), encoding='utf-8'
-                )
-            except OSError as e:
+                # Preserve the native newline conversion of Path.write_text, but
+                # validate UTF-8 before opening any output device.
+                payload = self.editor.toPlainText().replace('\n', os.linesep).encode('utf-8')
+                output = QSaveFile(str(self.file_path))
+                output.setDirectWriteFallback(False)
+                if not output.open(QIODevice.OpenModeFlag.WriteOnly):
+                    raise OSError(output.errorString())
+                if output.write(payload) != len(payload):
+                    raise OSError(output.errorString() or 'Datei nicht vollständig geschrieben')
+                if not output.commit():
+                    raise OSError(output.errorString())
+            except (OSError, UnicodeError) as e:
+                if output is not None and output.isOpen():
+                    output.cancelWriting()
+                    output.commit()  # Discard and close the private output.
                 QMessageBox.critical(None, "Speichern fehlgeschlagen",
                                      f"Konnte nicht speichern:\n{e}")
                 return False
