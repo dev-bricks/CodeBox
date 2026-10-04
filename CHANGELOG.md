@@ -17,6 +17,105 @@ Alle wesentlichen Änderungen an CodeBox werden hier dokumentiert.
 - **Git-Tracking bereinigt:** `BEFUNDE.md` aus dem Git-Tracking entfernt (`git rm --cached`), bleibt lokal erhalten.
 - **Vertragstests (`tests/test_metadata.py`):** `test_gitignore_internal_file_hygiene` hinzugefuegt (T-20260926-434768981).
 
+### Added (I18N Expansion & Tier-2 6-Sprachen-Architektur 2026-09-30)
+- **Policy P-006 Tier-2 6-Sprachen-Standard (`translator.py`, `manage_translations.py`, `locales/translations.json`)**:
+  - `translator.py`: Vollwertiges `TranslationSystem` v2.0 mit 6 Standardsprachen (`de`, `en`, `es`, `zh`, `ja`, `ru`), deterministischer 4-Stufen-Fallback-Kette (`target -> en -> de -> key`), Systemsprachenerkennung (`detect_system_language()`), thread-sicherem Singleton `get_translator()` und globalem Helper `t(key, **kwargs)` mit kwargs-Interpolation und Fehlerisolation.
+  - `locales/translations.json`: 95 UI-, Menü-, Dialog-, Status- und Aktionsschlüssel lückenlos über alle 6 Sprachen kuratiert (570 Strings, 100% Schlüsselparität, 0 fehlend, echte deutsche Umlaute und spanische Diakritika intakt).
+  - `manage_translations.py`: CLI-Management- und CI-Auditing-Tool mit `--check`-Gate (Exit 0 bei 100% Parität) und `--stats`-Übersicht.
+  - `config/__init__.py`: `"language": "de"` in `DEFAULT_SETTINGS` ergänzt.
+  - `ui/settings_dialog.py`: Neues Sprachauswahlfeld ("Sprache:") mit nativer Anzeige aller 6 Sprachen in den Programmeinstellungen verankert.
+  - `ui/main_window.py`: Neues Untermenü *Ansicht > Sprache* mit exklusiver `QActionGroup`-Auswahl für alle 6 Sprachen, dynamische Menü-Umschaltung via `retranslate_ui()` ohne Anwendungsneustart und synchrone Persistierung in den Einstellungen.
+  - `README.es.md`: Vollständige spanische Gesamtdokumentation gemäß Leerlauf-Sprachzug mit 1:1 Parität zu allen 18 Abschnitten, wechselseitigen Ankern und synchronisierten Sprachumschaltern in `README.md` und `README_de.md`.
+  - `tests/test_i18n.py`: 10 neue automatisierte Vertragstests für P-006-Sprachen, Fallback-Hierarchie, Schlüssel-Parität, Subprozess-CLI-Auditing, Umlaute, Einstellungen-Persistenz und dynamischen MainWindow-Sprachwechsel (100% bestanden).
+
+### Fixed (Bugsweep 2026-09-29)
+- **Git Staging & Commit-Dialog (`ui/git_commit_dialog.py`, `ui/diff_viewer.py`, `features/git_integration.py`)**:
+  - `_open_diff_viewer()`: Behebt unberechtigten `ImportError: cannot import name 'GitDiffDialog' from 'ui.diff_viewer'` beim Klick auf Diff-Schaltflächen im Commit-Dialog; `GitDiffDialog = DiffViewerDialog` als abwärtskompatiblen Alias in `ui/diff_viewer.py` verankert und in `ui/__init__.py` exportiert.
+  - `GitCommitDialog.refresh()`: Staged-Deletion-Duplikation behoben; Dateien, die für die Löschung bereitgestellt sind (`index_status='D', work_status=' '`), werden nicht mehr fälschlich zusätzlich in `unstaged_items` eingereiht.
+  - `GitCommitDialog.refresh()`: Relative `initial_file`-Pfade (z. B. `Path('README.md')`) werden nun fehlerfrei aufgelöst und im UI selektiert (verhindert unbemerkten `ValueError`).
+  - `DiffViewerDialog.refresh_diff()`: Unterstützt nun Strings und relative `Path`-Objekte für `select_file` ohne `AttributeError` oder `ValueError`.
+  - `DiffViewerDialog.open_selected_in_editor()`: Schaltfläche 'Im Editor öffnen' wird für gelöschte Dateien (`[D]`) defensiv deaktiviert und fängt Zugriffe auf nicht-existente Dateien ab.
+  - `GitRepo.discard_file_changes()`: Verwirft nun auch unversionierte Verzeichnisse (`target.is_dir()`) zuverlässig via `shutil.rmtree()` und `git clean -fd`.
+  - `GitRepo.get_diff()`: Normalisiert Backslashes in Pfad-Headern unversionierter Dateien auf POSIX-konforme Formatierung (`--- a/...`, `+++ b/...`).
+  - 7 neue hermetische Regressionstests in `tests/test_bugsweep_git_commit_and_diff_resilience_20260929.py`.
+
+### Repository Hygiene, CI Lifecycle Hardening & Lock Defense (Pfad A 2026-09-25)
+
+- **CI-Workflow Härtung & Concurrency-Schutz**:
+  - `.github/workflows/welcome.yml`: Auf `actions/first-interaction@v3` aktualisiert, Job-Timeout auf 5 Minuten begrenzt und `concurrency: cancel-in-progress: true` ergänzt.
+  - `.github/workflows/stale.yml`: Job-Timeout auf 10 Minuten begrenzt und `concurrency: cancel-in-progress: true` hinzugefügt.
+  - `.github/workflows/ci.yml`: `timeout-minutes: 10` für Lint-Job und `timeout-minutes: 25` für die Multi-OS Test-Matrix ergänzt.
+  - `.github/workflows/linux-platform-smoke.yml`: `timeout-minutes: 15` für Smoke- und macOS-Smoke-Jobs konfiguriert.
+- **Multi-Host Cloud-Sync-, Lock- & Cache-Schutz (`.gitignore`)**:
+  - Flottenweite Abwehrmuster gegen Cloud-Konflikte (`*conflicted copy*`, `* (Kopie)*`, `* (Copy)*`), gerätespezifische Host-Spiegel (`*-ASUS*`, `*-LAPTOP*`, `*-Mac Studio*`, `*-MacBook*`, `*-IDEAPAD*`, `*-WORKSTATION*`, `*-WORKSTATION-LG*`), agentische Lock-Artefakte (`LOCK.user.*`, `LOCK.until.*`, `LOCK.condition.*`, `.automation-lock`, `uv.lock`, `!package-lock.json`) und temporäre Cache-Pfade (`.pytest_temp/`, `.pytest_tmp*/`, `.hypothesis/`, `.turbo/`, `.tox/`, `*.orig`, `*.rej`) verankert.
+- **PEP 621 Standardisierung & Test-Runner-Härtung (`pyproject.toml`)**:
+  - `[tool.pytest.ini_options]`: `norecursedirs` um `.pytest_temp`, `.hypothesis`, `.turbo`, `.tox` erweitert und `addopts` mit `--basetemp=.pytest_temp` gehärtet.
+  - Strikte Version-Freeze-Disziplin per T-20260920-167562623 eingehalten (`version = "0.3.3"` unverändert beibehalten).
+- **SBOM- & Governance-Audit (`THIRD_PARTY_LICENSES.md`, `THIRD_PARTY_LICENSES.txt`)**:
+  - Level 1 SBOM Drittanbieter-Lizenzaudit auf Stand 2026-09-25 re-auditiert. Bestätigung der 10 Governance- und Laufzeitinvarianten (`INV-LOCAL-01` bis `INV-SLA-10`), des unprivilegierten RunAsInvoker Non-Elevation Modus und der strikten LGPL-3.0 Section 4 dynamischen Verlinkung für PySide6.
+- **Doku-, Kontext- & Badge-Synchronisation (`llms.txt`, `README.md`, `README_de.md`)**:
+  - `llms.txt` und README-Badges auf Stand 2026-09-25 und 299/300 verifizierte Tests aktualisiert.
+  - Lokales `MARKETING-LOG.txt` um Pfad A Revisionsbericht 2026-09-25 ergänzt.
+- **Vertragstest-Erweiterung (`tests/test_metadata.py`)**:
+  - Neue Contract-Tests für CI-Workflow-Concurrency/Timeouts, erweiterte .gitignore Lock-Defense-Muster, pyproject.toml Test-Härtung und synchrone Changelog/Marketing-Log-Einträge.
+
+### Fixed (Bugsearch & Härtungslauf 2026-09-23)
+- `features/git_integration.py`:
+  - `_decode_c_escapes()`: Dekodiert C-Style Oktalsequenzen (`\ooo`) für UTF-8 Zeichen (z. B. deutsche Umlaute `ä, ö, ü, ß`) sowie Steuerzeichen (`\a, \b, \t, \n, \v, \f, \r, \", \\`). Git porcelain Pfade mit Umlauten werden nun fehlerfrei aufgelöst, wodurch Git-Status-Badges in `ProjectView`, Commit-Dialoge, `discard_file_changes` und Diffs für solche Dateien zuverlässig funktionieren.
+  - `parse_porcelain_path()`: Verhindert das fehlerhafte Zerteilen von Dateinamen, die buchstäblich ` -> ` enthalten (z. B. `"notizen -> entwurf.md"`), wenn kein Rename vorliegt (`is_rename=False` oder einzeln gequoteter Pfad).
+  - `GitRepo.get_status()`: Berücksichtigt Umbenennungen sowohl im Index (`X == "R"`) als auch im Worktree (`Y == "R"`) und übergibt das Rename-Flag gezielt an `parse_porcelain_path()`.
+  - 3 neue Regressionstests in `tests/test_git_status_parsing.py`.
+
+### Marketing, Discoverability & Governance Audit (Pfad B 2026-09-23)
+
+- **Repository Metadata Saturation**:
+  - Maximized GitHub repository topics to 20/20 saturation with zero-egress, dev-bricks, local-first, lsp, and pyside6 taxonomy.
+  - Set canonical homepage URL to `https://github.com/dev-bricks/CodeBox#readme`.
+- **Level 1 SBOM & Invariant Matrix**:
+  - Created [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md) defining full dependency inventory, LGPL-3.0 Section 4 dynamic linking guarantees, and 10 technical invariants (`INV-LOCAL-01` to `INV-SLA-10`).
+  - Added root [`NOTICE`](NOTICE) attribution file formalizing copyright and open-bricks umbrella stewardship.
+- **Bilingual Documentation Parity & Dual Reciprocal Anchors**:
+  - Upgraded [`README.md`](README.md) and [`README_de.md`](README_de.md) with 18-point numbered quick navigation and reciprocal anchor pairs (`<a id="..."></a>`).
+  - Added Section 6: Target Personas (`[PERSONA-01]` to `[PERSONA-04]`) and high-intent SEO search queries.
+  - Added Section 7: 10-Dimension Comparative Matrix benchmarking CodeBox against VS Code, Sublime Text, PyCharm Community, and CLI editors.
+  - Added Section 16: Third-Party Licenses & Level 1 SBOM.
+  - Updated Section 17 & 18: German statutory liability limitation pursuant to § 521 BGB (Gefälligkeitsrecht) and 48-hour security response SLA (`INV-SLA-10`).
+  - Synchronized badges with Level 1 SBOM, NOTICE attribution, 295 passed tests, and Stand 2026-09-23 audit stempel.
+- **Machine-Readable LLM Context (`llms.txt`)**:
+  - Updated `llms.txt` to Stand 2026-09-23, documented 295 passed tests, NOTICE attribution, Level 1 SBOM notes, and statutory disclaimers.
+
+## [0.3.5] - 2026-09-28
+
+### Added
+- **Debugger Watch-Expressions & Call-Stack Panel (`core/debugger.py`, `ui/debug_panel.py`)**:
+  - `core/debugger.py`: Robustes Datenmodell (`StackFrame`, `WatchExpression`), PDB-Stack-Parser (`parse_pdb_stack`) mit Unterstützung für Windows- und POSIX-Dateipfade, Erkennung des aktiven Frames (`>`) und Quelltextzeilen (`->`), PDB-Ausdrucks-Evaluierung (`parse_pdb_eval_response`) und fehlertoleranter Ausdrucksrechner (`safe_eval_expression`).
+  - `ui/debug_panel.py`: Neues `DebugPanel` mit geteilter Ansicht (`QSplitter`), bestehend aus `WatchTreeWidget` (Variablen- und Ausdrucksüberwachung mit Spalten für Ausdruck, Wert und Typ) und `CallStackTreeWidget` (interaktiver Aufruf-Stapel mit visueller Hervorhebung des aktuellen Frames `▶`).
+  - Vollständiges CRUD für Variablenüberwachungen: Hinzufügen per Dialog (`Ctrl+Shift+W`), Inline-Bearbeitung (`F2`), Löschen (`Entf`), Kontextmenüs und Schnellauswertungsleiste mit Sofort-Feedback.
+  - Interaktive Stack-Navigation: Doppelklick oder `Enter` auf einen Stack-Frame öffnet direkt die Datei und navigiert zur exakten Zeile (`frameActivated` Signal verknüpft mit `open_path_at`).
+  - `core/output.py`: Entkoppeltes Streaming von Debugger-Ausgaben über das Signal `debugOutputReceived` an das Debug-Panel zur synchronen Zustandsaktualisierung.
+  - `core/editor.py`: Neues Signal `addWatchRequested` und Kontextmenü-Eintrag *"Zu Überwachung hinzufügen: '...' "* für markierten Code oder Symbole unter dem Cursor.
+  - `ui/main_window.py`: Integration des `DebugPanel` als Tab 5 in den unteren Bereich (`bottom_tabs`), Tastenkürzel `Ctrl+Shift+D` zum Ein-/Ausblenden und Fokussieren, Menüeinträge unter *Ausführen* und *Ansicht*, sowie automatische Aktualisierung bei Debug-Einzelschritten.
+  - `ui/shortcuts_dialog.py`: Registrierung der Tastenkürzel `Ctrl+Shift+D` und `Ctrl+Shift+W` im Abschnitt *Ausführen*.
+  - `tests/test_debug_panel.py`: 12 neue automatisierte Unit- und Integrationstests für Parsing, Datenmodelle, Baum-Widgets, Shortcuts, Navigation und Hauptfenster-Integration (100% bestanden).
+
+## [0.3.4] - 2026-09-26
+
+### Added
+- **Snippet-Manager & Tab-Trigger-Erweiterung (`core/snippets.py`, `core/editor.py`)**:
+  - `core/snippets.py`: Zentrales Datenmodell (`Snippet`, `SnippetTabStop`), robuster Template-Parser (`parse_snippet`) mit Unterstützung für Tab-Stops (`$1`, `$2`), Platzhalter mit Standardwerten (`${1:default}`) und definierte oder implizite Exit-Points (`$0`).
+  - `SnippetSession`: Interaktive Platzhalter-Navigation im Editor via `QTextCursor`. Ermöglicht flüssiges Durchspringen mit `Tab` und `Shift+Tab`/`Backtab`, Vorbelegung markierter Platzhalter zur direkten Überschreibung und sauberes Beenden am `$0`-Punkt.
+  - Standard-Snippetkatalog für 10 Programmier- und Auszeichnungssprachen: Python (`def`, `asyncdef`, `class`, `if`, `ifelse`, `elif`, `for`, `while`, `try`, `tryfin`, `with`, `main`, `prop`, `init`, `repr`, `lambda`, `print`, `doc`), JavaScript & TypeScript (`fn`, `afn`, `class`, `if`, `ifelse`, `for`, `forof`, `forin`, `try`, `clg`, `cerr`, `import`, `prom`, `asyncfn`, `interface`, `type`, `enum`), C/C++ (`main`, `class`, `for`, `cout`, `include`), Rust (`fn`, `struct`, `enum`, `impl`, `match`, `println`), Go (`func`, `main`, `struct`, `interface`, `iferr`), Java (`main`, `class`, `sout`, `for`, `try`), HTML (`html5`, `div`, `btn`, `script`, `link`), Markdown (`link`, `img`, `code`, `tbl`, `todo`) und globale Kommentare (`todo`, `fixme`, `note`).
+  - Benutzerdefinierte Snippets: Persistente Speicherung und Verwaltung in `config/snippets.json` mit voller CRUD-Unterstützung (`add_custom_snippet`, `remove_custom_snippet`, `load_custom_snippets`, `save_custom_snippets`).
+  - `core/editor.py`: Automatische Tab-Trigger-Erweiterung beim Drücken der `Tab`-Taste direkt nach einem Schlüsselwort (`get_word_before_cursor`, `expand_snippet`), proportionale Einrückungsanpassung bei mehrzeiligen Snippets und Modernisierung von `insert_completion`.
+- **Snippet-Manager Benutzeroberfläche (`ui/snippets_dialog.py`)**:
+  - `SnippetsDialog`: Responsiver, barrierefreier PySide6-Dialog mit Echtzeit-Volltextsuche, Sprachfilter-Dropdown, tabellarischer Übersicht (Trigger, Sprache, Beschreibung, Herkunfts-Badge) und interaktiver Monospace-Code-Vorschau.
+  - Schaltflächen zum direkten Einfügen in das aktive Dokument (`Enter`), Erstellen (`SnippetEditDialog`), Bearbeiten und Löschen benutzerdefinierter Snippets.
+  - Menüpunkt *Bearbeiten > Snippet einfügen...* (`Ctrl+Shift+J`) und `show_snippets_dialog` in `ui/main_window.py`.
+  - Registrierung in der Befehlspalette (`ui/command_palette.py`) und Tastenkürzelübersicht (`ui/shortcuts_dialog.py`).
+- **Testsuite & Qualitätssicherung (`tests/test_snippets.py`, `tests/test_diff_viewer.py`)**:
+  - 14 neue Unit- und Integrationstests für Template-Parsing, Escaping, Session-Navigation, Editor-Tab-Trigger, Einrückungserhalt, Dialog-Filterung, Subdialoge und Menü-Verträge.
+  - Härtung von `test_diff_viewer_no_git_repo` gegen `--basetemp=.pytest_temp` Pfadableitungen.
+
 ## [0.3.3] - 2026-09-21
 
 ### Interaktive Konsolen-Eingabe (stdin) & Integrierte Debugger-Steuerung (PDB)

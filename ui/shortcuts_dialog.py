@@ -47,6 +47,8 @@ SHORTCUTS_DATA = [
     ("Bearbeiten", "Gehe zu Zeile", "Ctrl+G", "Springt zu einer bestimmten Zeilennummer"),
     ("Bearbeiten", "Zur Definition springen", "F12", "Springt zur Definition des aktuellen Symbols"),
     ("Bearbeiten", "Alle Referenzen suchen", "Shift+F12", "Sucht alle Vorkommen und Referenzen des aktuellen Symbols"),
+    ("Bearbeiten", "Snippet einfügen", "Ctrl+Shift+J", "Öffnet den Snippet-Manager zum Einfügen und Verwalten von Code-Snippets"),
+    ("Bearbeiten", "Snippet erweitern", "Tab", "Erweitert ein Snippet-Kürzel oder springt zum nächsten Platzhalter"),
     ("Bearbeiten", "Cursor oberhalb hinzufügen", "Ctrl+Alt+Up", "Fügt einen weiteren Cursor in der Zeile darüber ein (Spaltenauswahl)"),
     ("Bearbeiten", "Cursor unterhalb hinzufügen", "Ctrl+Alt+Down", "Fügt einen weiteren Cursor in der Zeile darunter ein (Spaltenauswahl)"),
     ("Bearbeiten", "Alle Vorkommen markieren", "Ctrl+Shift+L", "Markiert alle Vorkommen des aktuellen Worts oder der Auswahl mit Multi-Cursorn"),
@@ -67,6 +69,9 @@ SHORTCUTS_DATA = [
     ("Ausführen", "Debug: Herausspringen (Step Out)", "Shift+F11", "Führt bis zum Verlassen der Funktion aus (r)"),
     ("Ausführen", "Breakpoint umschalten", "F9", "Setzt oder entfernt einen Breakpoint in der aktuellen Zeile"),
     ("Ausführen", "Alle Breakpoints löschen", "Ctrl+Shift+F9", "Löscht alle gesetzten Breakpoints im aktuellen Editor"),
+    ("Ausführen", "Debugger-Panel anzeigen", "Ctrl+Shift+D", "Blendet das Debugger-Panel mit Variablen und Call-Stack ein"),
+    ("Ausführen", "Ausdruck überwachen", "Ctrl+Shift+W", "Fügt einen neuen Ausdruck zur Variablenüberwachung hinzu"),
+    ("Ausführen", "Aufruf-Stapel aktualisieren", "", "Fragt den aktuellen Call-Stack beim Debugger ab (w)"),
 
     # Ansicht
     ("Ansicht", "Projektbaum umschalten", "Ctrl+B", "Blendet den Datei- und Projektbaum ein/aus"),

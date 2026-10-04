@@ -58,7 +58,7 @@ def test_pyproject_required_fields(pyproject_data: dict) -> None:
     assert proj.get("requires-python")
     assert proj.get("license", {}).get("text") == "MIT"
     assert isinstance(proj.get("authors"), list) and len(proj["authors"]) > 0
-    assert isinstance(proj.get("keywords"), list) and len(proj["keywords"]) >= 5
+    assert isinstance(proj.get("keywords"), list) and len(proj["keywords"]) >= 20
     assert isinstance(proj.get("classifiers"), list) and len(proj["classifiers"]) >= 10
 
     urls = proj.get("urls", {})
@@ -67,22 +67,32 @@ def test_pyproject_required_fields(pyproject_data: dict) -> None:
     assert "Issues" in urls
     assert "Changelog" in urls
     assert "Security" in urls
+    assert "Notice" in urls
+    assert "SBOM" in urls
     assert "Parent Org" in urls
     assert "Umbrella Ecosystem" in urls
 
+    license_files = proj.get("license-files", [])
+    assert "LICENSE" in license_files
+    assert "NOTICE" in license_files
+    assert "THIRD_PARTY_LICENSES.md" in license_files
+
 
 def test_core_documentation_files_exist() -> None:
-    """Ensure all standard documentation and license files exist and are non-empty."""
+    """Ensure all standard documentation, notice, and license files exist and are non-empty."""
     required_files = [
         "README.md",
         "README_de.md",
         "llms.txt",
         "CHANGELOG.md",
         "LICENSE",
+        "NOTICE",
         "SECURITY.md",
         "DEVELOPMENT_PLAN.md",
         "API_STATUS.md",
+        "THIRD_PARTY_LICENSES.md",
         "THIRD_PARTY_LICENSES.txt",
+        "MARKETING-LOG.txt",
     ]
     for filename in required_files:
         p = PROJECT_ROOT / filename
@@ -91,7 +101,7 @@ def test_core_documentation_files_exist() -> None:
 
 
 def test_bilingual_readme_parity_and_anchors() -> None:
-    """Ensure English and German READMEs have corresponding headers, anchors, and badges."""
+    """Ensure English and German READMEs have corresponding headers, 18-point quick navigation, and dual anchors."""
     readme_en = (PROJECT_ROOT / "README.md").read_text(encoding="utf-8")
     readme_de = (PROJECT_ROOT / "README_de.md").read_text(encoding="utf-8")
 
@@ -102,15 +112,89 @@ def test_bilingual_readme_parity_and_anchors() -> None:
     # Check key badges
     for text in [readme_en, readme_de]:
         assert "img.shields.io/badge/License-MIT" in text or "img.shields.io/badge/Lizenz-MIT" in text
+        assert "Attribution-NOTICE" in text
+        assert "SBOM-Level%201" in text
         assert "ecosystem-dev--bricks" in text
         assert "part%20of-open--bricks" in text
         assert re.search(r"tests-\d+%20passed", text) is not None
         assert "llms.txt" in text
         assert "SECURITY.md" in text
 
-    # Check quick navigation section
+    # Check quick navigation section with 18 numbered points
     assert "## Quick Navigation" in readme_en
     assert "## Schnellnavigation" in readme_de
+    for i in range(1, 19):
+        assert f"- [{i}." in readme_en, f"README.md missing quick navigation item {i}."
+        assert f"- [{i}." in readme_de, f"README_de.md missing schnellnavigation item {i}."
+
+    # Check reciprocal HTML anchors exist in both READMEs
+    anchors = [
+        "start-here", "schnellstart",
+        "system-architecture", "systemarchitektur",
+        "end-to-end-workflow-lifecycle", "end-to-end-workflow-lebenszyklus",
+        "key-capabilities--runtime-invariants", "kernfaehigkeiten--laufzeitinvarianten",
+        "visual-showcase", "visuelle-demonstration",
+        "target-personas--use-cases", "zielgruppen--anwendungsfaelle",
+        "comparative-matrix-vs-alternatives", "vergleichsmatrix-gegenueber-alternativen",
+        "features", "funktionsumfang",
+        "installation--quickstart", "installation--schnellstart",
+        "language-server-protocol-lsp-setup", "lsp-einrichtung",
+        "declarative-plugin-system", "deklaratives-plugin-system",
+        "local-windows-build", "lokaler-windows-build",
+        "project-structure", "projektstruktur",
+        "sibling-ecosystem", "geschwister-oekosystem",
+        "search--disambiguation", "suche--abgrenzung",
+        "third-party-licenses--level-1-sbom", "drittanbieter-lizenzen--level-1-sbom",
+        "security--privacy", "sicherheit--datenschutz",
+        "license--liability", "lizenz--haftung",
+    ]
+    for anchor in anchors:
+        assert f'id="{anchor}"' in readme_en, f"Anchor {anchor} missing in README.md"
+        assert f'id="{anchor}"' in readme_de, f"Anchor {anchor} missing in README_de.md"
+
+
+def test_target_personas_and_comparative_matrix_invariants() -> None:
+    """Verify personas [PERSONA-01]..[PERSONA-04] and invariants INV-LOCAL-01..INV-SLA-10."""
+    readme_en = (PROJECT_ROOT / "README.md").read_text(encoding="utf-8")
+    readme_de = (PROJECT_ROOT / "README_de.md").read_text(encoding="utf-8")
+    sbom_text = (PROJECT_ROOT / "THIRD_PARTY_LICENSES.md").read_text(encoding="utf-8")
+
+    personas = [f"[PERSONA-0{i}]" for i in range(1, 5)]
+    for p in personas:
+        assert p in readme_en, f"Persona {p} missing in README.md"
+        assert p in readme_de, f"Persona {p} missing in README_de.md"
+
+    invariants = [
+        "INV-LOCAL-01",
+        "INV-PERF-02",
+        "INV-LGPL-03",
+        "INV-CRASH-04",
+        "INV-LSP-05",
+        "INV-TERM-06",
+        "INV-PLUG-07",
+        "INV-PORT-08",
+        "INV-GIT-09",
+        "INV-SLA-10",
+    ]
+    for inv in invariants:
+        assert inv in readme_en, f"Invariant {inv} missing in README.md"
+        assert inv in readme_de, f"Invariant {inv} missing in README_de.md"
+        assert inv in sbom_text, f"Invariant {inv} missing in THIRD_PARTY_LICENSES.md"
+
+
+def test_notice_and_statutory_liability_disclaimer() -> None:
+    """Ensure root NOTICE and statutory liability (§ 521 BGB) are present across docs."""
+    notice_text = (PROJECT_ROOT / "NOTICE").read_text(encoding="utf-8")
+    assert "Lukas Geiger" in notice_text
+    assert "dev-bricks" in notice_text
+    assert "open-bricks" in notice_text
+
+    readme_en = (PROJECT_ROOT / "README.md").read_text(encoding="utf-8")
+    readme_de = (PROJECT_ROOT / "README_de.md").read_text(encoding="utf-8")
+    llms_text = (PROJECT_ROOT / "llms.txt").read_text(encoding="utf-8")
+
+    for doc in [readme_en, readme_de, llms_text]:
+        assert "521 BGB" in doc, "§ 521 BGB disclaimer missing in doc"
 
 
 def test_mermaid_diagrams_syntax() -> None:
@@ -212,3 +296,74 @@ def test_gitignore_internal_file_hygiene() -> None:
     for pattern in ["BEFUNDE.md", "MARKETING-LOG.txt", "TODO.md", "DONE.md", "DECISIONS.md"]:
         assert pattern in gitignore, f"{pattern} must be ignored in .gitignore"
 
+
+def test_welcome_and_stale_workflow_hardening() -> None:
+    """Verify welcome.yml and stale.yml contain least-privilege permissions, concurrency, and timeouts."""
+    welcome_path = PROJECT_ROOT / ".github" / "workflows" / "welcome.yml"
+    assert welcome_path.is_file(), "welcome.yml must exist"
+    welcome_text = welcome_path.read_text(encoding="utf-8")
+    assert "actions/first-interaction@v3" in welcome_text
+    assert "timeout-minutes: 5" in welcome_text
+    assert "cancel-in-progress: true" in welcome_text
+    assert "issues: write" in welcome_text
+    assert "pull-requests: write" in welcome_text
+
+    stale_path = PROJECT_ROOT / ".github" / "workflows" / "stale.yml"
+    assert stale_path.is_file(), "stale.yml must exist"
+    stale_text = stale_path.read_text(encoding="utf-8")
+    assert "actions/stale@v9" in stale_text
+    assert "timeout-minutes: 10" in stale_text
+    assert "cancel-in-progress: true" in stale_text
+    assert "cron: '30 1 * * *'" in stale_text
+    assert "issues: write" in stale_text
+    assert "pull-requests: write" in stale_text
+
+
+def test_ci_and_smoke_job_timeouts() -> None:
+    """Verify ci.yml and linux-platform-smoke.yml define finite job-level timeouts."""
+    ci_text = (PROJECT_ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    assert "timeout-minutes: 10" in ci_text
+    assert "timeout-minutes: 25" in ci_text
+
+    smoke_text = (PROJECT_ROOT / ".github" / "workflows" / "linux-platform-smoke.yml").read_text(encoding="utf-8")
+    assert "timeout-minutes: 15" in smoke_text
+
+
+def test_gitignore_fleetwide_defense() -> None:
+    """Verify .gitignore blocks multi-host sync conflicts, multi-agent lock files, and test caches."""
+    content = (PROJECT_ROOT / ".gitignore").read_text(encoding="utf-8")
+    required_patterns = [
+        "*conflicted copy*",
+        "*-ASUS*",
+        "*-LAPTOP*",
+        "*-Mac Studio*",
+        "*-MacBook*",
+        "*-WORKSTATION*",
+        "*-WORKSTATION-LG*",
+        "LOCK.user.*",
+        "LOCK.until.*",
+        "LOCK.condition.*",
+        ".automation-lock",
+        "uv.lock",
+        "!package-lock.json",
+        ".pytest_temp/",
+        ".hypothesis/",
+        ".turbo/",
+        ".tox/",
+    ]
+    for pat in required_patterns:
+        assert pat in content, f"Missing pattern {pat} in .gitignore"
+
+
+def test_changelog_and_marketing_log_recency(pyproject_data: dict) -> None:
+    """Verify CHANGELOG, MARKETING-LOG, and pyproject pytest options match Pfad A 2026-09-25 baseline."""
+    changelog = (PROJECT_ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+    assert "Repository Hygiene, CI Lifecycle Hardening & Lock Defense (Pfad A 2026-09-25)" in changelog
+
+    marketing = (PROJECT_ROOT / "MARKETING-LOG.txt").read_text(encoding="utf-8")
+    assert "Pfad A Repository Hygiene, CI Hardening & Lock Defense - 2026-09-25" in marketing
+
+    pytest_opts = pyproject_data.get("tool", {}).get("pytest", {}).get("ini_options", {})
+    norecursedirs = pytest_opts.get("norecursedirs", [])
+    assert ".pytest_temp" in norecursedirs
+    assert "--basetemp=.pytest_temp" in pytest_opts.get("addopts", "")

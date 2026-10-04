@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QFont
 from config import load_settings, save_settings
 from features.theme_manager import get_available_themes
+from translator import TranslationSystem
 
 
 class SettingsDialog(QDialog):
@@ -67,6 +68,20 @@ class SettingsDialog(QDialog):
             self.theme_combo.setCurrentIndex(theme_idx)
         form_layout.addRow(QLabel("Theme:"), self.theme_combo)
 
+        # Language
+        self.lang_combo = QComboBox()
+        self.lang_combo.setToolTip("Sprache für die Benutzeroberfläche auswählen")
+        self.lang_combo.setAccessibleName("Sprache")
+        self.lang_combo.setAccessibleDescription("Wählt die Sprache der Programmoberfläche aus")
+        for code in TranslationSystem.SUPPORTED_LANGUAGES:
+            name = TranslationSystem.LANGUAGE_NAMES.get(code, code)
+            self.lang_combo.addItem(f"{name} ({code})", code)
+        current_lang = self._settings.get("language", "de")
+        lang_idx = self.lang_combo.findData(current_lang)
+        if lang_idx >= 0:
+            self.lang_combo.setCurrentIndex(lang_idx)
+        form_layout.addRow(QLabel("Sprache:"), self.lang_combo)
+
         # Auto Save
         self.auto_save_cb = QCheckBox("Dateien beim Ausführen automatisch speichern")
         self.auto_save_cb.setToolTip("Speichert geänderte Dateien automatisch vor dem Ausführen")
@@ -108,6 +123,7 @@ class SettingsDialog(QDialog):
         settings["font_size"] = self.font_size_spin.value()
         settings["tab_size"] = self.tab_size_spin.value()
         settings["theme"] = self.theme_combo.currentData() or "dark"
+        settings["language"] = self.lang_combo.currentData() or "de"
         settings["auto_save"] = self.auto_save_cb.isChecked()
         settings["show_minimap"] = self.minimap_cb.isChecked()
         settings["vim_mode"] = self.vim_mode_cb.isChecked()

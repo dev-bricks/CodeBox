@@ -10,7 +10,9 @@ from PySide6.QtWidgets import (
     QMessageBox, QTabWidget, QMenu
 )
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QTextCursor
+from PySide6.QtGui import QTextCursor, QActionGroup
+
+from translator import get_translator, TranslationSystem
 
 from core.tabs import TabWidget, EditorTab
 from core.editor import CodeEditor
@@ -33,11 +35,12 @@ from core.todo_scanner import TodoItem, TodoScannerManager
 from ui.problems_panel import ProblemsPanel
 from ui.references_panel import ReferencesPanel
 from ui.todo_panel import TodoPanel
+from ui.debug_panel import DebugPanel
 from ui.plugins_dialog import PluginsDialog
 from ui.shortcuts_dialog import ShortcutsDialog
 from ui.command_palette import CommandPaletteDialog
 from version import format_window_title, APP_VERSION
-from config import load_settings
+from config import load_settings, save_settings
 
 
 class MainWindow(QMainWindow):
@@ -51,6 +54,8 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self._settings = load_settings()
+        self._current_ui_language = self._settings.get("language", "de")
+        get_translator(self._current_ui_language)
         self.setWindowTitle(format_window_title())
         self.setGeometry(100, 100, 1200, 800)
         self._lsp_manager = LSPManager()
@@ -145,6 +150,8 @@ class MainWindow(QMainWindow):
         act_indent.setStatusTip("Rückt die aktuelle Zeile oder Auswahl ein")
         act_dedent = self.edit_menu.addAction("Ausrücken", self._dedent, "Shift+Tab")
         act_dedent.setStatusTip("Rückt die aktuelle Zeile oder Auswahl aus")
+        act_snippets = self.edit_menu.addAction("Snippet einfügen...", self.show_snippets_dialog, "Ctrl+Shift+J")
+        act_snippets.setStatusTip("Öffnet den Snippet-Manager zum Einfügen und Verwalten von Code-Snippets (Ctrl+Shift+J)")
         self.edit_menu.addSeparator()
         self.selection_menu = self.edit_menu.addMenu("Mehrfachauswahl & Multi-Cursor")
         act_cursor_above = self.selection_menu.addAction("Cursor oberhalb hinzufügen", self._add_cursor_above, "Ctrl+Alt+Up")
@@ -190,6 +197,13 @@ class MainWindow(QMainWindow):
         self.act_toggle_breakpoint.setStatusTip("Setzt oder entfernt einen Breakpoint in der aktuellen Zeile (F9)")
         self.act_clear_breakpoints = self.run_menu.addAction("Alle Breakpoints löschen", self.clear_all_breakpoints, "Ctrl+Shift+F9")
         self.act_clear_breakpoints.setStatusTip("Löscht alle Breakpoints in der aktiven Datei (Ctrl+Shift+F9)")
+        self.run_menu.addSeparator()
+        self.act_show_debugger = self.run_menu.addAction("Debugger-Panel anzeigen", self.show_debug_panel, "Ctrl+Shift+D")
+        self.act_show_debugger.setStatusTip("Blendet das Debugger-Panel mit Variablen und Call-Stack ein (Ctrl+Shift+D)")
+        self.act_add_watch = self.run_menu.addAction("Ausdruck überwachen...", self.prompt_add_watch_expression, "Ctrl+Shift+W")
+        self.act_add_watch.setStatusTip("Fügt einen neuen Ausdruck zur Variablenüberwachung hinzu (Ctrl+Shift+W)")
+        self.act_refresh_stack = self.run_menu.addAction("Aufruf-Stapel aktualisieren", self.refresh_debugger_state)
+        self.act_refresh_stack.setStatusTip("Fragt den aktuellen Call-Stack beim aktiven Debugger ab (w)")
 
         # ---- Toolbar ----
         toolbar = QToolBar("Hauptleiste")
@@ -240,7 +254,8 @@ class MainWindow(QMainWindow):
         toolbar.addWidget(self.lang_combo)
 
         # ---- Ansicht-Menü ----
-        view_menu = menubar.addMenu("Ansicht")
+        self.view_menu = menubar.addMenu("Ansicht")
+        view_menu = self.view_menu
         self._toggle_project_action = view_menu.addAction(
             "Projektbaum", self._toggle_project_view, "Ctrl+B"
         )
@@ -266,6 +281,11 @@ class MainWindow(QMainWindow):
         )
         self._toggle_commit_action.setStatusTip("Öffnet den Dialog zum Stagen und Committen von Git-Änderungen")
 
+        self._toggle_debug_action = view_menu.addAction(
+            "Debugger-Panel", self.show_debug_panel, "Ctrl+Shift+D"
+        )
+        self._toggle_debug_action.setStatusTip("Blendet das Debugger-Panel mit Variablen und Call-Stack ein")
+
         # Theme-Submenü
         from features.theme_manager import get_available_themes, apply_theme
         theme_menu = view_menu.addMenu("Theme")
@@ -275,6 +295,19 @@ class MainWindow(QMainWindow):
                 lambda checked=False, t=theme_name: apply_theme(QApplication.instance(), t)
             )
             t_act.setStatusTip(f"Farbschema auf '{theme_name.capitalize()}' umstellen")
+
+        # UI-Sprache Submenü (Policy P-006)
+        self.ui_lang_menu = view_menu.addMenu("Sprache")
+        self._ui_lang_group = QActionGroup(self)
+        self._ui_lang_group.setExclusive(True)
+        for code in TranslationSystem.SUPPORTED_LANGUAGES:
+            name = TranslationSystem.LANGUAGE_NAMES.get(code, code)
+            act = self.ui_lang_menu.addAction(f"{name} ({code})")
+            act.setCheckable(True)
+            if code == self._current_ui_language:
+                act.setChecked(True)
+            act.triggered.connect(lambda checked=False, c=code: self.set_ui_language(c))
+            self._ui_lang_group.addAction(act)
 
         # Code-Faltung Submenü
         folding_menu = view_menu.addMenu("Code-Faltung")
@@ -321,7 +354,8 @@ class MainWindow(QMainWindow):
         self._move_tab_split_action.setStatusTip("Verschiebt das aktuelle Dokument in die andere Editorhälfte")
 
         # ---- Hilfe-Menü ----
-        help_menu = menubar.addMenu("Hilfe")
+        self.help_menu = menubar.addMenu("Hilfe")
+        help_menu = self.help_menu
         act_shortcuts = help_menu.addAction("Tastenkürzel-Übersicht", self.open_shortcuts_dialog, "F1")
         act_shortcuts.setStatusTip("Öffnet die Übersicht aller verfügbaren Tastenkombinationen")
         act_help_plugins = help_menu.addAction("Plugins & Sprachen...", self.open_plugins_dialog)
@@ -416,6 +450,13 @@ class MainWindow(QMainWindow):
         self.references.referenceActivated.connect(self._activate_reference)
         self.bottom_tabs.addTab(self.references, "Referenzen")
         self.bottom_tabs.setTabToolTip(3, "LSP- und Symbol-Referenzen")
+
+        self.debug_panel = DebugPanel(parent=self, main_window=self)
+        self.debug_panel.frameActivated.connect(self._on_debug_frame_activated)
+        self.debug_panel.refreshRequested.connect(self.refresh_debugger_state)
+        self.debug_panel.attach_output_panel(self.output)
+        self.bottom_tabs.addTab(self.debug_panel, "Debugger")
+        self.bottom_tabs.setTabToolTip(4, "Überwachungsausdrücke, Variablen und Aufruf-Stapel")
 
         self.v_splitter.addWidget(self.bottom_tabs)
         self.v_splitter.setSizes([600, 200])
@@ -1499,6 +1540,20 @@ class MainWindow(QMainWindow):
         if tab and tab.editor:
             tab.editor.unindent_selection()
 
+    def show_snippets_dialog(self):
+        """Öffnet den Snippet-Manager zur Auswahl, Vorschau und Verwaltung von Code-Snippets."""
+        from ui.snippets_dialog import SnippetsDialog
+
+        active_tab = self.get_active_tab()
+        current_lang = ""
+        if active_tab and hasattr(active_tab, "editor") and active_tab.editor and active_tab.editor._provider:
+            current_lang = active_tab.editor._provider.get_name().lower()
+
+        dialog = SnippetsDialog(current_language=current_lang, parent=self)
+        if active_tab and hasattr(active_tab, "editor") and active_tab.editor:
+            dialog.snippetSelected.connect(lambda s: active_tab.editor.expand_snippet(s))
+        dialog.exec()
+
     def _toggle_fold_current(self):
         """Schaltet die Faltung an der aktuellen Cursor-Zeile um."""
         tab = self.get_active_tab()
@@ -1613,6 +1668,51 @@ class MainWindow(QMainWindow):
 
         self._update_vim_status_label(self.get_active_tab())
 
+        # UI-Sprache anwenden (Policy P-006)
+        new_lang = self._settings.get("language", "de")
+        if getattr(self, "_current_ui_language", None) != new_lang:
+            self.set_ui_language(new_lang)
+
+    def set_ui_language(self, lang_code: str):
+        """Wechselt die UI-Sprache und aktualisiert die Benutzeroberfläche."""
+        if lang_code not in TranslationSystem.SUPPORTED_LANGUAGES:
+            return
+        self._current_ui_language = lang_code
+        get_translator().set_language(lang_code)
+        self._settings["language"] = lang_code
+        save_settings(self._settings)
+
+        # Haken im Sprachmenü synchronisieren
+        if hasattr(self, "_ui_lang_group"):
+            for act in self._ui_lang_group.actions():
+                if f"({lang_code})" in act.text():
+                    act.setChecked(True)
+
+        self.retranslate_ui()
+
+    def retranslate_ui(self):
+        """Aktualisiert alle übersetzbaren Texte im Hauptfenster."""
+        tr = get_translator()
+        tab = self.get_active_tab() if hasattr(self, "get_active_tab") else None
+        file_path = tab.file_path if (tab and hasattr(tab, "file_path")) else None
+        self.setWindowTitle(format_window_title(file_path))
+        if hasattr(self, "file_menu"):
+            self.file_menu.setTitle(tr.t("Datei"))
+        if hasattr(self, "edit_menu"):
+            self.edit_menu.setTitle(tr.t("Bearbeiten"))
+        if hasattr(self, "run_menu"):
+            self.run_menu.setTitle(tr.t("Ausführen"))
+        if hasattr(self, "view_menu"):
+            self.view_menu.setTitle(tr.t("Ansicht"))
+        if hasattr(self, "help_menu"):
+            self.help_menu.setTitle(tr.t("Hilfe"))
+        if hasattr(self, "ui_lang_menu"):
+            self.ui_lang_menu.setTitle(tr.t("Sprache"))
+        if hasattr(self, "selection_menu"):
+            self.selection_menu.setTitle(tr.t("Mehrfachauswahl & Multi-Cursor"))
+        if hasattr(self, "recent_files_menu"):
+            self.recent_files_menu.setTitle(tr.t("Zuletzt geöffnete Dateien"))
+
     def toggle_vim_mode(self, checked: Optional[bool] = None):
         """Schaltet den modalen Vim-Modus an allen offenen Editoren ein oder aus."""
         if checked is None:
@@ -1699,23 +1799,34 @@ class MainWindow(QMainWindow):
             for line_no in sorted(bps):
                 initial_cmds.append(f"b {line_no}")
 
+        if hasattr(self, "debug_panel"):
+            self.debug_panel.set_session_active(True)
+
         self.bottom_tabs.setCurrentWidget(self.output)
         self.output.run_command(cmd, is_debug=True, initial_commands=initial_cmds)
 
     def debug_continue(self):
         """Sendet 'c' (Continue) an den aktiven Debugger."""
+        if hasattr(self, "debug_panel"):
+            self.debug_panel.set_session_active(True)
         self.output.send_input("c")
 
     def debug_step_over(self):
         """Sendet 'n' (Next / Step Over) an den aktiven Debugger."""
+        if hasattr(self, "debug_panel"):
+            self.debug_panel.set_session_active(True)
         self.output.send_input("n")
 
     def debug_step_into(self):
         """Sendet 's' (Step Into) an den aktiven Debugger."""
+        if hasattr(self, "debug_panel"):
+            self.debug_panel.set_session_active(True)
         self.output.send_input("s")
 
     def debug_step_out(self):
         """Sendet 'r' (Return / Step Out) an den aktiven Debugger."""
+        if hasattr(self, "debug_panel"):
+            self.debug_panel.set_session_active(True)
         self.output.send_input("r")
 
     def _stop_run(self):
@@ -1865,6 +1976,19 @@ class MainWindow(QMainWindow):
             tab._lsp_ref_slot = _ref_slot
             tab.editor.referencesRequested.connect(_ref_slot)
 
+            old_watch_slot = getattr(tab, "_watch_slot", None)
+            if old_watch_slot is not None:
+                try:
+                    tab.editor.addWatchRequested.disconnect(old_watch_slot)
+                except (TypeError, RuntimeError):
+                    pass
+
+            def _watch_slot(expr):
+                self.add_watch_expression(expr)
+
+            tab._watch_slot = _watch_slot
+            tab.editor.addWatchRequested.connect(_watch_slot)
+
 
     def _open_file_from_project(self, file_path):
         """Öffnet eine Datei aus dem Projektbaum."""
@@ -1953,6 +2077,53 @@ class MainWindow(QMainWindow):
             self.bottom_tabs.show()
             self.bottom_tabs.setCurrentWidget(self.terminal)
             self.terminal.input.setFocus()
+
+    def show_debug_panel(self):
+        """Blendet das untere Panel ein und wechselt zum Debugger-Reiter."""
+        if hasattr(self, "bottom_tabs") and hasattr(self, "debug_panel"):
+            self.bottom_tabs.show()
+            self.bottom_tabs.setCurrentWidget(self.debug_panel)
+            self.debug_panel.watch_input.setFocus()
+
+    def add_watch_expression(self, expression: str):
+        """Fügt einen neuen Ausdruck zur Variablenüberwachung hinzu und öffnet das Debug-Panel."""
+        if hasattr(self, "debug_panel"):
+            self.show_debug_panel()
+            self.debug_panel.add_watch(expression)
+            self.status_bar.showMessage(f"Ausdruck '{expression}' zur Überwachung hinzugefügt", 3000)
+
+    def prompt_add_watch_expression(self):
+        """Öffnet einen Eingabedialog zum Hinzufügen einer Watch-Expression."""
+        from PySide6.QtWidgets import QInputDialog, QLineEdit
+        tab = self.get_active_tab()
+        default_expr = ""
+        if tab and tab.editor:
+            default_expr = tab.editor.textCursor().selectedText().strip() or tab.editor.get_symbol_at_cursor()
+
+        expr, ok = QInputDialog.getText(
+            self,
+            "Ausdruck überwachen",
+            "Zu überwachender Ausdruck:",
+            QLineEdit.EchoMode.Normal,
+            default_expr,
+        )
+        if ok and expr.strip():
+            self.add_watch_expression(expr.strip())
+
+    def _on_debug_frame_activated(self, file_path: str, line_number: int):
+        """Springt zur Position des ausgewählten Stack-Frames im Editor."""
+        if not file_path:
+            return
+        p = Path(file_path)
+        if not p.is_absolute() and getattr(self.project_view, "_root_path", None):
+            p = Path(self.project_view._root_path) / p
+        self.open_path_at(file_path=str(p), line=max(1, line_number), column=1)
+
+    def refresh_debugger_state(self):
+        """Sendet Befehle zur Aktualisierung des Call-Stacks und der Watch-Expressions."""
+        if hasattr(self, "debug_panel"):
+            self.debug_panel.request_stack_update()
+            self.debug_panel.evaluate_all_watches_in_debugger()
 
     def show_diff(self, file_path: Optional[Path] = None, staged: bool = False):
         """Öffnet den Git Diff-Viewer für das Projekt oder eine bestimmte Datei."""

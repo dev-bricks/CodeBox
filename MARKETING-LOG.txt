@@ -1,0 +1,53 @@
+# MARKETING-LOG.txt — CodeBox (Pfad B Discoverability & Visibility Recommendations)
+
+Date: 2026-09-25
+Repo: dev-bricks/CodeBox
+
+## Automated Actions Applied (Pfad A Repository Hygiene, CI Hardening & Lock Defense - 2026-09-25):
+1. **CI-Workflow Härtung & Concurrency-Schutz**:
+   - `.github/workflows/welcome.yml`: Upgraded to `actions/first-interaction@v3`, set 5-minute job timeout, and added `concurrency: cancel-in-progress: true`.
+   - `.github/workflows/stale.yml`: Added `concurrency: cancel-in-progress: true` and 10-minute job timeout.
+   - `.github/workflows/ci.yml`: Added `timeout-minutes: 10` to lint job and `timeout-minutes: 25` to multi-OS test matrix.
+   - `.github/workflows/linux-platform-smoke.yml`: Added `timeout-minutes: 15` to both smoke and macos-smoke jobs.
+2. **Multi-Host Cloud-Sync & Lock Defense (`.gitignore`)**:
+   - Standardized .gitignore with fleetwide cloud conflict markers (`*conflicted copy*`, `* (Kopie)*`, `* (Copy)*`), host-specific naming (`*-ASUS*`, `*-LAPTOP*`, `*-Mac Studio*`, `*-MacBook*`, `*-WORKSTATION*`, `*-WORKSTATION-LG*`), multi-agent lock patterns (`LOCK.user.*`, `LOCK.until.*`, `LOCK.condition.*`, `.automation-lock`, `uv.lock`, `!package-lock.json`), and test cache directories (`.pytest_temp/`, `.pytest_tmp*/`, `.hypothesis/`, `.turbo/`, `.tox/`, `*.orig`, `*.rej`).
+3. **PEP 621 Standardisierung & Test Configuration**:
+   - Updated `pyproject.toml` pytest configuration: expanded `norecursedirs` to include `.pytest_temp`, `.hypothesis`, `.turbo`, `.tox` and set `--basetemp=.pytest_temp` in `addopts`.
+   - Strict version freeze discipline adhered to: `0.3.3` preserved unchanged (T-20260920-167562623).
+4. **Level 1 SBOM & Governance Re-Audit**:
+   - Re-audited `THIRD_PARTY_LICENSES.md` and `THIRD_PARTY_LICENSES.txt` as of 2026-09-25.
+   - Confirmed 10 technical invariants (`INV-LOCAL-01` through `INV-SLA-10`), unprivileged RunAsInvoker non-elevation mode, and LGPL-3.0 Section 4 dynamic linking compliance.
+5. **Contract Test Suite Expansion (`tests/test_metadata.py`)**:
+   - Added automated regression contract tests verifying welcome.yml v3 / timeout / concurrency, stale.yml timeout / concurrency, .gitignore multi-host / lock patterns, and CHANGELOG / MARKETING-LOG recency.
+
+## Automated Actions Applied (Pfad B Discoverability, Level 1 SBOM & Navigation Parity):
+1. **GitHub Repository Topics Saturation (20/20)**:
+   - Saturated GitHub repository topics via `gh repo edit dev-bricks/CodeBox`: `code-editor`, `desktop-app`, `desktop-ide`, `dev-bricks`, `developer-tools`, `ide`, `language-server-protocol`, `local-first`, `lsp`, `lsp-client`, `lsp-editor`, `offline-code-editor`, `offline-first`, `open-bricks`, `pyside6`, `python`, `python-editor`, `syntax-highlighting`, `windows`, `zero-egress`.
+   - Set canonical homepage URL to `https://github.com/dev-bricks/CodeBox#readme`.
+   - Synchronized PEP 621 `keywords` in `pyproject.toml` with the identical 20 terms.
+2. **Canonical Root NOTICE Attribution**:
+   - Created root `NOTICE` file formalizing copyright attribution to Lukas Geiger, dev-bricks, and umbrella organization open-bricks.
+   - Added `NOTICE` to `license-files` and `[project.urls]` in `pyproject.toml`.
+   - Added Attribution NOTICE Shields.io badge to `README.md` and `README_de.md`.
+3. **Level 1 SBOM & Invariant Matrix (`THIRD_PARTY_LICENSES.md`)**:
+   - Created comprehensive `THIRD_PARTY_LICENSES.md` audit document detailing runtime dependencies (PySide6 LGPL-3.0 dynamic linkage compliance under LGPL-3.0 Section 4), optional remote/LSP tooling (paramiko>=5.0.0, python-lsp-server), build tools (PyInstaller, pytest, ruff), and operating system boundaries (RunAsInvoker unprivileged execution).
+   - Formulated 10 technical governance invariants (`INV-LOCAL-01` through `INV-SLA-10`).
+   - Added `THIRD_PARTY_LICENSES.md` to `license-files` and project URLs in `pyproject.toml`.
+   - Added Level 1 SBOM Shields.io badge to `README.md` and `README_de.md`.
+4. **18-Point Quick Navigation Parity & Dual Reciprocal Anchors**:
+   - Structured both `README.md` and `README_de.md` into 18 symmetrically numbered sections with dual reciprocal anchors (`<a id="..."></a>`).
+   - Added Section 6: Target Personas (`[PERSONA-01]` to `[PERSONA-04]`) with high-intent search query matrices.
+   - Added Section 7: 10-Dimension Comparative Matrix benchmarking CodeBox against VS Code / VSCodium, Sublime Text, PyCharm Community, and CLI editors across `INV-LOCAL-01` to `INV-SLA-10`.
+   - Added Section 16: Third-Party Licenses & Level 1 SBOM.
+   - Updated Section 17 & 18: German statutory liability limitation pursuant to § 521 BGB (Gefälligkeitsrecht) and 48-hour security response SLA (`INV-SLA-10`).
+5. **AI Agent Context & Documentation Sync (`llms.txt`)**:
+   - Refreshed `llms.txt` verification timestamp to `2026-09-23`, updated test counts (295 passed tests, 100%), and indexed root NOTICE, Level 1 SBOM, and § 521 BGB disclaimer.
+6. **CHANGELOG Maintenance**:
+   - Documented Pfad B discoverability and governance audit under `## [Unreleased]` adhering to the version freeze policy (T-20260920-167562623).
+7. **Test Suite Expansion**:
+   - Updated `tests/test_metadata.py` to validate NOTICE attribution, Level 1 SBOM existence, PEP 621 keywords, Section 18 statutory notice, 18-point bilingual navigation parity, and reciprocal HTML anchors.
+
+## Non-Automated Marketing & Discoverability Recommendations:
+1. **GitHub Social Preview**: Set a dedicated Open Graph / social preview image in repository settings matching `assets/banner.svg` styling.
+2. **Community Showcase**: Present CodeBox on Reddit (`r/Python`, `r/LocalFirst`, `r/QtFramework`) highlighting the zero-egress guarantee, sub-second cold start, and declarative JSON plugin architecture.
+3. **Ecosystem Cross-Referencing**: Confirm reciprocal discovery mentions in sibling developer tools (`safe-start-for-codex`, `companion-for-agy`, `ExplorerPro`, `CleanMarkdown`).

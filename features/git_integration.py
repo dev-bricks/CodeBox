@@ -8,6 +8,7 @@ Provides git status information for files in the project tree:
 Uses subprocess to call git CLI (no additional dependencies).
 """
 
+import re
 import subprocess
 import logging
 from pathlib import Path
@@ -60,24 +61,58 @@ class GitFileStatus:
         return ""
 
 
-def parse_porcelain_path(raw_path: str) -> str:
+def _decode_c_escapes(raw: str) -> str:
+    """Decodes C-style escape sequences including octal UTF-8 bytes into a string."""
+    raw_bytes = raw.encode("latin-1", errors="replace")
+    byte_pattern = re.compile(rb"\\([abtnvfr\"\\]|[0-7]{1,3})")
+
+    def sub_bytes(m: re.Match) -> bytes:
+        esc = m.group(1)
+        if esc == b"a":
+            return b"\a"
+        if esc == b"b":
+            return b"\b"
+        if esc == b"t":
+            return b"\t"
+        if esc == b"n":
+            return b"\n"
+        if esc == b"v":
+            return b"\v"
+        if esc == b"f":
+            return b"\f"
+        if esc == b"r":
+            return b"\r"
+        if esc == b"\"":
+            return b"\""
+        if esc == b"\\":
+            return b"\\"
+        return bytes([int(esc, 8)])
+
+    decoded_bytes = byte_pattern.sub(sub_bytes, raw_bytes)
+    return decoded_bytes.decode("utf-8", errors="replace")
+
+
+def parse_porcelain_path(raw_path: str, is_rename: bool = False) -> str:
     """Parses a file path from git status --porcelain output, handling renames and C-style quotes.
 
-    Git quotes paths with spaces or special characters in double quotes and C-escapes them.
+    Git quotes paths with spaces or special characters in double quotes and C-escapes them
+    (including octal bytes \\ooo for UTF-8 umlauts and non-ASCII characters).
     Renamed files have the format: "old_path" -> "new_path" or old_path -> new_path.
     """
     raw = raw_path.strip()
-    if " -> " in raw:
-        raw = raw.split(" -> ")[-1].strip()
+    if is_rename:
+        if " -> " in raw:
+            raw = raw.split(" -> ")[-1].strip()
+    else:
+        if " -> " in raw:
+            # If the entire string is enclosed in a single pair of quotes,
+            # the arrow is part of the filename itself, not a rename.
+            if not (raw.startswith('"') and raw.endswith('"') and raw.count('"') == 2):
+                raw = raw.split(" -> ")[-1].strip()
 
     if raw.startswith('"') and raw.endswith('"'):
         raw = raw[1:-1]
-        raw = (
-            raw.replace(r'\"', '"')
-            .replace(r'\\', '\\')
-            .replace(r'\t', '\t')
-            .replace(r'\n', '\n')
-        )
+        raw = _decode_c_escapes(raw)
     return raw
 
 
@@ -131,7 +166,8 @@ class GitRepo:
                 continue
             x = line[0]  # index status
             y = line[1]  # worktree status
-            filepath = parse_porcelain_path(line[3:])
+            is_renamed = (x == "R" or y == "R")
+            filepath = parse_porcelain_path(line[3:], is_rename=is_renamed)
 
             status = GitFileStatus(
                 path=filepath,
@@ -141,7 +177,7 @@ class GitRepo:
                 is_modified=y == "M",
                 is_untracked=x == "?" and y == "?",
                 is_deleted=x == "D" or y == "D",
-                is_renamed=x == "R",
+                is_renamed=is_renamed,
             )
             statuses[filepath] = status
 
@@ -164,9 +200,10 @@ class GitRepo:
             args.extend(["--", filepath])
         diff = self._run_git(*args)
         if (not diff) and filepath and not staged:
-            full_path = self.repo_path / filepath
+            clean_filepath = filepath.replace("\\", "/")
+            full_path = self.repo_path / clean_filepath
             if full_path.is_file():
-                status = self.get_status().get(filepath.replace("\\", "/"))
+                status = self.get_status().get(clean_filepath)
                 if status and status.is_untracked:
                     try:
                         import difflib
@@ -174,8 +211,8 @@ class GitRepo:
                         diff_lines = list(difflib.unified_diff(
                             [],
                             content,
-                            fromfile=f"a/{filepath}",
-                            tofile=f"b/{filepath}",
+                            fromfile=f"a/{clean_filepath}",
+                            tofile=f"b/{clean_filepath}",
                         ))
                         if diff_lines:
                             return "".join(diff_lines).strip()
@@ -254,18 +291,24 @@ class GitRepo:
 
     def discard_file_changes(self, filepath: str) -> bool:
         """Discards worktree changes for a file (restore or clean)."""
+        import shutil
         clean_path = filepath.replace("\\", "/")
         status_dict = self.get_status()
         status = status_dict.get(clean_path)
         if status and status.is_untracked:
-            target = self.repo_path / filepath
+            target = self.repo_path / clean_path
             try:
-                if target.is_file():
+                if target.is_file() or target.is_symlink():
                     target.unlink()
                     return True
+                elif target.is_dir():
+                    shutil.rmtree(target)
+                    return True
             except OSError:
-                code, _, _ = self._run_git_result("clean", "-f", "--", clean_path)
+                code, _, _ = self._run_git_result("clean", "-fd", "--", clean_path)
                 return code == 0
+            code, _, _ = self._run_git_result("clean", "-fd", "--", clean_path)
+            return code == 0
         code, _, _ = self._run_git_result("restore", "--", clean_path)
         if code != 0:
             code, _, _ = self._run_git_result("checkout", "--", clean_path)

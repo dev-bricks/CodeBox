@@ -31,6 +31,7 @@ class OutputPanel(QWidget):
 
     processFinished = Signal(int, str)  # exit_code, output
     inputSent = Signal(str)  # text sent to process or entered
+    debugOutputReceived = Signal(str)  # Für Debugger-Auswertung (PDB Output)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -306,6 +307,7 @@ class OutputPanel(QWidget):
     def _on_stdout(self):
         data = self.process.readAllStandardOutput().data().decode('utf-8', errors='replace')
         self.append_text(data)
+        self.debugOutputReceived.emit(data)
         if self._initial_commands and self.is_running():
             cmds = list(self._initial_commands)
             self._initial_commands.clear()
@@ -315,6 +317,7 @@ class OutputPanel(QWidget):
     def _on_stderr(self):
         data = self.process.readAllStandardError().data().decode('utf-8', errors='replace')
         self.append_text(data, color="#ff8888")
+        self.debugOutputReceived.emit(data)
 
     def _on_finished(self, exit_code, exit_status):
         self.stop_btn.setEnabled(False)

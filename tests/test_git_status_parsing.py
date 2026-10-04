@@ -98,6 +98,25 @@ class GitFileStatusIconTests(unittest.TestCase):
         parsed = parse_porcelain_path(raw[3:])
         self.assertEqual(parsed, 'src/file "quoted".py')
 
+    def test_parse_porcelain_path_decodes_octal_umlaut_escapes(self):
+        """Git kodiert Nicht-ASCII und Umlaute (ä, ö, ü, ß) in Oktalsequenzen wie \303\244.
+        Diese müssen zu sauberen UTF-8 Zeichen aufgelöst werden."""
+        raw = r'?? "Dokumente/\303\244nderungen \303\266\303\274\303\237.txt"'
+        parsed = parse_porcelain_path(raw[3:])
+        self.assertEqual(parsed, "Dokumente/änderungen öüß.txt")
+
+    def test_parse_porcelain_path_preserves_arrow_in_filename_when_not_renamed(self):
+        """Dateinamen mit ' -> ' dürfen nicht verstümmelt werden, wenn keine Umbenennung vorliegt."""
+        raw = '?? "notizen -> entwurf.md"'
+        parsed = parse_porcelain_path(raw[3:], is_rename=False)
+        self.assertEqual(parsed, "notizen -> entwurf.md")
+
+    def test_parse_porcelain_path_handles_renamed_with_umlauts(self):
+        """Umbenannte Dateien mit Oktal-Umlauten müssen den korrekten Zielpfad liefern."""
+        raw = r'R  "alt.txt" -> "Dokumente/\303\244nderung.txt"'
+        parsed = parse_porcelain_path(raw[3:], is_rename=True)
+        self.assertEqual(parsed, "Dokumente/änderung.txt")
+
 
 if __name__ == "__main__":
     unittest.main()

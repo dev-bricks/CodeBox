@@ -6,6 +6,10 @@ on:
   pull_request_target:
     types: [opened]
 
+concurrency:
+  group: welcome-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   issues: write
   pull-requests: write
@@ -13,8 +17,9 @@ permissions:
 jobs:
   welcome:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - uses: actions/first-interaction@v1
+      - uses: actions/first-interaction@v3
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           issue_message: |
