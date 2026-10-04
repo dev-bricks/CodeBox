@@ -114,6 +114,11 @@ TODO.txt
 DONE.md
 DONE.txt
 ERLEDIGT.txt
+BEFUNDE.md
+MARKETING-LOG.txt
+TASKPLAN_STATUS_*.md
+_after-care/
+
 
 # Node / Web / Test Caches
 node_modules/

@@ -12,6 +12,11 @@ Alle wesentlichen Änderungen an CodeBox werden hier dokumentiert.
 
 ## [Unreleased]
 
+### Repository-Hygiene & interne Dateien [2026-09-28]
+- **Interne Dateien geschuetzt (`.gitignore`):** `BEFUNDE.md`, `MARKETING-LOG.txt`, `TASKPLAN_STATUS_*.md` und `_after-care/` in `.gitignore` aufgenommen.
+- **Git-Tracking bereinigt:** `BEFUNDE.md` aus dem Git-Tracking entfernt (`git rm --cached`), bleibt lokal erhalten.
+- **Vertragstests (`tests/test_metadata.py`):** `test_gitignore_internal_file_hygiene` hinzugefuegt (T-20260926-434768981).
+
 ### Fixed (2026-10-02: Editor-Dateien bei Speicherfehlern erhalten)
 - Editor-Tabs kodieren UTF-8 vor dem Öffnen der Ausgabe und verwenden QSaveFile ohne direkten Schreib-Fallback. Teilwrites und fehlgeschlagene Commits überschreiben den bisherigen Code nicht.
 - Ungültiges UTF-8 wird als Speicherfehler gemeldet; geänderte Dokumente und geteilte Ansichten werden erst nach erfolgreichem Commit als unverändert markiert.
