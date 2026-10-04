@@ -11,6 +11,9 @@ Part of the dev-bricks family. Python, MIT.
 - [README.md](https://github.com/dev-bricks/CodeBox/blob/main/README.md): Primary documentation, installation guide, system architecture flowchart, sequence diagram, capabilities table, comparative matrix, and features.
 - [README_de.md](https://github.com/dev-bricks/CodeBox/blob/main/README_de.md): German entry point with localized architecture, workflow diagrams, setup, privacy, and status notes.
 - [README.es.md](https://github.com/dev-bricks/CodeBox/blob/main/README.es.md): Spanish entry point with localized architecture, workflow diagrams, setup, privacy, and status notes.
+- [README.zh.md](https://github.com/dev-bricks/CodeBox/blob/main/README.zh.md): Simplified Chinese entry point (machine-assisted translation; English README is authoritative).
+- [README.ja.md](https://github.com/dev-bricks/CodeBox/blob/main/README.ja.md): Japanese entry point (machine-assisted translation; English README is authoritative).
+- [README.ru.md](https://github.com/dev-bricks/CodeBox/blob/main/README.ru.md): Russian entry point (machine-assisted translation; English README is authoritative).
 - [NOTICE](https://github.com/dev-bricks/CodeBox/blob/main/NOTICE): Copyright attribution and open-bricks umbrella metadata.
 - [THIRD_PARTY_LICENSES.md](https://github.com/dev-bricks/CodeBox/blob/main/THIRD_PARTY_LICENSES.md): Level 1 Software Bill of Materials (SBOM) and governance invariants (`INV-LOCAL-01` to `INV-SLA-10`).
 - [SECURITY.md](https://github.com/dev-bricks/CodeBox/blob/main/SECURITY.md): Bilingual security policy, supported versions, zero-egress invariants, and reporting protocols.

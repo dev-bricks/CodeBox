@@ -18,7 +18,7 @@
 [![Última comprobación](https://img.shields.io/badge/last%20checked-2026--10--04-informational.svg)](llms.txt)
 [![llms.txt](https://img.shields.io/badge/llms.txt-available-green.svg)](llms.txt)
 
-[English](README.md) | [Deutsch](README_de.md) | Español
+[English](README.md) | [Deutsch](README_de.md) | Español | [简体中文](README.zh.md) | [日本語](README.ja.md) | [Русский](README.ru.md)
 
 CodeBox es un entorno de desarrollo integrado (IDE) de escritorio local-first para desarrolladores de Windows, Linux y macOS que buscan un editor de código ligero en PySide6 con espacio de trabajo con múltiples pestañas, árbol de proyectos, terminal integrado, indicadores de estado de Git porcelain, resaltado de sintaxis, diagnóstico de Language Server Protocol (LSP) y una arquitectura extensible de complementos de lenguajes en JSON/Python.
 
