@@ -7,9 +7,10 @@ if errorlevel 1 (
     pause
     exit /b 1
 )
-set "BUILD_ROOT=C:\_Local_DEV\codex_build\codebox"
+if not defined CODEBOX_BUILD_ROOT set "CODEBOX_BUILD_ROOT=%LOCALAPPDATA%\CodeBox\build"
+set "BUILD_ROOT=%CODEBOX_BUILD_ROOT%"
 set "WORK_DIR=%BUILD_ROOT%\work"
-set "DIST_DIR=C:\_Local_DEV\codex_build\codebox\dist"
+set "DIST_DIR=%BUILD_ROOT%\dist"
 if not exist "%BUILD_ROOT%" mkdir "%BUILD_ROOT%"
 echo Baue CodeBox.exe...
 python -m PyInstaller --noconfirm --clean --workpath "%WORK_DIR%" --distpath "%DIST_DIR%" CodeBox.spec
