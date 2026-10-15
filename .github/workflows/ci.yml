@@ -83,4 +83,4 @@ jobs:
           python -m pip install -r requirements.txt pytest Pillow tomli
 
       - name: Run Pytest Test Suite
-        run: pytest -v
+        run: python -X faulthandler -u -m pytest -s -v -o faulthandler_timeout=60
