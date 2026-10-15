@@ -1,4 +1,6 @@
 """Regressionstests für ProjectView und Pfadsync im Hauptfenster."""
+import gc
+import weakref
 from unittest.mock import patch
 
 from PySide6.QtWidgets import QApplication
@@ -9,6 +11,23 @@ from ui.main_window import MainWindow
 
 def _ensure_app():
     return QApplication.instance() or QApplication([])
+
+
+def test_commit_button_dispatch_and_closed_view_collection():
+    app = _ensure_app()
+    references = []
+    for _ in range(3):
+        view = ProjectView()
+        with patch.object(view, "open_commit_dialog") as open_dialog:
+            view.btn_commit.setEnabled(True)
+            view.btn_commit.click()
+            open_dialog.assert_called_once_with()
+        references.append(weakref.ref(view))
+        view.close()
+        del view
+    gc.collect()
+    app.processEvents()
+    assert all(reference() is None for reference in references)
 
 
 def test_new_file_in_shows_error_on_write_failure(tmp_path):
