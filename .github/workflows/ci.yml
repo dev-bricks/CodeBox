@@ -15,6 +15,62 @@ permissions:
   contents: read
 
 jobs:
+  qt-binding-probe:
+    name: Isolated Qt binding (${{ matrix.qt }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      matrix:
+        qt: ["6.11.2", "6.12.0"]
+    env:
+      QT_QPA_PLATFORM: offscreen
+      PYTHONIOENCODING: utf-8
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install Linux Qt runtime
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libegl1 libgl1 libxkbcommon-x11-0
+      - name: Install isolated binding
+        run: python -m pip install "PySide6_Essentials==${{ matrix.qt }}"
+      - name: Exercise virtual highlighter callbacks without product code
+        run: |
+          python -X faulthandler -u - <<'PY'
+          import gc
+          import sys
+          import PySide6
+          import shiboken6
+          from PySide6.QtGui import QSyntaxHighlighter, QTextCharFormat, QTextDocument
+          from PySide6.QtWidgets import QApplication
+
+          class Probe(QSyntaxHighlighter):
+              calls = 0
+
+              def highlightBlock(self, text):
+                  self.calls += 1
+                  self.setCurrentBlockState(0)
+                  self.setFormat(0, len(text), QTextCharFormat())
+
+          app = QApplication([])
+          document = QTextDocument()
+          highlighter = Probe(document)
+          print("versions", sys.version, PySide6.__version__, shiboken6.__version__)
+          print("initial None references", sys.getrefcount(None))
+          for iteration in range(1000):
+              document.setPlainText(("plain text " + str(iteration) + "\n") * 10)
+              highlighter.rehighlight()
+              app.processEvents()
+              if iteration % 100 == 0:
+                  gc.collect()
+                  print("iteration", iteration, "callbacks", highlighter.calls,
+                        "None references", sys.getrefcount(None))
+          assert highlighter.calls >= 1000
+          print("PROBE_COMPLETED", highlighter.calls, sys.getrefcount(None))
+          PY
+
   lint:
     name: Lint & Code Style
     runs-on: ubuntu-latest
@@ -83,4 +139,4 @@ jobs:
           python -m pip install -r requirements.txt pytest Pillow tomli
 
       - name: Run Pytest Test Suite
-        run: pytest -v
+        run: python -X faulthandler -u -m pytest -s -v -o faulthandler_timeout=60
