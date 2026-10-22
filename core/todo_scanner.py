@@ -102,8 +102,8 @@ def scan_file_for_todos(
         if allowed_tags and tag not in allowed_tags:
             continue
 
-        # Schließende Kommentarzeichen (*/ oder -->) am Zeilenende entfernen
-        text = re.sub(r'(\*/|-->)\s*$', '', raw_text).strip()
+        # Kommentar-Endzeichen für die Anzeige entfernen, kein HTML-Sanitizer.
+        text = re.sub(r'(\*/|--!?>)\s*$', '', raw_text).strip()
 
         items.append(
             TodoItem(
