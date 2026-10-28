@@ -18,7 +18,7 @@
 [![Last Checked](https://img.shields.io/badge/last%20checked-2026--10--04-informational.svg)](llms.txt)
 [![llms.txt](https://img.shields.io/badge/llms.txt-available-green.svg)](llms.txt)
 
-[English](README.md) | [Deutsch](README_de.md) | [Español](README.es.md) | [简体中文](README.zh.md) | [日本語](README.ja.md) | Русский
+[English](README.md) | [Deutsch](README_de.md) | [Español](README.es.md) | [简体中文](README.zh.md) | [日本語](README.ja.md) | Русский | [Français](README.fr.md)
 
 > Этот перевод выполнен с помощью машинного перевода; приоритет имеет английский README.md.
 
