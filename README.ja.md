@@ -18,7 +18,7 @@
 [![Last Checked](https://img.shields.io/badge/last%20checked-2026--10--04-informational.svg)](llms.txt)
 [![llms.txt](https://img.shields.io/badge/llms.txt-available-green.svg)](llms.txt)
 
-[English](README.md) | [Deutsch](README_de.md) | [Español](README.es.md) | [简体中文](README.zh.md) | 日本語 | [Русский](README.ru.md)
+[English](README.md) | [Deutsch](README_de.md) | [Español](README.es.md) | [简体中文](README.zh.md) | 日本語 | [Русский](README.ru.md) | [Français](README.fr.md)
 
 > 本書は機械支援による翻訳です。英語版 [README.md](README.md) が正本です。
 
