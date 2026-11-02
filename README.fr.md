@@ -394,9 +394,9 @@ Pour rechercher CodeBox, utilisez des mots-clés précis afin de le distinguer d
 
 CodeBox est distribué sous licence MIT permissive. Les dépendances tierces complètes, les textes de licence et les invariants de conformité sont audités et documentés :
 
-- **SBOM de niveau 1 :** `THIRD_PARTY_LICENSES.md` (auditée le 2026-09-23)
-- **Inventaire des textes des composants :** `THIRD_PARTY_LICENSES.txt`
-- **Attribution légale et avis de droit d’auteur :** `NOTICE`
+- **SBOM de niveau 1 :** [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md) (auditée le 2026-09-23)
+- **Inventaire des textes des composants :** [`THIRD_PARTY_LICENSES.txt`](THIRD_PARTY_LICENSES.txt)
+- **Attribution légale et avis de droit d’auteur :** [`NOTICE`](NOTICE)
 - **Garantie d’absence de copyleft :** PySide6 est lié dynamiquement via les roues officielles de PyPI, conformément à la section 4 de LGPL-3.0. Tous les plugins de langage fournis et les fonctionnalités du cœur sont publiés sous des licences permissives.
 
 ---
@@ -420,6 +420,6 @@ Ce projet est distribué sous [licence MIT](LICENSE). L’avis d’attribution o
 
 ### Limitation légale de responsabilité (§ 521 BGB)
 
-Ce logiciel est fourni à titre de contribution bénévole à un projet open source, conformément aux articles 516 et suivants du Code civil allemand (BGB). En vertu de l’article 521 BGB, la responsabilité est limitée aux actes intentionnels et à la faute lourde. Aucune garantie n’est accordée quant à la disponibilité du logiciel ni à son adéquation à un usage particulier.
+Ce logiciel est fourni à titre de contribution bénévole à un projet open source, conformément aux articles 516 et suivants du Code civil allemand (BGB). En vertu de l’article 521 BGB, la responsabilité est limitée aux actes intentionnels et à la faute lourde. Aucune garantie n’est fournie, notamment concernant la disponibilité du logiciel ou son adéquation à un usage particulier.
 
 > Cette traduction a été réalisée avec l’aide d’une IA ; le README anglais fait autorité.
