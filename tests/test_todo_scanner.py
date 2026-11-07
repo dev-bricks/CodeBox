@@ -90,6 +90,32 @@ def test_scan_file_for_todos(tmp_path):
     assert items[2].line_number == 5
 
 
+def test_scan_file_comment_terminators_preserve_task_text(tmp_path):
+    test_file = tmp_path / "comments.html"
+    test_file.write_text(
+        "<!-- TODO: Standard ending -->\n"
+        "<!-- FIXME(anna): Bang ending --!>   \n"
+        "/* BUG: C ending */\n"
+        "<!-- NOTE: Keep <b>literal markup</b> --!>\n"
+        "<!-- HACK: Keep unsupported ending --!!>\n"
+        "<!-- TODO: Keep --> inside text\n",
+        encoding="utf-8",
+    )
+
+    items = scan_file_for_todos(test_file)
+    assert [item.text for item in items] == [
+        "Standard ending",
+        "Bang ending",
+        "C ending",
+        "Keep <b>literal markup</b>",
+        "Keep unsupported ending --!!>",
+        "Keep --> inside text",
+    ]
+    assert items[1].author == "anna"
+    assert items[1].line_number == 2
+    assert items[1].line_text == "<!-- FIXME(anna): Bang ending --!>   "
+
+
 def test_scan_file_binary_and_size_limits(tmp_path):
     """Prüft, dass Binärdateien und übergroße Dateien übersprungen werden."""
     bin_file = tmp_path / "binary.dat"
