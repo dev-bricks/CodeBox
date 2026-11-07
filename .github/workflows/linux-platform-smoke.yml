@@ -52,10 +52,10 @@ jobs:
 
       - name: Run desktop regressions
         run: |
-          python -m pytest -q tests/test_lsp_client.py tests/test_save_failure_guards.py tests/test_tab_reordering.py
+          python -X faulthandler -u -m pytest -s -q -o faulthandler_timeout=60 tests/test_lsp_client.py tests/test_save_failure_guards.py tests/test_tab_reordering.py
 
       - name: Run Linux platform smoke
-        run: python tests/linux_platform_smoke.py
+        run: python -X faulthandler -u tests/linux_platform_smoke.py
 
   macos-smoke:
     runs-on: macos-latest
@@ -79,4 +79,4 @@ jobs:
           python -m pip install -r requirements.txt pytest
 
       - name: Run macOS platform smoke
-        run: python tests/macos_platform_smoke.py
+        run: python -X faulthandler -u tests/macos_platform_smoke.py
