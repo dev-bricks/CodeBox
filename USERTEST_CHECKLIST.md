@@ -1,7 +1,7 @@
 # CodeBox - Nutzertest-Checkliste
 
-**Version:** 0.1.0
-**Stand:** 2026-05-01
+**Version:** 0.3.5
+**Stand:** 2026-11-08
 **Tester:** _______________
 
 ---
@@ -31,6 +31,8 @@
 - [ ] Auto-Close Brackets: (), [], {}, "", ''
 - [ ] Bracket Matching (passende Klammern hervorgehoben)
 - [ ] Undo/Redo funktioniert (Ctrl+Z / Ctrl+Y)
+- [ ] Minimap wird am rechten Editor-Rand angezeigt und erlaubt Navigation per Klick und Ziehen
+- [ ] Code-Folding: Falt-Indikatoren in der Randleiste klappen Code-Blöcke ein und aus (Menü *Ansicht > Code-Faltung*)
 
 ## 4. Syntax-Highlighting
 
@@ -67,11 +69,12 @@
 - [ ] Modifizierter Tab zeigt *
 - [ ] Gleiche Datei wird nicht doppelt geöffnet
 
-## 7. Projektbaum, Terminal und LSP
+## 7. Projektbaum, Terminal, LSP und Linter
 
 - [ ] Projektbaum per Ctrl+B ein-/ausblenden
 - [ ] Terminal per Ctrl+` ein-/ausblenden
 - [ ] Terminal-Arbeitsverzeichnis folgt der geöffneten Datei
+- [ ] Automatisches Linting: Lokaler Linter (Ruff/flake8/ESLint) prüft beim Speichern asynchron und meldet Befunde im Probleme-Panel und Editor
 - [ ] Mit installiertem LSP-Server erscheinen Diagnostics im Editor
 - [ ] LSP-Completion erscheint nach Eingabe von mindestens zwei Zeichen
 
@@ -105,10 +108,7 @@
 
 ## Bekannte Einschränkungen
 
-- Minimap noch nicht implementiert (aus PythonBox v8)
-- Code-Folding noch nicht implementiert
-- Linter wird noch nicht automatisch ausgeführt
-- Runtime-Test mit installiertem LSP-Server steht noch aus
+- **LSP-Runtime-Integrationstest:** Der optionale End-to-End-LSP-Laufzeittest (`tests/test_lsp_runtime.py`) setzt einen lokal installierten und konfigurierten Sprachserver (z. B. `pylsp` / `pyright` bzw. `python-lsp-server[all]`) sowie die Umgebungsvariable `CODEBOX_LSP_RUNTIME=1` voraus. Ohne externen Sprachserver wird dieser Test im automatisierten CI-/Testlauf regulär und erwartungskonform als `skipped` ausgewiesen (360 passed, 1 skipped).
 
 ---
 
@@ -116,19 +116,19 @@
 
 | Kategorie | Bestanden | Fehlgeschlagen | Kommentar |
 |-----------|-----------|----------------|-----------|
-| Grundfunktionen | ___ / 5 | | |
+| Grundfunktionen | ___ / 6 | | |
 | Datei-Operationen | ___ / 5 | | |
-| Editor | ___ / 6 | | |
-| Highlighting | ___ / 10 | | |
+| Editor | ___ / 8 | | |
+| Highlighting | ___ / 12 | | |
 | Completion | ___ / 4 | | |
 | Tabs | ___ / 5 | | |
-| Projektbaum/Terminal/LSP | ___ / 5 | | |
+| Projektbaum/Terminal/LSP/Linter | ___ / 6 | | |
 | Ausführung | ___ / 5 | | |
 | Suchen | ___ / 3 | | |
 | Statusbar | ___ / 3 | | |
 | Sprach-Auswahl | ___ / 3 | | |
-| **Gesamt** | ___ / 55 | | |
+| **Gesamt** | ___ / 60 | | |
 
 ---
 
-*Checkliste erstellt: 2026-02-12 durch ATI Worker 2, aktualisiert 2026-05-01*
+*Checkliste erstellt: 2026-02-12 durch ATI Worker 2, aktualisiert 2026-11-08 für Version 0.3.5*
