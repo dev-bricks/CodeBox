@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 """Tests für CodeBox-Minimap und ihre Editor-Einstellung."""
 
+import gc
+import weakref
+
 import pytest
 from PySide6.QtWidgets import QApplication
 
@@ -45,6 +48,23 @@ def test_minimap_navigation_and_visibility(qapp):
     assert editor.minimap.isVisible()
     assert editor.viewportMargins().right() == Minimap.WIDTH
     editor.close()
+
+
+def test_minimap_signal_connections_release_closed_editor(qapp):
+    references = []
+    for _ in range(3):
+        editor = CodeEditor()
+        editor.setPlainText("first\nsecond")
+        assert editor.minimap._document_lines() == ["first", "second"]
+        editor.appendPlainText("third")
+        assert editor.minimap._cached_lines is None
+        assert editor.minimap._document_lines() == ["first", "second", "third"]
+        references.append(weakref.ref(editor))
+        editor.close()
+        del editor
+    gc.collect()
+    qapp.processEvents()
+    assert all(reference() is None for reference in references)
 
 
 def test_main_window_applies_minimap_setting(qapp, tmp_path, monkeypatch):

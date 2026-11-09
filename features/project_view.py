@@ -222,7 +222,7 @@ class ProjectView(QWidget):
             "Öffnet den Dialog zum Bereitstellen und Committen von Git-Änderungen."
         )
         self.btn_commit.setEnabled(False)
-        self.btn_commit.clicked.connect(lambda: self.open_commit_dialog())
+        self.btn_commit.clicked.connect(self._on_commit_clicked)
         header.addWidget(self.btn_commit)
 
         layout.addLayout(header)
@@ -337,6 +337,9 @@ class ProjectView(QWidget):
         self.tree.setItemDelegateForColumn(0, self.git_delegate)
 
         layout.addWidget(self.tree)
+
+    def _on_commit_clicked(self, _checked=False):
+        self.open_commit_dialog()
 
     def set_workspace(self, workspace: Optional[WorkspaceManager]):
         """Verbindet die ProjectView mit dem WorkspaceManager."""
