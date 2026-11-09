@@ -109,10 +109,16 @@ class Minimap(QWidget):
 
         editor.textChanged.connect(self._invalidate_cache)
         editor.cursorPositionChanged.connect(self.update)
-        editor.blockCountChanged.connect(lambda _count: self._invalidate_cache())
+        editor.blockCountChanged.connect(self._block_count_changed)
         editor.updateRequest.connect(self._editor_update_requested)
-        editor.verticalScrollBar().valueChanged.connect(lambda _value: self.update())
+        editor.verticalScrollBar().valueChanged.connect(self._scroll_value_changed)
         editor.document().contentsChanged.connect(self._invalidate_cache)
+
+    def _block_count_changed(self, _count):
+        self._invalidate_cache()
+
+    def _scroll_value_changed(self, _value):
+        self.update()
 
     def _editor_update_requested(self, _rect, _dy):
         """Zeichnet die Vorschau nach Scroll- und Viewport-Updates neu."""
