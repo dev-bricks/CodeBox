@@ -14,6 +14,7 @@ Part of the dev-bricks family. Python, MIT.
 - [README.zh.md](https://github.com/dev-bricks/CodeBox/blob/main/README.zh.md): Simplified Chinese entry point (machine-assisted translation; English README is authoritative).
 - [README.ja.md](https://github.com/dev-bricks/CodeBox/blob/main/README.ja.md): Japanese entry point (machine-assisted translation; English README is authoritative).
 - [README.ru.md](https://github.com/dev-bricks/CodeBox/blob/main/README.ru.md): Russian entry point (machine-assisted translation; English README is authoritative).
+- [README.fr.md](https://github.com/dev-bricks/CodeBox/blob/main/README.fr.md): French entry point (AI-assisted translation; the English README is authoritative).
 - [NOTICE](https://github.com/dev-bricks/CodeBox/blob/main/NOTICE): Copyright attribution and open-bricks umbrella metadata.
 - [THIRD_PARTY_LICENSES.md](https://github.com/dev-bricks/CodeBox/blob/main/THIRD_PARTY_LICENSES.md): Level 1 Software Bill of Materials (SBOM) and governance invariants (`INV-LOCAL-01` to `INV-SLA-10`).
 - [SECURITY.md](https://github.com/dev-bricks/CodeBox/blob/main/SECURITY.md): Bilingual security policy, supported versions, zero-egress invariants, and reporting protocols.
@@ -88,5 +89,5 @@ CodeBox local desktop IDE
 ## External Discovery Notes
 
 - The primary disambiguators are `dev-bricks`, `PySide6`, `local-first`, `Windows desktop IDE`, `declarative language plugins`, and `Language Server Protocol`.
-- All documentation is fully bilingual (EN/DE) with zero-egress privacy and non-elevation security guarantees.
+- README entry points are available in English, German, Spanish, Simplified Chinese, Japanese, Russian, and French; the English README is authoritative. The UI supports six languages only: German, English, Spanish, Chinese, Japanese, and Russian. Runtime remains zero-egress and does not require elevated privileges.
 - Statutory liability is limited to intent and gross negligence pursuant to § 521 BGB (Gefälligkeitsrecht).

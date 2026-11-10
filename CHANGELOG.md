@@ -12,6 +12,8 @@ Alle wesentlichen Änderungen an CodeBox werden hier dokumentiert.
 
 ## [Unreleased]
 
+- Französische README mit reziproker Sprachwahl und Dokumentationsindex ergänzt. Lizenzverweise und Gewährleistungsformulierung nach Gegenprüfung an die englische Vorlage angeglichen; die Laufzeitsprachen bleiben unverändert (2026-11-02).
+
 ### Repository-Hygiene & interne Dateien [2026-09-28]
 - **Interne Dateien geschuetzt (`.gitignore`):** `BEFUNDE.md`, `MARKETING-LOG.txt`, `TASKPLAN_STATUS_*.md` und `_after-care/` in `.gitignore` aufgenommen.
 - **Git-Tracking bereinigt:** `BEFUNDE.md` aus dem Git-Tracking entfernt (`git rm --cached`), bleibt lokal erhalten.

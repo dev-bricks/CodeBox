@@ -18,7 +18,7 @@
 [![Last Checked](https://img.shields.io/badge/last%20checked-2026--10--04-informational.svg)](llms.txt)
 [![llms.txt](https://img.shields.io/badge/llms.txt-available-green.svg)](llms.txt)
 
-[English](README.md) | [Deutsch](README_de.md) | [Español](README.es.md) | 简体中文 | [日本語](README.ja.md) | [Русский](README.ru.md)
+[English](README.md) | [Deutsch](README_de.md) | [Español](README.es.md) | 简体中文 | [日本語](README.ja.md) | [Русский](README.ru.md) | [Français](README.fr.md)
 
 > 本文为机器辅助翻译；以英文 README.md 为准。
 
